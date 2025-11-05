@@ -130,29 +130,32 @@
   position: sticky;
   top: calc(var(--header-height) + 12px);
   z-index: 110;
-  background: rgba(248, 249, 250, 0.92);
-  backdrop-filter: blur(6px);
-  border-radius: 8px;
+  /* 移除外层容器的背景，让内层容器完全控制视觉效果 */
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .tag-filter {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--filter-bg, #f8f9fa);
-  border: 1px solid var(--filter-border, #e0e0e0);
+  background: var(--filter-bg);
+  border: 1px solid var(--filter-border);
   border-radius: 8px;
   padding: 8px 12px;
-  margin-bottom: 12px;
+  /* 移除 margin-bottom，因为容器已经处理了间距 */
+  margin: 0;
   flex-wrap: nowrap;
   overflow-x: auto;
   box-shadow: var(--shadow-sm);
+  /* 添加毛玻璃效果到内层容器 */
+  backdrop-filter: blur(6px);
 }
 
 .tag-filter__title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--filter-title-color, #333);
+  color: var(--filter-title-color);
   white-space: nowrap;
 }
 
@@ -170,12 +173,12 @@
 }
 
 .tag-filter__item--active {
-  border-color: var(--filter-active-border, #007bff);
-  box-shadow: 0 0 0 1px var(--filter-active-border, #007bff);
+  border-color: var(--filter-active-border);
+  box-shadow: 0 0 0 1px var(--filter-active-border);
 }
 
 .tag-filter__clear {
-  background: var(--filter-clear-bg, #dc3545);
+  background: var(--filter-clear-bg);
   color: white;
   border: none;
   border-radius: 4px;
@@ -188,16 +191,16 @@
 }
 
 .tag-filter__clear:hover {
-  background: var(--filter-clear-hover-bg, #c82333);
+  background: var(--filter-clear-hover-bg);
 }
 
 .tag-filter-empty {
   padding: 24px;
   text-align: center;
-  border: 1px dashed var(--filter-border, #e0e0e0);
+  border: 1px dashed var(--filter-border);
   border-radius: 8px;
-  color: var(--filter-title-color, #333);
-  background: var(--filter-bg, #f8f9fa);
+  color: var(--filter-title-color);
+  background: var(--filter-bg);
   font-size: 14px;
 }
 

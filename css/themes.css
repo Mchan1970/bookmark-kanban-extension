@@ -39,6 +39,14 @@
   /* Animation */
   --transition: all 0.3s ease;
   --transition-fast: all 0.2s ease;
+
+  /* Filter colors for light theme */
+  --filter-bg: rgba(248, 249, 250, 0.92);
+  --filter-border: #e2e8f0;
+  --filter-title-color: #1f2937;
+  --filter-active-border: #3b82f6;
+  --filter-clear-bg: #ef4444;
+  --filter-clear-hover-bg: #dc2626;
 }
 
 /* Dark theme */
@@ -72,6 +80,14 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.24);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.24);
+
+  /* Filter colors for dark theme */
+  --filter-bg: rgba(30, 41, 59, 0.92);
+  --filter-border: #475569;
+  --filter-title-color: #e2e8f0;
+  --filter-active-border: #6366f1;
+  --filter-clear-bg: #dc2626;
+  --filter-clear-hover-bg: #b91c1c;
 }
 
 /* Green theme */
@@ -100,6 +116,14 @@
   --border-color: #bbf7d0;
   --border-light: #86efac;
   --border-hover: #4ade80;
+
+  /* Filter colors for green theme */
+  --filter-bg: rgba(240, 253, 244, 0.92);
+  --filter-border: #bbf7d0;
+  --filter-title-color: #1f2937;
+  --filter-active-border: #22c55e;
+  --filter-clear-bg: #ef4444;
+  --filter-clear-hover-bg: #dc2626;
 }
 
 /* Purple theme */
@@ -128,6 +152,14 @@
   --border-color: #ddd6fe;
   --border-light: #c4b5fd;
   --border-hover: #a78bfa;
+
+  /* Filter colors for purple theme */
+  --filter-bg: rgba(245, 243, 255, 0.92);
+  --filter-border: #ddd6fe;
+  --filter-title-color: #1f2937;
+  --filter-active-border: #8b5cf6;
+  --filter-clear-bg: #ef4444;
+  --filter-clear-hover-bg: #dc2626;
 }
 
 /* High contrast theme */
@@ -161,4 +193,12 @@
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+
+  /* Filter colors for high contrast theme */
+  --filter-bg: #ffffff;
+  --filter-border: #000000;
+  --filter-title-color: #000000;
+  --filter-active-border: #000000;
+  --filter-clear-bg: #000000;
+  --filter-clear-hover-bg: #333333;
 }
