@@ -68,3 +68,90 @@ export const getDomain = (url) => {
     return url;
   }
 };
+
+/**
+ * Parse title to extract tags
+ * @param {string} title Bookmark title
+ * @returns {{cleanTitle: string, tags: string[]}} Cleaned title and tags
+ */
+export const parseTitle = (title) => {
+  if (!title || typeof title !== 'string') {
+    return { cleanTitle: title || '', tags: [] };
+  }
+
+  // 匹配 #标签 格式，支持中英文和数字
+  const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
+  const tags = (title.match(tagRegex) || []).map(match => match.substring(1));
+
+  // Remove tags and clean up whitespace
+  let cleanTitle = title.replace(tagRegex, '').trim();
+  cleanTitle = cleanTitle.replace(/\s+/g, ' '); // 合并多个空格
+
+  return { cleanTitle, tags };
+};
+
+/**
+ * Get a consistent color for a tag
+ * @param {string} tag The tag string
+ * @returns {string} HSL color string
+ */
+export const getTagColor = (tag) => {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const hue = Math.abs(hash) % 360;
+  const saturation = 60 + (Math.abs(hash) % 20); // 60-80%
+  const lightness = 45 + (Math.abs(hash) % 15);  // 45-60%
+
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
+/**
+ * Validate tag format
+ * @param {string} tag Tag string to validate
+ * @returns {boolean} True if valid tag format
+ */
+export const isValidTag = (tag) => {
+  if (!tag || typeof tag !== 'string') {
+    return false;
+  }
+
+  // Remove # if present and check
+  const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag;
+
+  // Should be 1-20 characters, alphanumeric + Chinese + underscore
+  return /^[\w\u4e00-\u9fa5]{1,20}$/.test(cleanTag);
+};
+
+/**
+ * Normalize tag string
+ * @param {string} tag Tag string to normalize
+ * @returns {string} Normalized tag (with # prefix)
+ */
+export const normalizeTag = (tag) => {
+  if (!tag || typeof tag !== 'string') {
+    return '';
+  }
+
+  const cleanTag = tag.trim();
+  return cleanTag.startsWith('#') ? cleanTag : `#${cleanTag}`;
+};
+
+/**
+ * Remove tags from title
+ * @param {string} title Title with tags
+ * @returns {string} Title without tags
+ */
+export const removeTagsFromTitle = (title) => {
+  if (!title || typeof title !== 'string') {
+    return title || '';
+  }
+
+  const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
+  let cleanTitle = title.replace(tagRegex, '').trim();
+  cleanTitle = cleanTitle.replace(/\s+/g, ' ');
+
+  return cleanTitle;
+};

@@ -1,10 +1,13 @@
-import { createElement, getDomain } from '../utils.js';
+import { createElement, getDomain, parseTitle } from '../utils.js';
 import { faviconLoader } from '../faviconLoader.js';
+import { tagRenderer } from '../tagRenderer.js';
+import { tagManager } from '../tagManager.js';
 
 export class BookmarkRenderer {
   constructor() {
     // Callbacks from outer components
     this.onBookmarkOrderChanged = null;
+    this.onTagClick = null; // 标签点击回调
   }
   
   /**
@@ -16,6 +19,15 @@ export class BookmarkRenderer {
   }
 
   /**
+   * Set callback for tag click events
+   * @param {Function} callback Callback function
+   */
+  setTagClickCallback(callback) {
+    this.onTagClick = callback;
+    tagRenderer.setTagClickCallback(callback);
+  }
+
+  /**
    * Create a bookmark item element
    * @param {Object} bookmark Bookmark data
    * @returns {HTMLElement} Bookmark item element
@@ -24,27 +36,43 @@ export class BookmarkRenderer {
     const item = createElement('div', 'bookmark-item');
     item.setAttribute('data-bookmark-id', bookmark.id);
     item.setAttribute('draggable', 'true');
-    
+
     // Add URL as data attribute for single-line mode tooltip
     item.setAttribute('data-url', bookmark.url);
-    
+
+    // 处理书签数据，提取标签信息
+    const processedBookmark = tagManager.processBookmark(bookmark);
+
     const content = createElement('div', 'bookmark-content');
-    
+
     // Create favicon container
     const faviconContainer = createElement('div', 'bookmark-favicon');
-    
-    // Create title element
+
+    // Create text container for title and tags
+    const textContainer = createElement('div', 'bookmark-text-container');
+
+    // Create title element (使用清理后的标题)
     const title = createElement('div', 'bookmark-title');
-    title.textContent = bookmark.title || '(Untitled)';
-    title.title = bookmark.title || bookmark.url;
-    
+    title.textContent = processedBookmark.cleanTitle || '(Untitled)';
+    title.title = processedBookmark.cleanTitle || processedBookmark.url;
+
+    // Create tags container
+    const tagsContainer = tagRenderer.createTagContainer(processedBookmark.tags, {
+      size: 'small',
+      clickable: true
+    });
+
     // Create domain element
     const domain = createElement('div', 'bookmark-domain');
     domain.textContent = getDomain(bookmark.url);
-    
-    // Create actions container
-    const actions = createElement('div', 'bookmark-actions');
-    
+
+    // Assemble text container
+    textContainer.appendChild(title);
+    if (tagsContainer) {
+      textContainer.appendChild(tagsContainer);
+    }
+    textContainer.appendChild(domain);
+
     // Create edit button
     const editButton = createElement('button', 'bookmark-action edit-btn');
     editButton.innerHTML = `
@@ -53,7 +81,7 @@ export class BookmarkRenderer {
       </svg>
     `;
     editButton.title = 'Edit';
-    
+
     // Create delete button
     const deleteButton = createElement('button', 'bookmark-action delete-btn');
     deleteButton.innerHTML = `
@@ -62,15 +90,14 @@ export class BookmarkRenderer {
       </svg>
     `;
     deleteButton.title = 'Delete';
-    
+
     // Assemble actions
     actions.appendChild(editButton);
     actions.appendChild(deleteButton);
-    
+
     // Assemble content
     content.appendChild(faviconContainer);
-    content.appendChild(title);
-    content.appendChild(domain);
+    content.appendChild(textContainer);
     
     // Assemble item
     item.appendChild(content);
