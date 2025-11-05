@@ -61,6 +61,9 @@ export class TagManager {
           this.tagColors.set(tag, this.generateTagColor(tag));
         }
       });
+    } else {
+      // 无标签时清理缓存，避免残留旧数据
+      this.bookmarkTags.delete(bookmark.id);
     }
 
     return enhancedBookmark;

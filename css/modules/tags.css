@@ -124,26 +124,44 @@
 }
 
 /* 标签过滤器 */
+.tag-filter-container {
+  width: calc(100% - 60px);
+  margin: 0 30px 12px;
+  position: sticky;
+  top: calc(var(--header-height) + 12px);
+  z-index: 110;
+  background: rgba(248, 249, 250, 0.92);
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+}
+
 .tag-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   background: var(--filter-bg, #f8f9fa);
   border: 1px solid var(--filter-border, #e0e0e0);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
 }
 
 .tag-filter__title {
   font-size: 14px;
   font-weight: 600;
   color: var(--filter-title-color, #333);
-  margin-bottom: 8px;
+  white-space: nowrap;
 }
 
 .tag-filter__list {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
-  margin-bottom: 8px;
+  margin: 0;
+  align-items: center;
 }
 
 .tag-filter__item {
@@ -161,14 +179,26 @@
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .tag-filter__clear:hover {
   background: var(--filter-clear-hover-bg, #c82333);
+}
+
+.tag-filter-empty {
+  padding: 24px;
+  text-align: center;
+  border: 1px dashed var(--filter-border, #e0e0e0);
+  border-radius: 8px;
+  color: var(--filter-title-color, #333);
+  background: var(--filter-bg, #f8f9fa);
+  font-size: 14px;
 }
 
 /* 标签编辑器 */

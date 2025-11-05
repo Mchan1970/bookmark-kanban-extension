@@ -155,9 +155,10 @@ export class TagRenderer {
     // 添加"全部"选项
     const allTag = this.createTagElement('全部', {
       size: 'medium',
-      clickable: true,
+      clickable: false,
       showCount: true
     });
+    allTag.classList.add('bookmark-tag--clickable');
     allTag.classList.toggle('tag-filter__item--active', activeTags.length === 0);
     allTag.addEventListener('click', () => {
       this.handleFilterClear();
@@ -168,9 +169,10 @@ export class TagRenderer {
     availableTags.forEach(tag => {
       const tagElement = this.createTagElement(tag, {
         size: 'medium',
-        clickable: true,
+        clickable: false,
         showCount: true
       });
+      tagElement.classList.add('bookmark-tag--clickable');
 
       // 标记为激活状态
       if (activeTags.includes(tag)) {

@@ -11,7 +11,9 @@ export class KanbanRenderer {
    * Render the entire kanban board
    * @param {HTMLElement} container The container to render the board into
    */
-  async renderBoard(container) {
+  async renderBoard(container, bookmarkTree = null, options = {}) {
+    const { activeTag = null } = options;
+
     // Clear container
     container.innerHTML = '';
     
@@ -20,8 +22,11 @@ export class KanbanRenderer {
     kanbanBoard.className = 'kanban-board';
     container.appendChild(kanbanBoard);
 
-    // Get bookmark tree
-    const bookmarkTree = await this.bookmarkManager.getBookmarkTree();
+    // Determine bookmark tree data
+    let treeData = bookmarkTree;
+    if (!treeData) {
+      treeData = await this.bookmarkManager.getBookmarkTree();
+    }
     
     // Get saved column order
     const savedColumnOrder = await storageManager.getColumnOrder();
@@ -29,9 +34,9 @@ export class KanbanRenderer {
     // Get saved bookmark order
     const savedBookmarkOrder = await storageManager.getBookmarkOrder();
     
-    if (bookmarkTree && bookmarkTree.length > 0) {
+    if (treeData && treeData.length > 0) {
       // Process bookmark tree and apply saved order
-      await this.processBookmarkTree(bookmarkTree[0], kanbanBoard, savedColumnOrder, savedBookmarkOrder);
+      await this.processBookmarkTree(treeData[0], kanbanBoard, savedColumnOrder, savedBookmarkOrder);
     }
   }
 

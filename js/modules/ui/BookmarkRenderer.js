@@ -1,4 +1,4 @@
-import { createElement, getDomain, parseTitle } from '../utils.js';
+import { createElement, getDomain } from '../utils.js';
 import { faviconLoader } from '../faviconLoader.js';
 import { tagRenderer } from '../tagRenderer.js';
 import { tagManager } from '../tagManager.js';
@@ -66,6 +66,9 @@ export class BookmarkRenderer {
     const domain = createElement('div', 'bookmark-domain');
     domain.textContent = getDomain(bookmark.url);
 
+    // Create actions container
+    const actions = createElement('div', 'bookmark-actions');
+
     // Assemble text container
     textContainer.appendChild(title);
     if (tagsContainer) {
@@ -123,12 +126,54 @@ export class BookmarkRenderer {
   updateBookmarkItem(bookmark) {
     const item = document.querySelector(`.bookmark-item[data-bookmark-id="${bookmark.id}"]`);
     if (item) {
-      const title = item.querySelector('.bookmark-title');
-      const favicon = item.querySelector('.bookmark-favicon');
-      
-      title.textContent = bookmark.title || getDomain(bookmark.url);
-      faviconLoader.prepareIconElement(favicon, bookmark.url);
+      const processedBookmark = tagManager.processBookmark(bookmark);
+
+      // Update dataset
       item.dataset.url = bookmark.url;
+
+      // Update title text and tooltip
+      const titleElement = item.querySelector('.bookmark-title');
+      if (titleElement) {
+        titleElement.textContent = processedBookmark.cleanTitle || '(Untitled)';
+        titleElement.title = processedBookmark.cleanTitle || processedBookmark.url;
+      }
+
+      // Update tags
+      const textContainer = item.querySelector('.bookmark-text-container');
+      if (textContainer) {
+        // Remove existing tags container if present
+        const existingTagsContainer = textContainer.querySelector('.bookmark-tags');
+        if (existingTagsContainer) {
+          existingTagsContainer.remove();
+        }
+
+        // Re-insert tags container before domain
+        const domainElement = textContainer.querySelector('.bookmark-domain');
+        const newTagsContainer = tagRenderer.createTagContainer(processedBookmark.tags, {
+          size: 'small',
+          clickable: true
+        });
+
+        if (newTagsContainer) {
+          if (domainElement) {
+            textContainer.insertBefore(newTagsContainer, domainElement);
+          } else {
+            textContainer.appendChild(newTagsContainer);
+          }
+        }
+      }
+
+      // Update domain
+      const domainElement = item.querySelector('.bookmark-domain');
+      if (domainElement) {
+        domainElement.textContent = getDomain(bookmark.url);
+      }
+
+      // Update favicon
+      const faviconElement = item.querySelector('.bookmark-favicon');
+      if (faviconElement) {
+        faviconLoader.prepareIconElement(faviconElement, bookmark.url);
+      }
     }
   }
   

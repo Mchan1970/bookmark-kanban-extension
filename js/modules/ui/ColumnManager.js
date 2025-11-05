@@ -16,6 +16,16 @@ export class ColumnManager {
   }
 
   /**
+   * Create an empty state element
+   * @returns {HTMLElement}
+   */
+  createEmptyState() {
+    const empty = createElement('div', 'empty-column');
+    empty.textContent = 'No bookmarks';
+    return empty;
+  }
+
+  /**
    * Render a folder column
    * @param {Object} folder Folder data
    * @param {HTMLElement} container Container to append to
@@ -25,7 +35,7 @@ export class ColumnManager {
     const column = createElement('div', 'kanban-column');
     column.dataset.columnType = 'folder';
     column.dataset.folderId = folder.id;
-    
+
     // Create header
     const header = this.createColumnHeader(folder.title, this.countBookmarksInFolder(folder));
     column.appendChild(header);
@@ -37,21 +47,28 @@ export class ColumnManager {
     const bookmarkList = createElement('div', 'bookmark-list');
     
     if (folder.children) {
-      // Check if there's saved bookmark order
+      const directBookmarks = folder.children.filter(child => child.url);
+
       if (savedBookmarkOrder && savedBookmarkOrder[folder.id]) {
-        // Arrange bookmarks according to saved order
-        this.renderOrderedBookmarks(folder.children, bookmarkList, savedBookmarkOrder[folder.id]);
+        this.renderOrderedBookmarks(directBookmarks, bookmarkList, savedBookmarkOrder[folder.id]);
       } else {
-        // Render bookmarks in original order
-        folder.children.forEach(child => {
-          if (child.url) {
-            const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(child);
-            bookmarkList.appendChild(bookmarkItem);
-          }
+        directBookmarks.forEach(child => {
+          const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(child);
+          bookmarkList.appendChild(bookmarkItem);
         });
       }
+
+      folder.children
+        .filter(child => child.children)
+        .forEach(child => {
+          this.renderSubfolderGroup(child, bookmarkList, savedBookmarkOrder);
+        });
     }
-    
+
+    if (bookmarkList.children.length === 0) {
+      bookmarkList.appendChild(this.createEmptyState());
+    }
+
     column.appendChild(bookmarkList);
     container.appendChild(column);
   }
@@ -71,7 +88,7 @@ export class ColumnManager {
     column.dataset.folderId = folderId;
     
     // Create header
-    const header = this.createColumnHeader(title, bookmarks.length);
+    const header = this.createColumnHeader(title, this.countBookmarksInList(bookmarks));
     column.appendChild(header);
     
     // Add double-click event handling for title editing
@@ -84,16 +101,20 @@ export class ColumnManager {
     const columnStorageId = column.dataset.columnType === 'uncategorized' ? 
       'uncategorized' : folderId;
     
+    let renderedContent = false;
+
+    const directBookmarks = bookmarks.filter(bookmark => bookmark.url);
+
     // If there's saved bookmark order, render in order
     if (columnStorageId && savedBookmarkOrder && savedBookmarkOrder[columnStorageId]) {
-      // Filter out direct bookmarks (not in subfolders)
-      const directBookmarks = bookmarks.filter(bookmark => bookmark.url);
-      this.renderOrderedBookmarks(directBookmarks, bookmarkList, savedBookmarkOrder[columnStorageId]);
+      const appended = this.renderOrderedBookmarks(directBookmarks, bookmarkList, savedBookmarkOrder[columnStorageId]);
+      renderedContent = renderedContent || appended;
       
       // Render subfolders
       bookmarks.forEach(bookmark => {
         if (bookmark.children) {
-          this.renderSubfolderGroup(bookmark, bookmarkList, savedBookmarkOrder);
+          const groupRendered = this.renderSubfolderGroup(bookmark, bookmarkList, savedBookmarkOrder);
+          renderedContent = renderedContent || groupRendered;
         }
       });
     } else {
@@ -102,10 +123,16 @@ export class ColumnManager {
         if (bookmark.url) {
           const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmark);
           bookmarkList.appendChild(bookmarkItem);
+          renderedContent = true;
         } else if (bookmark.children) {
-          this.renderSubfolderGroup(bookmark, bookmarkList, savedBookmarkOrder);
+          const groupRendered = this.renderSubfolderGroup(bookmark, bookmarkList, savedBookmarkOrder);
+          renderedContent = renderedContent || groupRendered;
         }
       });
+    }
+
+    if (!renderedContent) {
+      bookmarkList.appendChild(this.createEmptyState());
     }
     
     column.appendChild(bookmarkList);
@@ -285,6 +312,8 @@ export class ColumnManager {
    * @param {Array} savedOrder Saved order array of bookmark IDs
    */
   renderOrderedBookmarks(bookmarks, container, savedOrder) {
+    let appended = false;
+
     // Create a bookmark map for quick lookup by id
     const bookmarkMap = {};
     bookmarks.forEach(bookmark => {
@@ -298,6 +327,7 @@ export class ColumnManager {
       if (bookmarkMap[bookmarkId]) {
         const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmarkMap[bookmarkId]);
         container.appendChild(bookmarkItem);
+        appended = true;
         // Remove from map to avoid duplicate addition
         delete bookmarkMap[bookmarkId];
       }
@@ -307,7 +337,10 @@ export class ColumnManager {
     Object.values(bookmarkMap).forEach(bookmark => {
       const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmark);
       container.appendChild(bookmarkItem);
+      appended = true;
     });
+
+    return appended;
   }
   
   /**
@@ -318,29 +351,47 @@ export class ColumnManager {
    */
   renderSubfolderGroup(folder, container, savedBookmarkOrder) {
     // Don't render if subfolder has no bookmarks
-    if (!folder.children || folder.children.length === 0) return;
-    
+    if (!folder.children || folder.children.length === 0) return false;
+
+    const directBookmarks = folder.children.filter(child => child.url);
+    const nestedFolders = folder.children.filter(child => child.children && child.children.length > 0);
+
+    if (directBookmarks.length === 0 && nestedFolders.length === 0) {
+      return false;
+    }
+
     const subfolderGroup = createElement('div', 'subfolder-group');
-    
     const subfolderTitle = createElement('div', 'subfolder-title');
     subfolderTitle.textContent = folder.title;
     subfolderGroup.appendChild(subfolderTitle);
-    
-    // If there's saved subfolder bookmark order, render in order
-    const subfolderKey = `subfolder-${folder.id}`;
-    if (savedBookmarkOrder && savedBookmarkOrder[subfolderKey]) {
-      this.renderOrderedBookmarks(folder.children, subfolderGroup, savedBookmarkOrder[subfolderKey]);
-    } else {
-      // Render bookmarks in subfolder in original order
-      folder.children.forEach(child => {
-        if (child.url) {
+
+    let rendered = false;
+
+    if (directBookmarks.length > 0) {
+      const subfolderKey = `subfolder-${folder.id}`;
+      if (savedBookmarkOrder && savedBookmarkOrder[subfolderKey]) {
+        const appended = this.renderOrderedBookmarks(directBookmarks, subfolderGroup, savedBookmarkOrder[subfolderKey]);
+        rendered = rendered || appended;
+      } else {
+        directBookmarks.forEach(child => {
           const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(child);
           subfolderGroup.appendChild(bookmarkItem);
-        }
-      });
+          rendered = true;
+        });
+      }
     }
-    
-    container.appendChild(subfolderGroup);
+
+    nestedFolders.forEach(childFolder => {
+      const childRendered = this.renderSubfolderGroup(childFolder, subfolderGroup, savedBookmarkOrder);
+      rendered = rendered || childRendered;
+    });
+
+    if (rendered) {
+      container.appendChild(subfolderGroup);
+      return true;
+    }
+
+    return false;
   }
   
   /**
@@ -359,6 +410,27 @@ export class ColumnManager {
         }
       });
     }
+    return count;
+  }
+
+  /**
+   * Count bookmarks within a generic list (direct children + subfolders)
+   * @param {Array} items Array of bookmark or folder nodes
+   * @returns {number} Total bookmark count
+   */
+  countBookmarksInList(items) {
+    if (!items || items.length === 0) {
+      return 0;
+    }
+
+    let count = 0;
+    items.forEach(item => {
+      if (item.url) {
+        count++;
+      } else if (item.children) {
+        count += this.countBookmarksInFolder(item);
+      }
+    });
     return count;
   }
   

@@ -2,6 +2,7 @@
 
 /* Variable Definitions */
 :root {
+  --header-height: 72px;
   --primary-color: #2563eb;
   --primary-light: #3b82f6;
   --primary-dark: #1d4ed8;
@@ -39,7 +40,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   margin: 0;
-  padding: 0;
+  padding: calc(var(--header-height) + 12px) 0 0;
   transition: var(--transition);
 }
 
@@ -53,6 +54,13 @@ header {
   align-items: center;
   box-shadow: var(--shadow);
   transition: var(--transition);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  height: var(--header-height);
+  box-sizing: border-box;
 }
 
 /* Default theme header title */
@@ -199,7 +207,8 @@ header {
 /* Single Line Mode Styles */
 body[data-display-mode="single"] .bookmark-item {
   padding: 0.5rem 0.8rem;
-  height: 36px;
+  min-height: 36px;
+  height: auto;
   position: relative;
   z-index: 1;
   transition: z-index 0s linear 0.1s;
@@ -207,7 +216,7 @@ body[data-display-mode="single"] .bookmark-item {
 
 body[data-display-mode="single"] .bookmark-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   width: calc(100%);
 }
 
@@ -220,6 +229,11 @@ body[data-display-mode="single"] .bookmark-title {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: calc(100%);
+}
+
+body[data-display-mode="single"] .bookmark-text-container {
+  width: 100%;
+  padding-right: 48px; /* 留出操作按钮的空间 */
 }
 
 body[data-display-mode="single"] .bookmark-actions {
@@ -314,10 +328,10 @@ body[data-display-mode="double"] .bookmark-domain {
 /* Main Container */
 main {
   max-width: 100%;
-  margin: 1.5rem auto;
+  margin: 1.5rem auto 0;
   padding: 0;
   background-color: var(--bg-color);
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - var(--header-height));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -356,6 +370,11 @@ main {
   background-color: var(--bg-color);
   justify-content: flex-start;
   padding-left: 30px;
+  padding-right: 30px;
+}
+
+.kanban-board-wrapper {
+  width: 100%;
 }
 
 /* Optimized Scrollbar Styles */
