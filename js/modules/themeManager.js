@@ -20,18 +20,24 @@ export class ThemeManager {
     try {
       // Get saved theme settings
       const savedTheme = await this.getSavedTheme();
-      
-      // Apply theme
+
+      // Apply theme with validation
       if (savedTheme && this.availableThemes.includes(savedTheme)) {
         this.currentTheme = savedTheme;
       } else {
+        // If saved theme is invalid, clean it up and use system preference
+        if (savedTheme && !this.availableThemes.includes(savedTheme)) {
+          console.warn(`Invalid theme "${savedTheme}" found in storage, clearing and using default`);
+          await this.clearInvalidTheme();
+        }
+
         // Check system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.currentTheme = prefersDark ? 'dark' : 'default';
       }
-      
+
       this.applyTheme(this.currentTheme);
-      
+
       // Set up system theme change listener
       this.setupSystemThemeListener();
     } catch (error) {
@@ -53,6 +59,22 @@ export class ThemeManager {
         } else {
           resolve(result[this.STORAGE_KEY] || null);
         }
+      });
+    });
+  }
+
+  /**
+   * Clear invalid theme from storage
+   */
+  async clearInvalidTheme() {
+    return new Promise((resolve) => {
+      chrome.storage.sync.remove(this.STORAGE_KEY, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to clear invalid theme:', chrome.runtime.lastError);
+        } else {
+          console.log('Invalid theme cleared from storage');
+        }
+        resolve();
       });
     });
   }
@@ -83,6 +105,8 @@ export class ThemeManager {
     if (!this.availableThemes.includes(theme)) {
       console.warn(`Unknown theme: ${theme}, using default theme`);
       theme = this.DEFAULT_THEME;
+      // Also clear the invalid theme from storage
+      this.clearInvalidTheme();
     }
     
     // Ensure applied to document.documentElement (i.e., <html> element)
