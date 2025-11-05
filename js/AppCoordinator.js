@@ -11,6 +11,8 @@ import { EventManager } from './modules/eventManager.js';
 import { MessageHandler } from './modules/messageHandler.js';
 import { SiteCheckManager } from './modules/siteCheckManager.js';
 import { NotificationManager } from './modules/notificationManager.js';
+import { tagManager } from './modules/tagManager.js';
+import { tagRenderer } from './modules/tagRenderer.js';
 
 export class AppCoordinator {
   constructor() {
@@ -34,7 +36,11 @@ export class AppCoordinator {
       
       // 初始化书签管理器
       this.bookmarkManager = new BookmarkManager();
-      
+
+      // 初始化标签管理器
+      this.tagManager = tagManager;
+      this.tagRenderer = tagRenderer;
+
       // 初始化 UI 管理器
       this.uiManager = new UIManager(this.bookmarkManager);
       

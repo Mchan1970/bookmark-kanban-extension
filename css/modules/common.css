@@ -135,3 +135,21 @@ body {
 .bookmark-actions {
   cursor: default; /* Keep default pointer in button area */
 }
+
+/* 书签文本容器 - 支持标签显示 */
+.bookmark-text-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 域名样式 - 在标签容器中 */
+.bookmark-domain {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

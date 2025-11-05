@@ -4,6 +4,7 @@ import { ColumnManager } from './ColumnManager.js';
 import { KanbanRenderer } from './KanbanRenderer.js';
 import { NotificationService } from './NotificationService.js';
 import { UIStateManager } from './UIStateManager.js';
+import { tagRenderer } from '../tagRenderer.js';
 
 export class UIManager {
   constructor(bookmarkManager) {
@@ -18,6 +19,11 @@ export class UIManager {
     this.bookmarkRenderer = new BookmarkRenderer();
     this.columnManager = new ColumnManager(this.bookmarkManager, this.notificationService);
     this.columnManager.setBookmarkRenderer(this.bookmarkRenderer);
+
+    // Set up tag click callback
+    this.bookmarkRenderer.setTagClickCallback((tag, event) => {
+      this.handleTagClick(tag, event);
+    });
     
     // Initialize kanban renderer with all required dependencies
     this.kanbanRenderer = new KanbanRenderer(
@@ -106,5 +112,17 @@ export class UIManager {
    */
   showDragGuide() {
     this.uiStateManager.showDragGuide();
+  }
+
+  /**
+   * Handle tag click events
+   * @param {string} tag Tag name
+   * @param {Event} event Click event
+   */
+  handleTagClick(tag, event) {
+    console.log(`Tag clicked: ${tag}`);
+    // TODO: Implement tag filtering functionality
+    // For now, just show a notification
+    this.notificationService.show(`点击了标签: ${tag}`, 'info');
   }
 } 
