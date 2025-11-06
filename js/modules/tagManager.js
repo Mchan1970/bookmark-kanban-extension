@@ -24,7 +24,7 @@ export class TagManager {
     const tagMatches = title.match(tagRegex) || [];
 
     // Remove the leading # character
-    const tags = tagMatches.map(match => match.substring(1));
+    const tags = tagMatches.map(match => match.substring(1).toLowerCase());
 
     // Remove tags from the title and collapse consecutive spaces
     let cleanTitle = title.replace(tagRegex, '').trim();

@@ -258,6 +258,7 @@ export class UIManager {
    */
   updateBookmarkItem(bookmark) {
     this.bookmarkRenderer.updateBookmarkItem(bookmark);
+    this.refreshTagFilter();
   }
 
   /*** Show drag guide for new users
@@ -348,6 +349,24 @@ export class UIManager {
 
     this.tagFilterContainer.appendChild(filterElement);
     return this.tagFilterContainer;
+  }
+
+  refreshTagFilter() {
+    if (!this.tagFilterContainer) {
+      return;
+    }
+
+    this.bookmarkManager.getBookmarkTree().then((tree) => {
+      if (!tree) {
+        return;
+      }
+      tagManager.clearCache();
+      this.collectTags(tree);
+      const availableTags = tagManager.getAllTags();
+      this.renderTagFilter(availableTags);
+    }).catch((error) => {
+      console.error('Failed to refresh tag filter:', error);
+    });
   }
 
   /*** Create empty state element

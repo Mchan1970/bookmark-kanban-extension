@@ -75,7 +75,7 @@ export const parseTitle = (title) => {
 
   //Match #tag format, support Chinese, English and numbers
   const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
-  const tags = (title.match(tagRegex) || []).map(match => match.substring(1));
+  const tags = (title.match(tagRegex) || []).map(match => match.substring(1).toLowerCase());
 
   //Remove tags and clean up whitespace
   let cleanTitle = title.replace(tagRegex, '').trim();
