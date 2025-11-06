@@ -2,6 +2,7 @@ import { CleanupView } from './cleanupView.js';
 import { ArchivePanelController } from './archivePanelController.js';
 import { RecyclePanelController } from './recyclePanelController.js';
 import { SECTION_KEYS } from './cleanupConstants.js';
+import { Modal } from '../Modal.js';
 
 const noopAsync = async () => {};
 
@@ -29,9 +30,44 @@ export class CleanupUIController {
     this.view = null;
     this.archivePanel = null;
     this.recyclePanel = null;
+    this.cleanupModal = null;
+    this.archiveModal = null;
+    this.recycleModal = null;
+  }
+
+  createCleanupModals() {
+    if (this.cleanupModal && this.archiveModal && this.recycleModal) {
+      return;
+    }
+
+    this.cleanupModal = this.createModalInstance({
+      id: 'cleanupModal',
+      title: 'Cleanup Suggestions',
+      content: this.buildCleanupContent(),
+      width: '660px',
+      maxWidth: '95vw',
+      onOpen: () => this.clearSelectionState()
+    });
+
+    this.archiveModal = this.createModalInstance({
+      id: 'archiveModal',
+      title: 'Archived Bookmarks',
+      content: this.buildArchiveContent(),
+      width: '600px',
+      maxWidth: '95vw'
+    });
+
+    this.recycleModal = this.createModalInstance({
+      id: 'recycleModal',
+      title: 'Recycle Bin',
+      content: this.buildRecycleContent(),
+      width: '600px',
+      maxWidth: '95vw'
+    });
   }
 
   async initialize() {
+    this.createCleanupModals();
     this.cacheElements();
     if (!this.elements.headerButton) {
       return false;
@@ -43,14 +79,104 @@ export class CleanupUIController {
     return true;
   }
 
+  createModalInstance(options) {
+    const modal = new Modal({
+      closable: true,
+      closeOnBackdrop: true,
+      closeOnEscape: true,
+      ...options
+    });
+
+    modal.element.classList.add('cleanup-modal');
+    const content = modal.element.querySelector('.modal-content');
+    content?.classList.add('cleanup-content');
+    return modal;
+  }
+
+  buildCleanupContent() {
+    return `
+      <div class="cleanup-body">
+        <div class="cleanup-section" data-section="dead">
+          <div class="cleanup-section-header">
+            <h3>Dead Links</h3>
+            <span class="cleanup-count" id="cleanup-dead-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-dead-list"></div>
+        </div>
+        <div class="cleanup-section" data-section="duplicates">
+          <div class="cleanup-section-header">
+            <h3>Duplicates</h3>
+            <span class="cleanup-count" id="cleanup-duplicates-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-duplicates-list"></div>
+        </div>
+        <div class="cleanup-section" data-section="stale">
+          <div class="cleanup-section-header">
+            <h3>Stale Bookmarks</h3>
+            <span class="cleanup-count" id="cleanup-stale-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-stale-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-selection" id="cleanup-selection-count">No items selected</div>
+        <div class="cleanup-actions">
+          <button id="cleanup-archive" class="btn-secondary" disabled>Archive</button>
+          <button id="cleanup-delete" class="btn-warning" disabled>Delete</button>
+          <button id="cleanup-ignore" class="btn-secondary" disabled>Ignore</button>
+        </div>
+        <div class="cleanup-links">
+          <button id="open-archive-from-cleanup" class="link-button">View Archive</button>
+          <button id="open-recycle-from-cleanup" class="link-button">View Recycle Bin</button>
+        </div>
+      </div>
+    `;
+  }
+
+  buildArchiveContent() {
+    return `
+      <div class="cleanup-body">
+        <div class="cleanup-section">
+          <div class="cleanup-section-header">
+            <h3>Archive</h3>
+            <span class="cleanup-count" id="archive-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="archive-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-actions">
+          <button id="archive-restore" class="btn-secondary" disabled>Restore</button>
+        </div>
+      </div>
+    `;
+  }
+
+  buildRecycleContent() {
+    return `
+      <div class="cleanup-body">
+        <div class="cleanup-section">
+          <div class="cleanup-section-header">
+            <h3>Deleted Items</h3>
+            <span class="cleanup-count" id="recycle-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="recycle-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-actions">
+          <button id="recycle-restore" class="btn-secondary" disabled>Restore</button>
+          <button id="recycle-delete-permanent" class="btn-warning" disabled>Delete Permanently</button>
+        </div>
+      </div>
+    `;
+  }
+
   cacheElements() {
     this.elements.cleanupModal = document.getElementById('cleanupModal');
     this.elements.archiveModal = document.getElementById('archiveModal');
     this.elements.recycleModal = document.getElementById('recycleModal');
     this.elements.headerButton = document.getElementById('cleanup-button');
-    this.elements.closeCleanup = document.getElementById('closeCleanup');
-    this.elements.closeArchive = document.getElementById('closeArchive');
-    this.elements.closeRecycle = document.getElementById('closeRecycle');
     this.elements.openArchiveFromCleanup = document.getElementById('open-archive-from-cleanup');
     this.elements.openRecycleFromCleanup = document.getElementById('open-recycle-from-cleanup');
     this.elements.openArchiveView = document.getElementById('open-archive-view');
@@ -111,11 +237,6 @@ export class CleanupUIController {
     const {
       headerButton,
       cleanupModal,
-      archiveModal,
-      recycleModal,
-      closeCleanup,
-      closeArchive,
-      closeRecycle,
       openArchiveFromCleanup,
       openRecycleFromCleanup,
       openArchiveView,
@@ -127,30 +248,20 @@ export class CleanupUIController {
 
     headerButton?.addEventListener('click', () => this.openCleanupModal());
 
-    closeCleanup?.addEventListener('click', () => this.closeModal(cleanupModal));
-    closeArchive?.addEventListener('click', () => this.closeModal(archiveModal));
-    closeRecycle?.addEventListener('click', () => this.closeModal(recycleModal));
-
     openArchiveFromCleanup?.addEventListener('click', async () => {
-      this.closeModal(cleanupModal);
-      await this.refreshPanels({ archiveOnly: true });
-      this.openModal(archiveModal);
+      await this.openArchiveModal({ fromCleanup: true });
     });
 
     openRecycleFromCleanup?.addEventListener('click', async () => {
-      this.closeModal(cleanupModal);
-      await this.refreshPanels({ recycleOnly: true });
-      this.openModal(recycleModal);
+      await this.openRecycleModal({ fromCleanup: true });
     });
 
     openArchiveView?.addEventListener('click', async () => {
-      await this.refreshPanels({ archiveOnly: true });
-      this.openModal(archiveModal);
+      await this.openArchiveModal();
     });
 
     openRecycleView?.addEventListener('click', async () => {
-      await this.refreshPanels({ recycleOnly: true });
-      this.openModal(recycleModal);
+      await this.openRecycleModal();
     });
 
     cleanupModal?.addEventListener('change', async (event) => {
@@ -184,24 +295,6 @@ export class CleanupUIController {
     archiveButton?.addEventListener('click', () => this.handleBulkAction('archive'));
     deleteButton?.addEventListener('click', () => this.handleBulkAction('delete'));
     ignoreButton?.addEventListener('click', () => this.handleBulkAction('ignore'));
-
-    [cleanupModal, archiveModal, recycleModal].forEach(modal => {
-      modal?.addEventListener('click', (event) => {
-        if (event.target === modal) {
-          this.closeModal(modal);
-        }
-      });
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        [cleanupModal, archiveModal, recycleModal].forEach(modal => {
-          if (modal?.classList.contains('active')) {
-            this.closeModal(modal);
-          }
-        });
-      }
-    });
   }
 
   renderSnapshot(snapshot) {
@@ -212,22 +305,24 @@ export class CleanupUIController {
   }
 
   openCleanupModal() {
-    this.openModal(this.elements.cleanupModal);
     this.clearSelectionState();
+    this.cleanupModal?.show();
   }
 
-  openModal(modalElement) {
-    if (!modalElement) {
-      return;
+  async openArchiveModal(options = {}) {
+    if (options.fromCleanup) {
+      this.cleanupModal?.close();
     }
-    modalElement.classList.add('active', 'show');
+    await this.refreshPanels({ archiveOnly: true });
+    this.archiveModal?.show();
   }
 
-  closeModal(modalElement) {
-    if (!modalElement) {
-      return;
+  async openRecycleModal(options = {}) {
+    if (options.fromCleanup) {
+      this.cleanupModal?.close();
     }
-    modalElement.classList.remove('active', 'show');
+    await this.refreshPanels({ recycleOnly: true });
+    this.recycleModal?.show();
   }
 
   toggleSelection(section, bookmarkId, isSelected) {
@@ -244,13 +339,13 @@ export class CleanupUIController {
 
   updateSelectionState() {
     const totalSelected = this.getTotalSelected();
-    this.view.updateSelectionSummary(totalSelected);
-    this.view.updateActionState(totalSelected > 0);
+    this.view?.updateSelectionSummary(totalSelected);
+    this.view?.updateActionState(totalSelected > 0);
   }
 
   clearSelectionState() {
     SECTION_KEYS.forEach(section => this.selected[section].clear());
-    this.view.clearSelection();
+    this.view?.clearSelection();
     this.updateSelectionState();
   }
 

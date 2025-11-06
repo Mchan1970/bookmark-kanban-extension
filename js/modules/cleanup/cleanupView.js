@@ -54,11 +54,15 @@ export class CleanupView {
       wrapper.classList.add(item.severity === 'error' ? 'error' : 'warning');
     }
 
+    const actionColumn = document.createElement('div');
+    actionColumn.className = 'cleanup-item-gutter';
+
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'cleanup-checkbox';
     checkbox.dataset.section = section;
     checkbox.dataset.bookmarkId = item.id;
+    actionColumn.appendChild(checkbox);
 
     const details = document.createElement('div');
     details.className = 'cleanup-item-details';
@@ -94,9 +98,10 @@ export class CleanupView {
       actions.appendChild(ignoreButton);
     }
 
-    wrapper.appendChild(checkbox);
+    actionColumn.appendChild(actions);
+
+    wrapper.appendChild(actionColumn);
     wrapper.appendChild(details);
-    wrapper.appendChild(actions);
 
     return wrapper;
   }

@@ -38,6 +38,13 @@
   padding: 0;
 }
 
+.cleanup-content .modal-body {
+  flex: 1;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .cleanup-header {
   display: flex;
   align-items: center;
@@ -99,10 +106,9 @@
 }
 
 .cleanup-item {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   padding: 10px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
@@ -123,6 +129,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .cleanup-item-title {
@@ -135,10 +142,19 @@
   font-size: 0.85rem;
 }
 
+.cleanup-item-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 30px;
+}
+
 .cleanup-item-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .cleanup-item-actions button {
@@ -211,12 +227,18 @@
 }
 
 .cleanup-item.cleanup-item--management {
-  grid-template-columns: 1fr auto;
-  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .cleanup-item.cleanup-item--management .cleanup-item-details {
   padding-left: 4px;
+}
+
+.cleanup-item.cleanup-item--management .cleanup-item-actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
 }
 
 .cleanup-empty {

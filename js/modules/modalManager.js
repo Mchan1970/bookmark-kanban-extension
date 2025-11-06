@@ -374,6 +374,24 @@ export class ModalManager {
       });
       resetButton.dataset.bound = 'true';
     }
+
+    const openArchiveView = modal.querySelector('#open-archive-view');
+    if (openArchiveView && !openArchiveView.dataset.bound) {
+      openArchiveView.addEventListener('click', async () => {
+        closeSettings();
+        await window.app?.cleanupManager?.ui?.openArchiveModal();
+      });
+      openArchiveView.dataset.bound = 'true';
+    }
+
+    const openRecycleView = modal.querySelector('#open-recycle-view');
+    if (openRecycleView && !openRecycleView.dataset.bound) {
+      openRecycleView.addEventListener('click', async () => {
+        closeSettings();
+        await window.app?.cleanupManager?.ui?.openRecycleModal();
+      });
+      openRecycleView.dataset.bound = 'true';
+    }
     
     // Close button is now handled automatically by the new Modal factory
   }
