@@ -127,6 +127,7 @@ export class ModalManager {
             <select id="display-mode-selector" class="display-mode-selector">
               <option value="double">Double Line</option>
               <option value="single">Single Line</option>
+              <option value="full">Full (wrap titles)</option>
             </select>
           </div>
         </div>

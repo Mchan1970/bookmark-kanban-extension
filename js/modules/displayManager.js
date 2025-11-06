@@ -5,7 +5,7 @@ export class DisplayManager {
   constructor() {
     this.STORAGE_KEY = 'bookmark_board_display_mode';
     this.DEFAULT_MODE = 'double';
-    this.availableModes = ['single', 'double'];
+    this.availableModes = ['single', 'double', 'full'];
     this.currentMode = this.DEFAULT_MODE;
     this.initializeDisplayMode();
   }

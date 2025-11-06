@@ -356,6 +356,36 @@ body[data-display-mode="double"] .bookmark-domain {
   max-width: 320px;
 }
 
+/* Full mode - wrap titles completely */
+body[data-display-mode="full"] .bookmark-item {
+  padding: 0.9rem;
+}
+
+body[data-display-mode="full"] .bookmark-content {
+  align-items: flex-start;
+}
+
+body[data-display-mode="full"] .bookmark-title {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  line-height: 1.35;
+  max-height: none;
+}
+
+body[data-display-mode="full"] .bookmark-text-container {
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+body[data-display-mode="full"] .bookmark-domain {
+  display: block;
+}
+
+body[data-display-mode="full"] .bookmark-menu-button {
+  margin-top: 0.2rem;
+}
+
 #current-time {
   font-size: 1.5rem;
   font-weight: bold;

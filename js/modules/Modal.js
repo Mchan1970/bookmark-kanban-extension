@@ -237,6 +237,13 @@ export class Modal {
 
     // 更新状态
     this.isOpen = false;
+
+    // 如果当前焦点在模态内部，先移走以避免 aria-hidden 与焦点冲突
+    const activeElement = document.activeElement;
+    if (activeElement && this.element.contains(activeElement)) {
+      activeElement.blur();
+    }
+
     this.element.setAttribute('aria-hidden', 'true');
 
     // 隐藏模态框
