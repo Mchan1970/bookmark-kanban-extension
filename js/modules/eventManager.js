@@ -58,6 +58,22 @@ export class EventManager {
       const position = { x: e.clientX, y: e.clientY };
       this.openBookmarkMenu(bookmarkItem, { position });
     });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!this.actionMenu.visible) {
+        return;
+      }
+
+      const hoveredBookmark = e.target.closest('.bookmark-item');
+      if (!hoveredBookmark) {
+        return;
+      }
+
+      const currentId = this.actionMenu.currentBookmark?.id;
+      if (currentId && hoveredBookmark.dataset.bookmarkId !== currentId) {
+        this.actionMenu.hide();
+      }
+    });
   }
 
   setupKeyboardShortcuts() {

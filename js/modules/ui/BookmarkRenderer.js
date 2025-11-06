@@ -56,10 +56,12 @@ export class BookmarkRenderer {
     //Create text container for title and tags
     const textContainer = createElement('div', 'bookmark-text-container');
 
+    const tooltipText = this.buildTooltipText(processedBookmark.cleanTitle, bookmark.url);
+
     // Create title element (using the cleaned title)
     const title = createElement('div', 'bookmark-title');
     title.textContent = processedBookmark.cleanTitle || '(Untitled)';
-    title.title = processedBookmark.cleanTitle || processedBookmark.url;
+    title.title = tooltipText;
 
     //Create tags container
     const tagsContainer = tagRenderer.createTagContainer(processedBookmark.tags, {
@@ -99,6 +101,10 @@ export class BookmarkRenderer {
     //Assemble item
     item.appendChild(content);
     item.appendChild(menuButton);
+
+    // Attach tooltip info for hover (single-line + native title)
+    item.setAttribute('data-tooltip', tooltipText);
+    item.setAttribute('title', tooltipText);
     
     //Add click handler to open bookmark
     item.addEventListener('click', (e) => {
@@ -136,10 +142,15 @@ export class BookmarkRenderer {
 
       //Update title text and tooltip
       const titleElement = item.querySelector('.bookmark-title');
+      const tooltipText = this.buildTooltipText(processedBookmark.cleanTitle, bookmark.url);
+
       if (titleElement) {
         titleElement.textContent = processedBookmark.cleanTitle || '(Untitled)';
-        titleElement.title = processedBookmark.cleanTitle || processedBookmark.url;
+        titleElement.title = tooltipText;
       }
+
+      item.setAttribute('data-tooltip', tooltipText);
+      item.setAttribute('title', tooltipText);
 
       //Update tags
       const textContainer = item.querySelector('.bookmark-text-container');
@@ -257,5 +268,13 @@ export class BookmarkRenderer {
     }
 
     item.setAttribute('data-site-status', status);
+  }
+
+  buildTooltipText(title, url) {
+    const cleanTitle = (title || '').trim();
+    if (cleanTitle && url) {
+      return `${cleanTitle}\n${url}`;
+    }
+    return cleanTitle || url || '';
   }
 }

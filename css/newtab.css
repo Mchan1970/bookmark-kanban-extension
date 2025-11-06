@@ -298,17 +298,18 @@ body[data-display-mode="single"] .bookmark-item::after {
 }
 
 body[data-display-mode="single"] .bookmark-item:hover::after {
-  content: attr(data-url);
+  content: attr(data-tooltip);
   position: absolute;
   left: 50%;
-  bottom: -28px;
+  top: calc(100% + 6px);
+  bottom: auto;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
-  white-space: nowrap;
+  white-space: pre-line;
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -321,8 +322,13 @@ body[data-display-mode="single"] .bookmark-list {
 }
 
 body[data-display-mode="single"] .bookmark-item:nth-last-child(-n+3):hover::after {
-  bottom: -28px;
   top: auto;
+  bottom: calc(100% + 6px);
+}
+
+body.bookmark-menu-open .bookmark-item:hover::after {
+  content: none;
+  display: none;
 }
 
 /* Ensure tooltips appear above the bookmark list */

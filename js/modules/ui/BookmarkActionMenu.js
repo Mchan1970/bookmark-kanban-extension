@@ -57,12 +57,14 @@ export class BookmarkActionMenu {
     this.positionMenu(options);
     this.menuElement.classList.add('visible');
     this.visible = true;
+    document.body.classList.add('bookmark-menu-open');
   }
 
   hide() {
     if (!this.visible) return;
     this.menuElement.classList.remove('visible');
     this.visible = false;
+    document.body.classList.remove('bookmark-menu-open');
   }
 
   renderMenu(status) {
