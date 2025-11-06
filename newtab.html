@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/modules/common.css">
   <link rel="stylesheet" href="css/modules/drag.css">
   <link rel="stylesheet" href="css/modules/modal.css">
+  <link rel="stylesheet" href="css/modules/modal-unified.css">
   <link rel="stylesheet" href="css/modules/commandPalette.css">
   <link rel="stylesheet" href="css/modules/tags.css">
   <link rel="stylesheet" href="css/modules/cleanup.css">
@@ -83,55 +84,7 @@
     </div>
   </div>
 
-  <!-- Settings Modal (New) -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-content settings-content">
-      <h2>Settings</h2>
-      <div class="settings-container">
-        <div class="settings-group">
-          <h3>Appearance</h3>
-          <div class="form-group">
-            <label for="theme-selector">Theme</label>
-            <select id="theme-selector" class="theme-selector">
-              <option value="default">Default (Light Blue)</option>
-              <option value="dark">Dark</option>
-              <option value="green">Green</option>
-              <option value="purple">Purple</option>
-              <option value="high-contrast">High Contrast</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="display-mode-selector">Display Mode</label>
-            <select id="display-mode-selector" class="display-mode-selector">
-              <option value="double">Double Line</option>
-              <option value="single">Single Line</option>
-            </select>
-          </div>
-        </div>
-        <div class="settings-group">
-          <h3>Data Management</h3>
-          <div class="form-group">
-            <button id="refresh-bookmarks" class="btn-secondary">Refresh Bookmarks</button>
-          </div>
-          <div class="form-group">
-            <button id="reset-layout" class="btn-warning">Reset Board Layout</button>
-          </div>
-        </div>
-        <div class="settings-group">
-          <h3>Cleanup</h3>
-          <div class="form-group">
-            <button id="open-archive-view" class="btn-secondary">View Archived Bookmarks</button>
-          </div>
-          <div class="form-group">
-            <button id="open-recycle-view" class="btn-secondary">View Recycle Bin</button>
-          </div>
-        </div>
-      </div>
-      <div class="form-actions">
-        <button type="button" class="btn-primary" id="closeSettings">Close</button>
-      </div>
-    </div>
-  </div>
+  <!-- Settings Modal - Now created dynamically by Modal.js factory -->
 
   <!-- Cleanup Modal -->
   <div id="cleanupModal" class="modal cleanup-modal">
@@ -227,6 +180,7 @@
     </div>
   </div>
 
+  <script type="module" src="js/modules/Modal.js"></script>
   <script type="module" src="js/newtab.js"></script>
 </body>
 </html>

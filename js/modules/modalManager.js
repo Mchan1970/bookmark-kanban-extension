@@ -1,4 +1,5 @@
 import { createElement } from './utils.js';
+import { Modal, modalManager } from './Modal.js';
 
 export class ModalManager {
   constructor(bookmarkManager, uiManager, app) {
@@ -16,9 +17,9 @@ export class ModalManager {
     this.editModal = this.createEditModal();
     //Create confirm delete modal
     this.confirmModal = this.createConfirmModal();
-    //Create settings modal
-    this.settingsModal = document.getElementById('settingsModal');
-    
+    //Create settings modal using new factory
+    this.settingsModal = this.createSettingsModal();
+
     //Add to document
     document.body.appendChild(this.editModal);
     document.body.appendChild(this.confirmModal);
@@ -101,6 +102,73 @@ export class ModalManager {
     `;
 
     return modal;
+  }
+
+  /*** Create settings modal using new Modal factory
+   * @returns {Modal} Settings modal instance
+   */
+  createSettingsModal() {
+    const settingsContent = `
+      <div class="settings-container">
+        <div class="settings-group">
+          <h3>Appearance</h3>
+          <div class="form-group">
+            <label for="theme-selector">Theme</label>
+            <select id="theme-selector" class="theme-selector">
+              <option value="default">Default (Light Blue)</option>
+              <option value="dark">Dark</option>
+              <option value="green">Green</option>
+              <option value="purple">Purple</option>
+              <option value="high-contrast">High Contrast</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="display-mode-selector">Display Mode</label>
+            <select id="display-mode-selector" class="display-mode-selector">
+              <option value="double">Double Line</option>
+              <option value="single">Single Line</option>
+            </select>
+          </div>
+        </div>
+        <div class="settings-group">
+          <h3>Data Management</h3>
+          <div class="form-group">
+            <button id="refresh-bookmarks" class="btn-secondary">Refresh Bookmarks</button>
+          </div>
+          <div class="form-group">
+            <button id="reset-layout" class="btn-secondary">Reset Layout</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return new Modal({
+      id: 'settingsModal',
+      title: 'Settings',
+      content: settingsContent,
+      width: '500px',
+      maxWidth: '90vw',
+      closable: true,
+      closeOnBackdrop: true,
+      closeOnEscape: true,
+      onOpen: (modal) => {
+        // Ensure current settings are reflected when modal opens
+        if (window.app) {
+          const themeSelector = modal.getButton('#theme-selector');
+          if (themeSelector && window.app.themeManager) {
+            themeSelector.value = window.app.themeManager.getCurrentTheme();
+          }
+
+          const displayModeSelector = modal.getButton('#display-mode-selector');
+          if (displayModeSelector && window.app.displayManager) {
+            displayModeSelector.value = window.app.displayManager.getCurrentDisplayMode();
+          }
+        }
+
+        // Bind events
+        this.bindSettingsEvents(modal.element);
+      }
+    });
   }
 
   /*** Show edit modal
@@ -233,28 +301,8 @@ export class ModalManager {
   /*** Show settings modal
    */
   showSettingsModal() {
-    const modal = this.settingsModal;
-    
-    //Ensure current settings are reflected
-    if (window.app) {
-      //Theme selector
-      const themeSelector = modal.querySelector('#theme-selector');
-      if (themeSelector && window.app.themeManager) {
-        themeSelector.value = window.app.themeManager.getCurrentTheme();
-      }
-      
-      //Display mode selector
-      const displayModeSelector = modal.querySelector('#display-mode-selector');
-      if (displayModeSelector && window.app.displayManager) {
-        displayModeSelector.value = window.app.displayManager.getCurrentDisplayMode();
-      }
-    }
-    
-    //Bind events if not already bound
-    this.bindSettingsEvents(modal);
-    
-    //Show modal
-    this.showModal(modal);
+    // Show the modal using the new Modal instance
+    this.settingsModal.show();
   }
   
   /*** Bind settings modal events
@@ -310,14 +358,7 @@ export class ModalManager {
       resetButton.dataset.bound = 'true';
     }
     
-    //Close button
-    const closeButton = modal.querySelector('#closeSettings');
-    if (closeButton && !closeButton.dataset.bound) {
-      closeButton.addEventListener('click', () => {
-        this.closeActiveModal();
-      });
-      closeButton.dataset.bound = 'true';
-    }
+    // Close button is now handled automatically by the new Modal factory
   }
 
   /*** Show short notification message

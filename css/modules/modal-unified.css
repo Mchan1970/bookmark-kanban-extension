@@ -1,0 +1,511 @@
+/*
+ * 统一模态框样式系统
+ * 架构统一：所有模态框使用相同的HTML结构和CSS类名
+ * 杜绝冲突：统一的作用域和命名规范
+ */
+
+/* ===== 基础模态框结构 ===== */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal[aria-hidden="false"] {
+  display: flex;
+}
+
+/* ===== 模态框内容容器 ===== */
+.modal-content {
+  background-color: var(--card-bg, #ffffff);
+  color: var(--text-primary, #333333);
+  border-radius: var(--border-radius-lg, 12px);
+  box-shadow: var(--shadow-lg, 0 10px 25px rgba(0, 0, 0, 0.2));
+  border: 1px solid var(--border-color, #e0e0e0);
+  max-width: 90vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.95);
+  transition: transform 0.2s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+/* ===== 模态框头部 ===== */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  background-color: var(--card-bg, #ffffff);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary, #333333);
+  line-height: 1.4;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: var(--text-secondary, #666666);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background-color: var(--bg-hover, #f5f5f5);
+  color: var(--text-primary, #333333);
+}
+
+.modal-close:focus {
+  outline: 2px solid var(--primary-color, #0066cc);
+  outline-offset: 2px;
+}
+
+/* ===== 模态框主体内容 ===== */
+.modal-body {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: var(--bg-light, #f8f9fa);
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: var(--border-color, #d0d0d0);
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary, #666666);
+}
+
+/* ===== 模态框底部按钮区域 ===== */
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  background-color: var(--card-bg, #ffffff);
+  flex-shrink: 0;
+}
+
+.modal-footer:empty {
+  display: none;
+}
+
+/* ===== 模态框按钮样式 ===== */
+.modal-button {
+  padding: 8px 16px;
+  border-radius: var(--border-radius, 6px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  min-width: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.modal-button:focus {
+  outline: 2px solid var(--primary-color, #0066cc);
+  outline-offset: 2px;
+}
+
+/* 主要按钮 */
+.modal-button.btn-primary {
+  background-color: var(--primary-color, #0066cc);
+  color: white;
+  border-color: var(--primary-color, #0066cc);
+}
+
+.modal-button.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-dark, #0052a3);
+  border-color: var(--primary-dark, #0052a3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+/* 次要按钮 */
+.modal-button.btn-secondary {
+  background-color: var(--bg-secondary, #f8f9fa);
+  color: var(--text-primary, #333333);
+  border-color: var(--border-color, #e0e0e0);
+}
+
+.modal-button.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-hover, #e9ecef);
+  border-color: var(--border-hover, #d0d0d0);
+  transform: translateY(-1px);
+}
+
+/* 危险按钮 */
+.modal-button.btn-danger {
+  background-color: var(--danger-color, #dc3545);
+  color: white;
+  border-color: var(--danger-color, #dc3545);
+}
+
+.modal-button.btn-danger:hover:not(:disabled) {
+  background-color: var(--danger-dark, #c82333);
+  border-color: var(--danger-dark, #c82333);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* 警告按钮 */
+.modal-button.btn-warning {
+  background-color: var(--warning-color, #ffc107);
+  color: var(--text-primary, #333333);
+  border-color: var(--warning-color, #ffc107);
+}
+
+.modal-button.btn-warning:hover:not(:disabled) {
+  background-color: var(--warning-dark, #e0a800);
+  border-color: var(--warning-dark, #e0a800);
+  transform: translateY(-1px);
+}
+
+/* ===== 输入框样式 ===== */
+.modal-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: var(--border-radius, 6px);
+  font-size: 0.875rem;
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #333333);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #0066cc);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.modal-input::placeholder {
+  color: var(--text-placeholder, #999999);
+}
+
+/* ===== 表单元素 ===== */
+.modal-form-group {
+  margin-bottom: 16px;
+}
+
+.modal-form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary, #333333);
+}
+
+.modal-form-help {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #666666);
+  margin-top: 4px;
+}
+
+/* ===== 加载状态 ===== */
+.modal-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.modal-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.modal-loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-color, #e0e0e0);
+  border-top: 2px solid var(--primary-color, #0066cc);
+  border-radius: 50%;
+  animation: modal-spin 1s linear infinite;
+  z-index: 2;
+}
+
+@keyframes modal-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 95vw;
+    margin: 20px;
+    max-height: calc(100vh - 40px);
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 12px 20px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-button {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .modal-title {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-header {
+    padding: 12px 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 8px 16px;
+  }
+
+  .modal-title {
+    font-size: 1rem;
+  }
+
+  .modal-close {
+    width: 28px;
+    height: 28px;
+    font-size: 1.25rem;
+  }
+}
+
+/* ===== 暗色主题支持 ===== */
+@media (prefers-color-scheme: dark) {
+  .modal-content {
+    background-color: var(--card-bg-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+  }
+
+  .modal-header {
+    background-color: var(--card-bg-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+  }
+
+  .modal-footer {
+    background-color: var(--card-bg-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+  }
+
+  .modal-close {
+    color: var(--text-secondary-dark, #a0aec0);
+  }
+
+  .modal-close:hover {
+    background-color: var(--bg-hover-dark, #4a5568);
+    color: var(--text-primary-dark, #f7fafc);
+  }
+
+  .modal-input {
+    background-color: var(--bg-primary-dark, #1a202c);
+    border-color: var(--border-color-dark, #4a5568);
+    color: var(--text-primary-dark, #f7fafc);
+  }
+
+  .modal-button.btn-secondary {
+    background-color: var(--bg-secondary-dark, #2d3748);
+    border-color: var(--border-color-dark, #4a5568);
+    color: var(--text-primary-dark, #f7fafc);
+  }
+
+  .modal-button.btn-secondary:hover:not(:disabled) {
+    background-color: var(--bg-hover-dark, #4a5568);
+  }
+}
+
+/* ===== 可访问性增强 ===== */
+@media (prefers-reduced-motion: reduce) {
+  .modal,
+  .modal-content,
+  .modal-close,
+  .modal-button {
+    transition: none;
+  }
+
+  .modal-loading::before {
+    animation: none;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .modal {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-content {
+    border: 2px solid;
+  }
+
+  .modal-button:focus {
+    outline-width: 3px;
+  }
+}
+
+/* ===== 特殊内容类型 ===== */
+.modal-body .form-group {
+  margin-bottom: 16px;
+}
+
+.modal-body .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.modal-body label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: var(--text-primary, #333333);
+}
+
+.modal-body input[type="text"],
+.modal-body input[type="url"],
+.modal-body input[type="email"],
+.modal-body input[type="password"],
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: var(--border-radius, 6px);
+  font-size: 0.875rem;
+  background-color: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #333333);
+  box-sizing: border-box;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  outline: none;
+  border-color: var(--primary-color, #0066cc);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.modal-body select {
+  cursor: pointer;
+}
+
+.modal-body textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ===== 错误和验证状态 ===== */
+.modal-error {
+  color: var(--danger-color, #dc3545);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-error::before {
+  content: "⚠";
+  font-size: 1em;
+}
+
+.modal-input.error {
+  border-color: var(--danger-color, #dc3545);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* ===== 兼容性修复 ===== */
+/* 确保与现有代码兼容，但不破坏新系统 */
+.modal-content.cleanup-content,
+.modal-content.settings-content {
+  /* 继承统一的模态框样式 */
+  /* 这些特定的类名仍然有效，但使用统一的基础样式 */
+}
+
+/* 临时性修复 - 在迁移期间保持兼容 */
+#cleanupModal .modal-content,
+#settingsModal .modal-content,
+#editModal .modal-content,
+#confirmModal .modal-content {
+  /* 确保现有的模态框也能使用新的统一样式 */
+}
