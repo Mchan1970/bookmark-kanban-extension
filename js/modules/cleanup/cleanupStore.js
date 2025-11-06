@@ -537,4 +537,33 @@ export class CleanupStore {
     }
     return null;
   }
+
+  /*** Clear stored statuses for bookmarks
+   * @param {Array<string>} bookmarkIds Bookmark IDs
+   */
+  async clearStatuses(bookmarkIds = []) {
+    if (!Array.isArray(bookmarkIds) || bookmarkIds.length === 0) {
+      return;
+    }
+
+    let changed = false;
+
+    bookmarkIds.forEach(id => {
+      if (this.metadata.lastKnownStatus?.[id]) {
+        delete this.metadata.lastKnownStatus[id];
+        changed = true;
+      }
+      if (this.metadata.lastCheckedAt?.[id]) {
+        delete this.metadata.lastCheckedAt[id];
+        changed = true;
+      }
+    });
+
+    if (!changed) {
+      return;
+    }
+
+    await this.persistMetadata();
+    await this.refresh();
+  }
 }

@@ -1,6 +1,9 @@
+import { BookmarkActionMenu } from './ui/BookmarkActionMenu.js';
+
 export class EventManager {
   constructor(app) {
     this.app = app;
+    this.actionMenu = new BookmarkActionMenu((action, bookmark) => this.handleMenuAction(action, bookmark));
   }
 
   setupEventListeners() {
@@ -33,25 +36,27 @@ export class EventManager {
         return;
       }
       
-      //HandleEditButtonClick
-      if (target.closest('.edit-btn')) {
+      //Handle more actions button
+      if (target.closest('.bookmark-menu-btn')) {
         e.preventDefault();
         e.stopPropagation();
         const bookmarkItem = target.closest('.bookmark-item');
         if (bookmarkItem) {
-          this.handleEditClick(bookmarkItem);
+          const rect = target.getBoundingClientRect();
+          this.openBookmarkMenu(bookmarkItem, { anchorRect: rect });
         }
+        return;
       }
-      
-      //HandleDeleteButtonClick
-      if (target.closest('.delete-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const bookmarkItem = target.closest('.bookmark-item');
-        if (bookmarkItem) {
-          this.handleDeleteClick(bookmarkItem);
-        }
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+      const bookmarkItem = e.target.closest('.bookmark-item');
+      if (!bookmarkItem) {
+        return;
       }
+      e.preventDefault();
+      const position = { x: e.clientX, y: e.clientY };
+      this.openBookmarkMenu(bookmarkItem, { position });
     });
   }
 
@@ -71,7 +76,11 @@ export class EventManager {
   }
 
   async handleEditClick(bookmarkItem) {
-    const bookmarkId = bookmarkItem.dataset.bookmarkId;
+    if (!bookmarkItem) return;
+    await this.handleEditById(bookmarkItem.dataset.bookmarkId);
+  }
+
+  async handleEditById(bookmarkId) {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         const [bookmark] = await chrome.bookmarks.get(bookmarkId);
@@ -85,7 +94,11 @@ export class EventManager {
   }
 
   async handleDeleteClick(bookmarkItem) {
-    const bookmarkId = bookmarkItem.dataset.bookmarkId;
+    if (!bookmarkItem) return;
+    await this.handleDeleteById(bookmarkItem.dataset.bookmarkId);
+  }
+
+  async handleDeleteById(bookmarkId) {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         const [bookmark] = await chrome.bookmarks.get(bookmarkId);
@@ -110,4 +123,117 @@ export class EventManager {
       }
     }
   }
-} 
+
+  openBookmarkMenu(bookmarkItem, options = {}) {
+    const bookmarkId = bookmarkItem.dataset.bookmarkId;
+    const url = bookmarkItem.dataset.url;
+    const status = bookmarkItem.getAttribute('data-site-status');
+    this.actionMenu.show({
+      id: bookmarkId,
+      url,
+      status,
+      anchorRect: options.anchorRect,
+      position: options.position
+    });
+  }
+
+  async handleMenuAction(action, bookmark) {
+    switch (action) {
+      case 'edit':
+        await this.handleEditById(bookmark.id);
+        break;
+      case 'delete':
+        await this.handleDeleteById(bookmark.id);
+        break;
+      case 'archive':
+        await this.handleArchiveBookmark(bookmark.id);
+        break;
+      case 'recheck':
+        await this.handleRecheckBookmark(bookmark);
+        break;
+      case 'clear-status':
+        await this.handleClearStatus(bookmark.id);
+        break;
+      case 'copy-link':
+        await this.handleCopyLink(bookmark.url);
+        break;
+      default:
+        break;
+    }
+  }
+
+  async handleArchiveBookmark(bookmarkId) {
+    try {
+      await this.app.cleanupManager?.archiveBookmarks([bookmarkId]);
+    } catch (error) {
+      console.error('Failed to archive bookmark:', error);
+      this.app.notificationManager?.showErrorToast('Failed to archive bookmark');
+    }
+  }
+
+  async handleClearStatus(bookmarkId) {
+    try {
+      await this.app.cleanupManager?.clearStatuses([bookmarkId]);
+    } catch (error) {
+      console.error('Failed to clear status:', error);
+      this.app.notificationManager?.showErrorToast('Failed to clear status');
+    }
+  }
+
+  async handleRecheckBookmark(bookmark) {
+    if (!bookmark?.id) {
+      return;
+    }
+
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'RECHECK_BOOKMARK',
+        bookmarkId: bookmark.id
+      });
+
+      if (response?.error) {
+        throw new Error(response.error);
+      }
+
+      if (response?.status !== undefined) {
+        await this.app.cleanupManager?.applySiteStatus({ [bookmark.id]: response.status });
+        const message = response.status === true
+          ? 'Site reachable'
+          : response.status === 'cert-error'
+            ? 'Certificate issue detected'
+            : response.status === 'no-https'
+              ? 'Site only supports HTTP'
+              : 'Site unreachable';
+        this.app.notificationManager?.showToast(message);
+      }
+    } catch (error) {
+      console.error('Failed to re-check bookmark:', error);
+      this.app.notificationManager?.showErrorToast('Failed to re-check bookmark');
+    }
+  }
+
+  async handleCopyLink(url) {
+    if (!url) {
+      return;
+    }
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = url;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      this.app.notificationManager?.showToast('Link copied');
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+      this.app.notificationManager?.showErrorToast('Failed to copy link');
+    }
+  }
+}

@@ -257,7 +257,8 @@ body[data-display-mode="single"] .bookmark-item {
 body[data-display-mode="single"] .bookmark-content {
   display: flex;
   align-items: flex-start;
-  width: calc(100%);
+  flex: 1;
+  min-width: 0;
 }
 
 body[data-display-mode="single"] .bookmark-domain {
@@ -272,19 +273,14 @@ body[data-display-mode="single"] .bookmark-title {
 }
 
 body[data-display-mode="single"] .bookmark-text-container {
-  width: 100%;
-  padding-right: 48px; /* Reserve space for action buttons */
+  width: auto;
+  flex: 1;
+  min-width: 0;
+  padding-right: 0;
 }
 
-body[data-display-mode="single"] .bookmark-actions {
-  display: flex;
-  flex-direction: row;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  gap: 4px;
-  height: auto;
+body[data-display-mode="single"] .bookmark-menu-button {
+  margin-left: 4px;
 }
 
 body[data-display-mode="single"] .bookmark-item:hover {
@@ -578,6 +574,14 @@ main {
   align-items: center;
 }
 
+.bookmark-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
 .bookmark-item:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
@@ -592,54 +596,41 @@ main {
 
 .bookmark-title {
   flex-grow: 1;
+  min-width: 0;
   font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 28px;
-  max-width: 320px;
+  padding-right: 0;
+  max-width: 100%;
   color: var(--text-primary);
   transition: color 0.3s;
 }
 
-/* Bookmark Action Buttons */
-.bookmark-actions {
-  display: none;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  flex-direction: column;
-  gap: 2px;
-  height: calc(100% - 10px);
-  justify-content: center;
-}
-
-.bookmark-item:hover .bookmark-actions {
-  display: flex;
-}
-
-.action-btn {
+.bookmark-menu-button {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: none;
-  border: none;
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 0;
-  color: var(--text-light);
   transition: var(--transition);
-  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
-.edit-btn:hover {
-  color: var(--primary-color);
+.bookmark-menu-button svg {
+  fill: currentColor;
 }
 
-.delete-btn:hover {
-  color: var(--danger-color);
+.bookmark-menu-button:hover,
+.bookmark-item:hover .bookmark-menu-button {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .empty-column {
@@ -647,6 +638,62 @@ main {
   text-align: center;
   color: var(--secondary-color);
   font-style: italic;
+}
+
+.bookmark-action-menu {
+  position: absolute;
+  min-width: 180px;
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  padding: 6px 0;
+  z-index: 2000;
+  opacity: 0;
+  transform: scale(0.98);
+  transform-origin: top right;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.bookmark-action-menu.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.bookmark-action-menu button {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.bookmark-action-menu button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.bookmark-action-menu button.danger {
+  color: var(--danger-color);
+}
+
+.bookmark-action-menu__divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 6px 0;
+}
+
+.bookmark-action-menu button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Modal Styles */
@@ -1089,6 +1136,17 @@ main {
 
 .bookmark-item[data-site-status="no-https"]:hover::after {
   content: "This site is not using HTTPS";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 100;
 }
 
 .disabled-message,

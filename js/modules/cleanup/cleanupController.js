@@ -364,6 +364,21 @@ export class CleanupController {
     this.clearSelectionState();
   }
 
+  async archiveBookmarks(bookmarkIds) {
+    if (!bookmarkIds?.length) {
+      return;
+    }
+    await this.actions.archive(bookmarkIds);
+  }
+
+  async clearStatuses(bookmarkIds) {
+    if (!bookmarkIds?.length) {
+      return;
+    }
+    await this.store.clearStatuses(bookmarkIds);
+    this.notificationManager?.showToast('Status cleared');
+  }
+
   async refreshBinViews() {
     await Promise.all([
       this.renderArchivePanel(),

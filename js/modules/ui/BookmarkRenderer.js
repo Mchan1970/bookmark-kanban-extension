@@ -71,9 +71,6 @@ export class BookmarkRenderer {
     const domain = createElement('div', 'bookmark-domain');
     domain.textContent = getDomain(bookmark.url);
 
-    //Create actions container
-    const actions = createElement('div', 'bookmark-actions');
-
     //Assemble text container
     textContainer.appendChild(title);
     if (tagsContainer) {
@@ -81,27 +78,19 @@ export class BookmarkRenderer {
     }
     textContainer.appendChild(domain);
 
-    //Create edit button
-    const editButton = createElement('button', 'bookmark-action edit-btn');
-    editButton.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24">
-        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+    //Create menu trigger
+    const menuButton = createElement('button', 'bookmark-menu-button bookmark-menu-btn');
+    menuButton.type = 'button';
+    menuButton.setAttribute('draggable', 'false');
+    menuButton.setAttribute('aria-haspopup', 'true');
+    menuButton.setAttribute('title', 'More actions');
+    menuButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="5" r="2"></circle>
+        <circle cx="12" cy="12" r="2"></circle>
+        <circle cx="12" cy="19" r="2"></circle>
       </svg>
     `;
-    editButton.title = 'Edit';
-
-    //Create delete button
-    const deleteButton = createElement('button', 'bookmark-action delete-btn');
-    deleteButton.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24">
-        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-      </svg>
-    `;
-    deleteButton.title = 'Delete';
-
-    //Assemble actions
-    actions.appendChild(editButton);
-    actions.appendChild(deleteButton);
 
     //Assemble content
     content.appendChild(faviconContainer);
@@ -109,11 +98,17 @@ export class BookmarkRenderer {
     
     //Assemble item
     item.appendChild(content);
-    item.appendChild(actions);
+    item.appendChild(menuButton);
     
     //Add click handler to open bookmark
     item.addEventListener('click', (e) => {
-      if (!e.target.closest('.bookmark-action')) {
+      if (e.defaultPrevented) {
+        return;
+      }
+      if (e.target.closest('.bookmark-menu-button')) {
+        return;
+      }
+      if (!e.target.closest('.bookmark-action-menu')) {
         window.open(bookmark.url, '_blank');
       }
     });

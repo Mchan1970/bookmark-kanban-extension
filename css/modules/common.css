@@ -92,48 +92,35 @@ body {
   color: var(--text-primary);
 }
 
-.bookmark-actions {
-  display: flex;
-  gap: var(--spacing-xs);
-  opacity: 0;
-  transition: var(--transition);
-}
-
-.bookmark-item:hover .bookmark-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: none;
+.bookmark-menu-button {
+  width: 28px;
+  height: 28px;
   border: none;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  font-size: 14px;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
   color: var(--text-light);
+  cursor: pointer;
   transition: var(--transition);
+  flex-shrink: 0;
 }
 
-.action-btn:hover {
-  background: var(--bg-light);
+.bookmark-menu-button svg {
+  fill: currentColor;
+}
+
+.bookmark-menu-button:hover,
+.bookmark-item:hover .bookmark-menu-button {
   color: var(--text-primary);
-}
-
-.edit-btn {
-  font-size: 12px;
-}
-
-.delete-btn {
-  font-size: 16px;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 /* Drag handle styles */
 .bookmark-item {
   cursor: move; /* Indicates draggable */
-}
-
-.bookmark-actions {
-  cursor: default; /* Keep default pointer in button area */
 }
 
 /* Bookmark text container with tag support */

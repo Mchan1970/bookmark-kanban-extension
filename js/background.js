@@ -111,6 +111,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     return false; // We already responded, no need to keep channel open
   }
+
+  if (message.type === 'RECHECK_BOOKMARK') {
+    const bookmarkId = message.bookmarkId;
+    handleSingleBookmarkCheck(bookmarkId).then((status) => {
+      try {
+        sendResponse({ status });
+      } catch (error) {
+        _debug('Failed to respond to single check request');
+      }
+    }).catch((error) => {
+      _debug('Single bookmark check failed:', error);
+      try {
+        sendResponse({ error: error.message });
+      } catch (responseError) {
+        _debug('Failed to send error response for single check');
+      }
+    });
+    return true;
+  }
   
   // Return false to indicate no async response needed
   return false;
@@ -352,4 +371,47 @@ async function persistCleanupMetadata(statusMap) {
       });
     });
   });
+}
+
+async function handleSingleBookmarkCheck(bookmarkId) {
+  if (!bookmarkId) {
+    throw new Error('Missing bookmark id');
+  }
+
+  const [bookmark] = await chrome.bookmarks.get(bookmarkId);
+  if (!bookmark || !bookmark.url) {
+    throw new Error('Bookmark not found');
+  }
+
+  let url;
+  try {
+    url = new URL(bookmark.url);
+  } catch (error) {
+    throw new Error('Invalid bookmark URL');
+  }
+  const status = await siteChecker.checkSite(url.hostname);
+
+  const entry = { [bookmarkId]: status };
+  await persistCleanupMetadata(entry);
+
+  if (chrome.storage.session) {
+    try {
+      const existing = await new Promise((resolve) => {
+        chrome.storage.session.get(['siteStatus'], (result) => {
+          if (chrome.runtime.lastError) {
+            resolve({});
+            return;
+          }
+          resolve(result.siteStatus || {});
+        });
+      });
+      const updated = { ...existing, [bookmarkId]: status };
+      await chrome.storage.session.set({ siteStatus: updated });
+      currentSessionResults = updated;
+    } catch (error) {
+      _debug('Failed to update session storage for single check');
+    }
+  }
+
+  return status;
 }
