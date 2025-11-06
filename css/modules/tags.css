@@ -1,8 +1,8 @@
 /**
- * Tags CSS - 书签标签样式
+ * Tags CSS - Bookmark tag styles
  */
 
-/* 标签基础样式 */
+/* Basic tag styles */
 .bookmark-tags {
   display: flex;
   flex-wrap: wrap;
@@ -11,7 +11,7 @@
   align-items: center;
 }
 
-/* 标签元素 */
+/* Tag element */
 .bookmark-tag {
   display: inline-flex;
   align-items: center;
@@ -29,7 +29,7 @@
   text-overflow: ellipsis;
 }
 
-/* 标签尺寸变体 */
+/* Tag size variants */
 .bookmark-tag--small {
   padding: 1px 4px;
   font-size: 10px;
@@ -51,7 +51,7 @@
   max-width: 150px;
 }
 
-/* 可点击标签 */
+/* Clickable tags */
 .bookmark-tag--clickable {
   cursor: pointer;
 }
@@ -66,7 +66,7 @@
   transform: translateY(0);
 }
 
-/* 标签删除按钮 */
+/* Tag delete button */
 .bookmark-tag__remove {
   display: inline-flex;
   align-items: center;
@@ -87,7 +87,7 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* 标签计数 */
+/* Tag counter */
 .bookmark-tag__count {
   display: inline-flex;
   align-items: center;
@@ -102,7 +102,7 @@
   font-weight: 600;
 }
 
-/* 更多标签指示器 */
+/* More tags indicator */
 .bookmark-tags__more {
   display: inline-flex;
   align-items: center;
@@ -123,14 +123,14 @@
   background: var(--tag-more-hover-bg, #d0d0d0);
 }
 
-/* 标签过滤器 */
+/* Tag filter */
 .tag-filter-container {
   width: calc(100% - 60px);
-  margin: 0 30px 12px;
+  margin: 0 30px 0px;
   position: sticky;
-  top: calc(var(--header-height) + 12px);
+  top: var(--header-height);
   z-index: 110;
-  /* 移除外层容器的背景，让内层容器完全控制视觉效果 */
+  /* Remove outer container background, let inner container control visual effects */
   background: transparent;
   backdrop-filter: none;
 }

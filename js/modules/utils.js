@@ -73,13 +73,13 @@ export const parseTitle = (title) => {
     return { cleanTitle: title || '', tags: [] };
   }
 
-  //匹配 #Tag 格式，Support中英文和Number
+  //Match #tag format, support Chinese, English and numbers
   const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
   const tags = (title.match(tagRegex) || []).map(match => match.substring(1));
 
   //Remove tags and clean up whitespace
   let cleanTitle = title.replace(tagRegex, '').trim();
-  cleanTitle = cleanTitle.replace(/\s+/g, ' '); //合并多个Empty格
+  cleanTitle = cleanTitle.replace(/\s+/g, ' '); //Merge multiple empty spaces
 
   return { cleanTitle, tags };
 };

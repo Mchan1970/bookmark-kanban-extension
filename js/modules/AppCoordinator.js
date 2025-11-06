@@ -21,17 +21,17 @@ export class AppCoordinator {
       //InitializeDragManager
       this.dragManager = new DragManager(this.bookmarkManager, this.uiManager);
       
-      //Initialize命令Panel
+      //Initialize command palette
       this.commandPalette = new CommandPalette(this.bookmarkManager);
       await this.commandPalette.initialize();
       
       //InitializeEventManager
       this.eventManager = new EventManager(this);
       
-      //InitializeMessageHandle器
+      //Initialize message handler
       this.messageHandler = new MessageHandler(this);
       
-      //Initialize站点CheckManager
+      //Initialize site check manager
       this.siteCheckManager = new SiteCheckManager(this);
       
       //InitializeNotificationManager
@@ -40,32 +40,32 @@ export class AppCoordinator {
       //ShowLoadState
       this.uiManager.showLoading();
       
-      //SettingsBookmark变更Listener
+      //Set up bookmark change listener
       this.bookmarkManager.setChangeListener(() => this.handleBookmarksChange());
       this.bookmarkManager.setRemoveListener((id) => {
-        //直接Handle DOM，不触发完整Refresh
+        //Handle DOM directly, no full refresh triggered
         const bookmarkItem = document.querySelector(`[data-bookmark-id="${id}"]`);
         if (bookmarkItem) {
           bookmarkItem.style.transition = 'opacity 0.3s ease';
           bookmarkItem.style.opacity = '0';
           setTimeout(() => {
             bookmarkItem.remove();
-            //Delete后UpdateBookmark顺序Storage
+            //Update bookmark order after deletion
             this.dragManager.saveBookmarkOrder();
           }, 300);
         }
       });
       
-      //渲染Kanban
+      //Render kanban
       await this.uiManager.renderKanban();
       
-      //InitializeDrag功能
+      //Initialize drag functionality
       this.dragManager.initialize();
 
-      //Add全局EventListener
+      //Add global event listener
       this.eventManager.setupEventListeners();
 
-      //InitializeIcon懒Load
+      //Initialize lazy icon loading
       this.initializeFaviconLoading();
 
     } catch (error) {
