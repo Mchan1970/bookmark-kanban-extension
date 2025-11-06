@@ -146,14 +146,14 @@ export class TagRenderer {
 
     // 创建标题
     const title = createElement('div', 'tag-filter__title');
-    title.textContent = '标签筛选';
+    title.textContent = 'Filter by Tags';
     filterContainer.appendChild(title);
 
     // 创建标签列表
     const tagList = createElement('div', 'tag-filter__list');
 
     // 添加"全部"选项
-    const allTag = this.createTagElement('全部', {
+    const allTag = this.createTagElement('All', {
       size: 'medium',
       clickable: false,
       showCount: true
@@ -192,7 +192,7 @@ export class TagRenderer {
     // 添加清除按钮
     if (activeTags.length > 0) {
       const clearButton = createElement('button', 'tag-filter__clear');
-      clearButton.textContent = '清除筛选';
+      clearButton.textContent = 'Clear Filter';
       clearButton.addEventListener('click', () => {
         this.handleFilterClear();
       });
@@ -278,7 +278,7 @@ export class TagRenderer {
 
     tagItems.forEach(item => {
       const tag = item.getAttribute('data-tag');
-      if (tag === '全部') {
+      if (tag === 'All') {
         item.classList.toggle('tag-filter__item--active', activeTags.length === 0);
       } else {
         item.classList.toggle('tag-filter__item--active', activeTags.includes(tag));

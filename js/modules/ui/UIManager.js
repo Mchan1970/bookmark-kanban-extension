@@ -338,7 +338,7 @@ export class UIManager {
   createTagEmptyState(tag) {
     const wrapper = document.createElement('div');
     wrapper.className = 'tag-filter-empty';
-    wrapper.textContent = `没有找到带有 #${tag} 的书签`;
+    wrapper.textContent = `No bookmarks found with tag #${tag}`;
     return wrapper;
   }
 } 
