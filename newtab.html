@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/modules/modal.css">
   <link rel="stylesheet" href="css/modules/commandPalette.css">
   <link rel="stylesheet" href="css/modules/tags.css">
+  <link rel="stylesheet" href="css/modules/cleanup.css">
   <link rel="stylesheet" href="css/newtab.css">
   <link rel="stylesheet" href="css/themes.css">
   <script src="lib/Sortable.min.js"></script>
@@ -22,6 +23,11 @@
       <div class="search-bar">
         <input type="text" id="header-search" placeholder="Search bookmarks or type #tag" autocomplete="off" />
         <button id="header-search-go" title="Search">Go</button>
+      </div>
+      <div id="cleanup-button" class="header-button" title="Cleanup suggestions">
+        <span class="cleanup-icon">🧹</span>
+        <span class="cleanup-text">Cleanup</span>
+        <span id="cleanup-badge" class="header-badge" style="display: none;">0</span>
       </div>
       <div id="check-sites-button" class="header-button" title="Check bookmarks availability">
         <span class="check-icon">🔍</span>
@@ -111,9 +117,112 @@
             <button id="reset-layout" class="btn-warning">Reset Board Layout</button>
           </div>
         </div>
+        <div class="settings-group">
+          <h3>Cleanup</h3>
+          <div class="form-group">
+            <button id="open-archive-view" class="btn-secondary">View Archived Bookmarks</button>
+          </div>
+          <div class="form-group">
+            <button id="open-recycle-view" class="btn-secondary">View Recycle Bin</button>
+          </div>
+        </div>
       </div>
       <div class="form-actions">
         <button type="button" class="btn-primary" id="closeSettings">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cleanup Modal -->
+  <div id="cleanupModal" class="modal cleanup-modal">
+    <div class="modal-content cleanup-content">
+      <div class="cleanup-header">
+        <h2>Cleanup Suggestions</h2>
+        <button id="closeCleanup" class="cleanup-close" aria-label="Close">×</button>
+      </div>
+      <div class="cleanup-body">
+        <div class="cleanup-section" data-section="dead">
+          <div class="cleanup-section-header">
+            <h3>Dead Links</h3>
+            <span class="cleanup-count" id="cleanup-dead-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-dead-list"></div>
+        </div>
+        <div class="cleanup-section" data-section="duplicates">
+          <div class="cleanup-section-header">
+            <h3>Duplicates</h3>
+            <span class="cleanup-count" id="cleanup-duplicates-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-duplicates-list"></div>
+        </div>
+        <div class="cleanup-section" data-section="stale">
+          <div class="cleanup-section-header">
+            <h3>Stale Bookmarks</h3>
+            <span class="cleanup-count" id="cleanup-stale-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-stale-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-selection" id="cleanup-selection-count">No items selected</div>
+        <div class="cleanup-actions">
+          <button id="cleanup-archive" class="btn-secondary" disabled>Archive</button>
+          <button id="cleanup-delete" class="btn-warning" disabled>Delete</button>
+          <button id="cleanup-ignore" class="btn-secondary" disabled>Ignore</button>
+        </div>
+        <div class="cleanup-links">
+          <button id="open-archive-from-cleanup" class="link-button">View Archive</button>
+          <button id="open-recycle-from-cleanup" class="link-button">View Recycle Bin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Archive Modal -->
+  <div id="archiveModal" class="modal cleanup-modal">
+    <div class="modal-content cleanup-content">
+      <div class="cleanup-header">
+        <h2>Archived Bookmarks</h2>
+        <button id="closeArchive" class="cleanup-close" aria-label="Close">×</button>
+      </div>
+      <div class="cleanup-body">
+        <div class="cleanup-section">
+          <div class="cleanup-section-header">
+            <h3>Archive</h3>
+            <span class="cleanup-count" id="archive-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="archive-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-actions">
+          <button id="archive-restore" class="btn-secondary" disabled>Restore</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recycle Modal -->
+  <div id="recycleModal" class="modal cleanup-modal">
+    <div class="modal-content cleanup-content">
+      <div class="cleanup-header">
+        <h2>Recycle Bin</h2>
+        <button id="closeRecycle" class="cleanup-close" aria-label="Close">×</button>
+      </div>
+      <div class="cleanup-body">
+        <div class="cleanup-section">
+          <div class="cleanup-section-header">
+            <h3>Deleted Items</h3>
+            <span class="cleanup-count" id="recycle-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="recycle-list"></div>
+        </div>
+      </div>
+      <div class="cleanup-footer">
+        <div class="cleanup-actions">
+          <button id="recycle-restore" class="btn-secondary" disabled>Restore</button>
+          <button id="recycle-delete-permanent" class="btn-warning" disabled>Delete Permanently</button>
+        </div>
       </div>
     </div>
   </div>

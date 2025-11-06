@@ -13,6 +13,9 @@ import { SiteCheckManager } from './modules/siteCheckManager.js';
 import { NotificationManager } from './modules/notificationManager.js';
 import { tagManager } from './modules/tagManager.js';
 import { tagRenderer } from './modules/tagRenderer.js';
+import { CleanupController } from './modules/cleanup/cleanupController.js';
+import { ArchiveManager } from './modules/cleanup/archiveManager.js';
+import { RecycleManager } from './modules/cleanup/recycleManager.js';
 
 export class AppCoordinator {
   constructor() {
@@ -67,6 +70,25 @@ export class AppCoordinator {
       
       // Initialize the notification manager
       this.notificationManager = new NotificationManager();
+
+      // Initialize archive and recycle managers
+      this.archiveManager = new ArchiveManager(this.bookmarkManager);
+      this.recycleManager = new RecycleManager(this.bookmarkManager);
+
+      // Initialize cleanup controller
+      this.cleanupManager = new CleanupController({
+        bookmarkManager: this.bookmarkManager,
+        notificationManager: this.notificationManager,
+        archiveManager: this.archiveManager,
+        recycleManager: this.recycleManager
+      });
+      await this.cleanupManager.initialize();
+
+      // Wire status badges between cleanup manager and UI
+      this.uiManager.setStatusResolver((bookmarkId) => this.cleanupManager.getStatusForBookmark(bookmarkId));
+      this.cleanupManager.setStatusUpdateCallback((statusMap) => {
+        this.uiManager.updateBookmarkStatuses(statusMap);
+      });
       
       // Determine whether the new-tab replacement is enabled
       const enabled = await this.checkNewTabEnabled();
@@ -87,6 +109,10 @@ export class AppCoordinator {
       
       // Render the kanban board
       await this.uiManager.renderKanban();
+
+      if (this.cleanupManager) {
+        await this.cleanupManager.refresh();
+      }
       
       // Initialize drag-and-drop interactions
       this.dragManager.initialize();
@@ -173,6 +199,10 @@ export class AppCoordinator {
         
         // Re-render the board
         await this.uiManager.renderKanban();
+
+        if (this.cleanupManager) {
+          await this.cleanupManager.refresh();
+        }
         
         // Reinitialize drag interactions
         if (this.dragManager) {

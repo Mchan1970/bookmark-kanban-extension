@@ -267,6 +267,9 @@ async function checkAllBookmarks() {
         _debug('Failed to store results in session storage');
       }
     }
+
+    // Persist metadata for cleanup feature (timestamps + latest status)
+    await persistCleanupMetadata(Object.fromEntries(results));
     
     // Send completion message to all tabs
     chrome.tabs.query({}, (tabs) => {
@@ -309,4 +312,44 @@ async function traverseBookmarks(bookmarks, callback) {
       await callback(bookmark);
     }
   }
-} 
+}
+
+// Persist cleanup metadata (last check timestamps + statuses)
+async function persistCleanupMetadata(statusMap) {
+  const timestamp = Date.now();
+
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['kanbanCleanupMetadata'], (result) => {
+      if (chrome.runtime.lastError) {
+        _debug('Failed to read cleanup metadata:', chrome.runtime.lastError.message);
+        resolve();
+        return;
+      }
+
+      const metadata = result.kanbanCleanupMetadata || {
+        lastCheckedAt: {},
+        lastKnownStatus: {}
+      };
+
+      const lastCheckedAt = metadata.lastCheckedAt || {};
+      const lastKnownStatus = metadata.lastKnownStatus || {};
+
+      Object.entries(statusMap).forEach(([bookmarkId, status]) => {
+        lastCheckedAt[bookmarkId] = timestamp;
+        lastKnownStatus[bookmarkId] = status;
+      });
+
+      chrome.storage.local.set({
+        kanbanCleanupMetadata: {
+          lastCheckedAt,
+          lastKnownStatus
+        }
+      }, () => {
+        if (chrome.runtime.lastError) {
+          _debug('Failed to persist cleanup metadata:', chrome.runtime.lastError.message);
+        }
+        resolve();
+      });
+    });
+  });
+}

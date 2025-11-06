@@ -14,6 +14,8 @@ export class UIManager {
     this.activeTag = null;
     this.tagFilterContainer = null;
     this.renderRequestId = 0;
+    this.statusResolver = null;
+    this.currentStatusMap = {};
     
     //Initialize services
     this.notificationService = new NotificationService();
@@ -21,6 +23,7 @@ export class UIManager {
     
     //Initialize renderers in correct order
     this.bookmarkRenderer = new BookmarkRenderer();
+    this.bookmarkRenderer.setStatusProvider((bookmarkId) => this.resolveBookmarkStatus(bookmarkId));
     this.columnManager = new ColumnManager(this.bookmarkManager, this.notificationService);
     this.columnManager.setBookmarkRenderer(this.bookmarkRenderer);
 
@@ -41,6 +44,35 @@ export class UIManager {
     
     //Initialize UI components
     this.initializeTimeUpdate();
+  }
+
+  /*** Set status resolver provided by cleanup manager
+   * @param {Function} resolver Resolver returning status key for a bookmark
+   */
+  setStatusResolver(resolver) {
+    this.statusResolver = resolver;
+    this.currentStatusMap = {};
+  }
+
+  /*** Update bookmark statuses on the board
+   * @param {Object<string,string>} statusMap Bookmark ID -> status key
+   */
+  updateBookmarkStatuses(statusMap = {}) {
+    this.currentStatusMap = statusMap || {};
+    this.bookmarkRenderer.applyStatusMap(this.currentStatusMap);
+  }
+
+  resolveBookmarkStatus(bookmarkId) {
+    if (!bookmarkId) {
+      return null;
+    }
+    if (this.currentStatusMap && this.currentStatusMap[bookmarkId]) {
+      return this.currentStatusMap[bookmarkId];
+    }
+    if (typeof this.statusResolver === 'function') {
+      return this.statusResolver(bookmarkId);
+    }
+    return null;
   }
 
   /*** Initialize time update
@@ -132,6 +164,9 @@ export class UIManager {
       nodes.push(boardContainer);
 
       this.container.replaceChildren(...nodes);
+
+      // Apply status badges after render
+      this.bookmarkRenderer.applyStatusMap(this.currentStatusMap);
       
     } catch (error) {
       console.error('Failed to render kanban:', error);

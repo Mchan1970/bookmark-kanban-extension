@@ -48,6 +48,11 @@ export class MessageHandler {
 
   handleCheckCompleted(message) {
     this.app.siteCheckManager.handleCheckCompleted(message.siteStatus);
+    if (this.app.cleanupManager) {
+      this.app.cleanupManager.applySiteStatus(message.siteStatus).catch((error) => {
+        console.error('Failed to apply cleanup status update:', error);
+      });
+    }
   }
 
   handleCheckFailed(message) {

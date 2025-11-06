@@ -8,6 +8,7 @@ export class BookmarkRenderer {
     //Callbacks from outer components
     this.onBookmarkOrderChanged = null;
     this.onTagClick = null; //TagClickCallback
+    this.statusProvider = null;
   }
   
   /*** Set callback for when bookmark order changes
@@ -23,6 +24,13 @@ export class BookmarkRenderer {
   setTagClickCallback(callback) {
     this.onTagClick = callback;
     tagRenderer.setTagClickCallback(callback);
+  }
+
+  /*** Set provider for bookmark status badges
+   * @param {Function} provider Function returning status key for a bookmark
+   */
+  setStatusProvider(provider) {
+    this.statusProvider = provider;
   }
 
   /*** Create a bookmark item element
@@ -112,6 +120,10 @@ export class BookmarkRenderer {
     
     //Load favicon
     faviconLoader.prepareIconElement(faviconContainer, bookmark.url);
+
+    //Apply status badge if available
+    const status = this.statusProvider ? this.statusProvider(bookmark.id) : null;
+    this.applyStatusToItem(item, status);
     
     return item;
   }
@@ -213,4 +225,42 @@ export class BookmarkRenderer {
     empty.textContent = 'This folder is empty';
     return empty;
   }
-} 
+
+  /*** Update bookmark status badge
+   * @param {string} bookmarkId Bookmark ID
+   * @param {string|null} status Status key
+   */
+  updateBookmarkStatus(bookmarkId, status) {
+    const item = document.querySelector(`.bookmark-item[data-bookmark-id="${bookmarkId}"]`);
+    this.applyStatusToItem(item, status);
+  }
+
+  /*** Apply status map to all currently rendered bookmarks
+   * @param {Object<string,string>} statusMap Bookmark ID -> status key
+   */
+  applyStatusMap(statusMap = {}) {
+    const items = document.querySelectorAll('.bookmark-item');
+    items.forEach(item => {
+      const bookmarkId = item.dataset.bookmarkId;
+      const status = statusMap[bookmarkId] || null;
+      this.applyStatusToItem(item, status);
+    });
+  }
+
+  /*** Internal helper to apply site-status attribute
+   * @param {HTMLElement|null} item Bookmark element
+   * @param {string|null} status Status key (dead, cert-error, no-https)
+   */
+  applyStatusToItem(item, status) {
+    if (!item) {
+      return;
+    }
+
+    if (!status) {
+      item.removeAttribute('data-site-status');
+      return;
+    }
+
+    item.setAttribute('data-site-status', status);
+  }
+}
