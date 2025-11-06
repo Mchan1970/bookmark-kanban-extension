@@ -139,6 +139,15 @@ export class ModalManager {
             <button id="reset-layout" class="btn-secondary">Reset Layout</button>
           </div>
         </div>
+        <div class="settings-group">
+          <h3>Cleanup</h3>
+          <div class="form-group">
+            <button id="open-archive-view" class="btn-secondary">View Archived Bookmarks</button>
+          </div>
+          <div class="form-group">
+            <button id="open-recycle-view" class="btn-secondary">View Recycle Bin</button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -309,6 +318,14 @@ export class ModalManager {
    * @param {HTMLElement} modal Settings modal element
    */
   bindSettingsEvents(modal) {
+    const closeSettings = () => {
+      if (this.settingsModal) {
+        this.settingsModal.close();
+      } else {
+        this.closeActiveModal();
+      }
+    };
+
     //Theme selector
     const themeSelector = modal.querySelector('#theme-selector');
     if (themeSelector && !themeSelector.dataset.bound) {
@@ -336,7 +353,7 @@ export class ModalManager {
     if (refreshButton && !refreshButton.dataset.bound) {
       refreshButton.addEventListener('click', () => {
         if (window.app && window.app.bookmarkManager) {
-          this.closeActiveModal();
+          closeSettings();
           window.app.bookmarkManager.refreshBookmarkTree();
           this.showToast('Bookmarks refreshed');
         }
@@ -350,7 +367,7 @@ export class ModalManager {
       resetButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to reset the board layout? This will restore the default order of columns and bookmarks.')) {
           if (window.app) {
-            this.closeActiveModal();
+            closeSettings();
             window.app.resetLayout();
           }
         }

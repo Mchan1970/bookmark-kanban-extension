@@ -242,6 +242,32 @@ export class Modal {
     // 隐藏模态框
     this.element.classList.remove('show');
 
+    // 等待过渡结束后真正隐藏，避免遮罩残留阻挡点击
+    const hideModal = (event) => {
+      if (!this.element) {
+        return;
+      }
+
+      // 仅响应当前模态自身的过渡事件，或回退调用
+      if (event && event.target !== this.element) {
+        return;
+      }
+
+      // 如果在过渡期间重新打开了模态，则不要强制隐藏
+      if (this.isOpen) {
+        return;
+      }
+
+      this.element.style.display = 'none';
+      this.element.removeEventListener('transitionend', hideModal);
+    };
+
+    if (this.element) {
+      this.element.addEventListener('transitionend', hideModal);
+      // 兜底：部分浏览器可能不会触发 transitionend
+      setTimeout(() => hideModal(), 250);
+    }
+
     // 恢复背景滚动
     document.body.style.overflow = '';
 
