@@ -53,6 +53,8 @@ export class AppCoordinator {
       // 初始化命令面板
       this.commandPalette = new CommandPalette(this.bookmarkManager);
       await this.commandPalette.initialize();
+
+      this.setupHeaderSearch();
       
       // 初始化事件管理器
       this.eventManager = new EventManager(this);
@@ -98,6 +100,34 @@ export class AppCoordinator {
     } catch (error) {
       console.error('Failed to initialize app:', error);
       this.uiManager.showErrorMessage();
+    }
+  }
+
+  setupHeaderSearch() {
+    const searchInput = document.getElementById('header-search');
+    const searchButton = document.getElementById('header-search-go');
+
+    if (!searchInput || !this.commandPalette) {
+      return;
+    }
+
+    const triggerSearch = () => {
+      const query = searchInput.value.trim();
+      this.commandPalette.quickSearch(query);
+    };
+
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        triggerSearch();
+      }
+    });
+
+    if (searchButton) {
+      searchButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        triggerSearch();
+      });
     }
   }
 

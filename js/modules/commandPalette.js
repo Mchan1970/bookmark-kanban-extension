@@ -126,6 +126,24 @@ export class CommandPalette {
     }
   }
 
+  async quickSearch(query = '') {
+    await this.toggleIfHidden();
+    if (typeof query === 'string') {
+      this.input.value = query;
+      this.handleSearch();
+    }
+  }
+
+  async toggleIfHidden() {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+
+    if (!this.isVisible) {
+      await this.show();
+    }
+  }
+
   /*** Show command palette
    */
   async show() {
@@ -142,7 +160,7 @@ export class CommandPalette {
     setTimeout(() => {
       this.input.focus();
     }, 50);
-    
+
     //Reset state
     this.input.value = '';
     this.filteredBookmarks = [];
