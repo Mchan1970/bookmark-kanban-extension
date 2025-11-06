@@ -7,54 +7,52 @@ export class KanbanRenderer {
     this.bookmarkRenderer = bookmarkRenderer;
   }
 
-  /**
-   * Render the entire kanban board
+  /*** Render the entire kanban board
    * @param {HTMLElement} container The container to render the board into
    */
   async renderBoard(container, bookmarkTree = null, options = {}) {
     const { activeTag = null } = options;
 
-    // Clear container
+    //Clear container
     container.innerHTML = '';
     
-    // Create kanban board
+    //Create kanban board
     const kanbanBoard = document.createElement('div');
     kanbanBoard.className = 'kanban-board';
     container.appendChild(kanbanBoard);
 
-    // Determine bookmark tree data
+    //Determine bookmark tree data
     let treeData = bookmarkTree;
     if (!treeData) {
       treeData = await this.bookmarkManager.getBookmarkTree();
     }
     
-    // Get saved column order
+    //Get saved column order
     const savedColumnOrder = await storageManager.getColumnOrder();
     
-    // Get saved bookmark order
+    //Get saved bookmark order
     const savedBookmarkOrder = await storageManager.getBookmarkOrder();
     
     if (treeData && treeData.length > 0) {
-      // Process bookmark tree and apply saved order
+      //Process bookmark tree and apply saved order
       await this.processBookmarkTree(treeData[0], kanbanBoard, savedColumnOrder, savedBookmarkOrder);
     }
   }
 
-  /**
-   * Process bookmark tree and apply saved order
+  /*** Process bookmark tree and apply saved order
    */
   async processBookmarkTree(node, container, savedColumnOrder, savedBookmarkOrder) {
     if (!node.children) return;
     
-    // Prepare all column data without immediate rendering
+    //Prepare all column data without immediate rendering
     const columnsData = [];
     
-    // Find bookmark bar
+    //Find bookmark bar
     const bookmarkBar = node.children.find(child => child.id === '1');
     if (bookmarkBar) {
-      // Process folders in bookmark bar
+      //Process folders in bookmark bar
       bookmarkBar.children.forEach(child => {
-        if (child.children) { // Is a folder
+        if (child.children) { //Is a folder
           columnsData.push({
             type: 'folder',
             data: child
@@ -62,7 +60,7 @@ export class KanbanRenderer {
         }
       });
       
-      // Create an "Uncategorized" column for direct bookmarks in bookmark bar
+      //Create an "Uncategorized" column for direct bookmarks in bookmark bar
       const uncategorizedBookmarks = bookmarkBar.children.filter(child => child.url);
       if (uncategorizedBookmarks.length > 0) {
         columnsData.push({
@@ -73,7 +71,7 @@ export class KanbanRenderer {
       }
     }
     
-    // Process "Other Bookmarks"
+    //Process "Other Bookmarks"
     const otherBookmarks = node.children.find(child => child.id === '2');
     if (otherBookmarks) {
       columnsData.push({
@@ -82,7 +80,7 @@ export class KanbanRenderer {
       });
     }
     
-    // Process "Mobile Bookmarks"
+    //Process "Mobile Bookmarks"
     const mobileBookmarks = node.children.find(child => child.id === '3');
     if (mobileBookmarks) {
       columnsData.push({
@@ -91,36 +89,35 @@ export class KanbanRenderer {
       });
     }
     
-    // Determine which columns to render and in what order
+    //Determine which columns to render and in what order
     const orderedColumns = this.determineColumnOrder(columnsData, savedColumnOrder);
     
-    // Render ordered columns
+    //Render ordered columns
     orderedColumns.forEach(col => {
       this.renderColumn(col, container, savedBookmarkOrder);
     });
   }
   
-  /**
-   * Determine column order based on saved order
+  /*** Determine column order based on saved order
    */
   determineColumnOrder(columnsData, savedColumnOrder) {
-    // If no saved order, return original order
+    //If no saved order, return original order
     if (!savedColumnOrder || savedColumnOrder.length === 0) {
       return [...columnsData];
     }
     
-    // Arrange columns according to saved order
+    //Arrange columns according to saved order
     const orderedColumns = [];
     
-    // First find all matching columns
+    //First find all matching columns
     savedColumnOrder.forEach(columnId => {
       let matchColumn;
       
       if (columnId === 'uncategorized') {
-        // Handle uncategorized column
+        //Handle uncategorized column
         matchColumn = columnsData.find(col => col.type === 'uncategorized');
       } else {
-        // Handle regular folders and special folders
+        //Handle regular folders and special folders
         matchColumn = columnsData.find(col => {
           if (col.type === 'folder') return col.data.id === columnId;
           if (col.type === 'special') return col.data.id === columnId;
@@ -133,7 +130,7 @@ export class KanbanRenderer {
       }
     });
     
-    // Add columns not in saved order
+    //Add columns not in saved order
     columnsData.forEach(col => {
       let columnId;
       
@@ -146,7 +143,7 @@ export class KanbanRenderer {
       if (columnId && !savedColumnOrder.includes(columnId)) {
         orderedColumns.push(col);
       } else if (!columnId) {
-        // Handle special columns without IDs
+        //Handle special columns without IDs
         orderedColumns.push(col);
       }
     });
@@ -154,8 +151,7 @@ export class KanbanRenderer {
     return orderedColumns;
   }
   
-  /**
-   * Render a single column
+  /*** Render a single column
    */
   renderColumn(columnData, container, savedBookmarkOrder) {
     switch(columnData.type) {

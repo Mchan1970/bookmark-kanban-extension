@@ -1,13 +1,11 @@
 export class UIStateManager {
-  /**
-   * @param {HTMLElement} container Main container element
+  /*** @param {HTMLElement} container Main container element
    */
   constructor(container) {
     this.container = container;
   }
 
-  /**
-   * Show loading state
+  /*** Show loading state
    */
   showLoading() {
     this.container.innerHTML = `
@@ -18,8 +16,7 @@ export class UIStateManager {
     `;
   }
 
-  /**
-   * Show error message
+  /*** Show error message
    * @param {string} message Error message
    */
   showError(message) {
@@ -30,8 +27,7 @@ export class UIStateManager {
     `;
   }
 
-  /**
-   * Show disabled message when new tab is not enabled
+  /*** Show disabled message when new tab is not enabled
    */
   showDisabledMessage() {
     this.container.innerHTML = `
@@ -42,7 +38,7 @@ export class UIStateManager {
       </div>
     `;
 
-    // Add event listener to the enable button
+    //Add event listener to the enable button
     const enableButton = document.getElementById('enable-newtab');
     if (enableButton) {
       enableButton.addEventListener('click', () => {
@@ -53,8 +49,7 @@ export class UIStateManager {
     }
   }
 
-  /**
-   * Show empty state when no bookmarks are found
+  /*** Show empty state when no bookmarks are found
    */
   showEmptyState() {
     this.container.innerHTML = `
@@ -66,8 +61,7 @@ export class UIStateManager {
     `;
   }
 
-  /**
-   * Show drag guide for new users
+  /*** Show drag guide for new users
    */
   showDragGuide() {
     const guide = document.createElement('div');
@@ -82,19 +76,19 @@ export class UIStateManager {
 
     document.body.appendChild(guide);
 
-    // Close button handler
+    //Close button handler
     const closeButton = guide.querySelector('.guide-close');
     closeButton.addEventListener('click', () => {
       guide.classList.add('fade-out');
       setTimeout(() => {
         guide.remove();
         
-        // Remember that the user has seen the guide
+        //Remember that the user has seen the guide
         chrome.storage.sync.set({ dragGuideShown: true });
       }, 300);
     });
 
-    // Auto-hide after some time
+    //Auto-hide after some time
     setTimeout(() => {
       guide.classList.add('fade-out');
       setTimeout(() => {

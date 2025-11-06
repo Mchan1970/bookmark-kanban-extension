@@ -1,6 +1,5 @@
 export class NotificationService {
-  /**
-   * Show toast notification
+  /*** Show toast notification
    * @param {string} message Message to display
    * @param {string} type Notification type (info, success, error)
    * @param {number} duration Duration in milliseconds
@@ -14,7 +13,7 @@ export class NotificationService {
     toast.style.right = '20px';
     toast.style.padding = '10px 15px';
     
-    // Set background color based on type
+    //Set background color based on type
     toast.style.backgroundColor = 
       type === 'error' ? 'var(--danger-color)' : 
       type === 'success' ? 'var(--success-color)' : 
@@ -31,12 +30,12 @@ export class NotificationService {
     
     document.body.appendChild(toast);
     
-    // Fade in
+    //Fade in
     setTimeout(() => {
       toast.style.opacity = '1';
     }, 10);
     
-    // Fade out and remove
+    //Fade out and remove
     setTimeout(() => {
       toast.style.opacity = '0';
       setTimeout(() => {
@@ -47,8 +46,7 @@ export class NotificationService {
     }, duration);
   }
 
-  /**
-   * Show success toast
+  /*** Show success toast
    * @param {string} message Message to display
    * @param {number} duration Duration in milliseconds
    */
@@ -56,8 +54,7 @@ export class NotificationService {
     this.showToast(message, 'success', duration);
   }
 
-  /**
-   * Show error toast
+  /*** Show error toast
    * @param {string} message Message to display
    * @param {number} duration Duration in milliseconds
    */
@@ -65,8 +62,7 @@ export class NotificationService {
     this.showToast(message, 'error', duration);
   }
 
-  /**
-   * Show warning toast
+  /*** Show warning toast
    * @param {string} message Message to display
    * @param {number} duration Duration in milliseconds
    */

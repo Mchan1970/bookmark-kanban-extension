@@ -15,16 +15,16 @@ export class UIManager {
     this.tagFilterContainer = null;
     this.renderRequestId = 0;
     
-    // Initialize services
+    //Initialize services
     this.notificationService = new NotificationService();
     this.uiStateManager = new UIStateManager(this.container);
     
-    // Initialize renderers in correct order
+    //Initialize renderers in correct order
     this.bookmarkRenderer = new BookmarkRenderer();
     this.columnManager = new ColumnManager(this.bookmarkManager, this.notificationService);
     this.columnManager.setBookmarkRenderer(this.bookmarkRenderer);
 
-    // Set up tag click callback
+    //Set up tag click callback
     this.bookmarkRenderer.setTagClickCallback((tag, event) => {
       this.handleTagClick(tag, event);
     });
@@ -32,19 +32,18 @@ export class UIManager {
       this.handleTagFilterToggle(tag);
     });
     
-    // Initialize kanban renderer with all required dependencies
+    //Initialize kanban renderer with all required dependencies
     this.kanbanRenderer = new KanbanRenderer(
       this.bookmarkManager,
       this.columnManager,
       this.bookmarkRenderer
     );
     
-    // Initialize UI components
+    //Initialize UI components
     this.initializeTimeUpdate();
   }
 
-  /**
-   * Initialize time update
+  /*** Initialize time update
    */
   initializeTimeUpdate() {
     const updateDateTime = () => {
@@ -57,16 +56,15 @@ export class UIManager {
     setInterval(updateDateTime, 1000);
   }
 
-  /**
-   * Render the kanban board
+  /*** Render the kanban board
    */
   async renderKanban() {
     try {
       const requestId = ++this.renderRequestId;
-      // Clear container
+      //Clear container
       this.container.innerHTML = '';
       
-      // Get bookmark tree
+      //Get bookmark tree
       const bookmarkTree = await this.bookmarkManager.getBookmarkTree();
       if (requestId !== this.renderRequestId) {
         return;
@@ -76,7 +74,7 @@ export class UIManager {
         return;
       }
 
-      // Reset and collect tags for the current dataset
+      //Reset and collect tags for the current dataset
       tagManager.clearCache();
       this.collectTags(bookmarkTree);
 
@@ -91,7 +89,7 @@ export class UIManager {
 
       const nodes = [];
 
-      // Render tag filter if applicable
+      //Render tag filter if applicable
       if (availableTags.length > 0) {
         const filterElement = this.renderTagFilter(availableTags);
         if (filterElement) {
@@ -99,7 +97,7 @@ export class UIManager {
         }
       }
 
-      // Filter bookmark tree when a tag is active
+      //Filter bookmark tree when a tag is active
       let effectiveTree = bookmarkTree;
       if (this.activeTag) {
         const { filteredTree, matchCount } = this.filterBookmarkTree(bookmarkTree, this.activeTag);
@@ -112,11 +110,11 @@ export class UIManager {
         }
       }
 
-      // Create board container
+      //Create board container
       const boardContainer = document.createElement('div');
       boardContainer.className = 'kanban-board-wrapper';
 
-      // Render board content into wrapper
+      //Render board content into wrapper
       await this.kanbanRenderer.renderBoard(boardContainer, effectiveTree, {
         activeTag: this.activeTag
       });
@@ -135,8 +133,7 @@ export class UIManager {
     }
   }
 
-  /**
-   * Filter bookmark tree by active tag
+  /*** Filter bookmark tree by active tag
    * @param {Array} tree Bookmark tree array
    * @param {string} activeTag Tag name
    * @returns {{ filteredTree: Array, matchCount: number }}
@@ -190,52 +187,45 @@ export class UIManager {
     return { filteredTree, matchCount };
   }
 
-  /**
-   * Show loading state
+  /*** Show loading state
    */
   showLoading() {
     this.uiStateManager.showLoading();
   }
 
-  /**
-   * Show error message
+  /*** Show error message
    */
   showErrorMessage() {
     this.uiStateManager.showError('An error occurred while loading bookmarks');
   }
 
-  /**
-   * Show disabled message
+  /*** Show disabled message
    */
   showDisabledMessage() {
     this.uiStateManager.showDisabledMessage();
   }
 
-  /**
-   * Remove a bookmark item from the UI
+  /*** Remove a bookmark item from the UI
    * @param {string} bookmarkId Bookmark ID to remove
    */
   removeBookmarkItem(bookmarkId) {
     this.bookmarkRenderer.removeBookmarkItem(bookmarkId);
   }
 
-  /**
-   * Update a bookmark item in the UI
+  /*** Update a bookmark item in the UI
    * @param {Object} bookmark Bookmark data
    */
   updateBookmarkItem(bookmark) {
     this.bookmarkRenderer.updateBookmarkItem(bookmark);
   }
 
-  /**
-   * Show drag guide for new users
+  /*** Show drag guide for new users
    */
   showDragGuide() {
     this.uiStateManager.showDragGuide();
   }
 
-  /**
-   * Handle tag click events
+  /*** Handle tag click events
    * @param {string} tag Tag name
    * @param {Event} event Click event
    */
@@ -247,8 +237,7 @@ export class UIManager {
     }
   }
 
-  /**
-   * Handle tag filter toggles
+  /*** Handle tag filter toggles
    * @param {string|null} tag Selected tag or null when clearing
    */
   handleTagFilterToggle(tag) {
@@ -259,8 +248,7 @@ export class UIManager {
     }
   }
 
-  /**
-   * Apply tag filter and re-render
+  /*** Apply tag filter and re-render
    * @param {string} tag Tag name
    */
   applyTagFilter(tag) {
@@ -269,8 +257,7 @@ export class UIManager {
     this.renderKanban();
   }
 
-  /**
-   * Clear tag filter and re-render
+  /*** Clear tag filter and re-render
    */
   clearTagFilter() {
     if (this.activeTag === null) return;
@@ -278,8 +265,7 @@ export class UIManager {
     this.renderKanban();
   }
 
-  /**
-   * Collect tags from bookmark tree to warm caches
+  /*** Collect tags from bookmark tree to warm caches
    * @param {Array} nodes Bookmark tree nodes
    */
   collectTags(nodes) {
@@ -297,8 +283,7 @@ export class UIManager {
     traverse(nodes);
   }
 
-  /**
-   * Render tag filter UI
+  /*** Render tag filter UI
    * @param {Array} availableTags Available tag names
    * @returns {HTMLElement|null} Rendered filter element
    */
@@ -324,8 +309,7 @@ export class UIManager {
     return this.tagFilterContainer;
   }
 
-  /**
-   * Create empty state element
+  /*** Create empty state element
    * @returns {HTMLElement}
    */
   createEmptyState() {

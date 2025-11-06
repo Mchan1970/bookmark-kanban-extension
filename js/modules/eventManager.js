@@ -10,14 +10,14 @@ export class EventManager {
 
   setupDocumentListeners() {
     document.addEventListener('click', (e) => {
-      // 如果正在拖拽，不处理点击事件
+      //If正在Drag，不HandleClickEvent
       if (this.app.dragManager && this.app.dragManager.isDragging) {
         return;
       }
       
       const target = e.target;
       
-      // 处理检查站点按钮点击
+      //HandleCheck站点ButtonClick
       if (target.closest('#check-sites-button')) {
         e.preventDefault();
         e.stopPropagation();
@@ -25,7 +25,7 @@ export class EventManager {
         return;
       }
       
-      // 处理设置按钮点击
+      //HandleSettingsButtonClick
       if (target.closest('#settings-button')) {
         e.preventDefault();
         e.stopPropagation();
@@ -33,7 +33,7 @@ export class EventManager {
         return;
       }
       
-      // 处理编辑按钮点击
+      //HandleEditButtonClick
       if (target.closest('.edit-btn')) {
         e.preventDefault();
         e.stopPropagation();
@@ -43,7 +43,7 @@ export class EventManager {
         }
       }
       
-      // 处理删除按钮点击
+      //HandleDeleteButtonClick
       if (target.closest('.delete-btn')) {
         e.preventDefault();
         e.stopPropagation();
@@ -57,12 +57,12 @@ export class EventManager {
 
   setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      // Ctrl/Cmd + F 触发搜索
+      //Ctrl/Cmd + F 触发Search
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
       }
       
-      // Ctrl/Cmd + S 手动保存当前布局
+      //Ctrl/Cmd + S ManualSaveWhen前Layout
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         this.saveCurrentLayout();

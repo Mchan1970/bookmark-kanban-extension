@@ -1,7 +1,6 @@
-// js/modules/themeManager.js
+//js/modules/themeManager.js
 
-/**
- * Theme Manager Class
+/*** Theme Manager Class
  * Handles theme switching and persistence
  */
 export class ThemeManager {
@@ -13,42 +12,40 @@ export class ThemeManager {
     this.initializeTheme();
   }
 
-  /**
-   * Initialize theme settings
+  /*** Initialize theme settings
    */
   async initializeTheme() {
     try {
-      // Get saved theme settings
+      //Get saved theme settings
       const savedTheme = await this.getSavedTheme();
 
-      // Apply theme with validation
+      //Apply theme with validation
       if (savedTheme && this.availableThemes.includes(savedTheme)) {
         this.currentTheme = savedTheme;
       } else {
-        // If saved theme is invalid, clean it up and use system preference
+        //If saved theme is invalid, clean it up and use system preference
         if (savedTheme && !this.availableThemes.includes(savedTheme)) {
           console.warn(`Invalid theme "${savedTheme}" found in storage, clearing and using default`);
           await this.clearInvalidTheme();
         }
 
-        // Check system preference
+        //Check system preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         this.currentTheme = prefersDark ? 'dark' : 'default';
       }
 
       this.applyTheme(this.currentTheme);
 
-      // Set up system theme change listener
+      //Set up system theme change listener
       this.setupSystemThemeListener();
     } catch (error) {
       console.error('Failed to initialize theme:', error);
-      // In case of error, apply default theme
+      //In case of error, apply default theme
       this.applyTheme(this.DEFAULT_THEME);
     }
   }
 
-  /**
-   * Get saved theme settings
+  /*** Get saved theme settings
    */
   getSavedTheme() {
     return new Promise((resolve) => {
@@ -63,8 +60,7 @@ export class ThemeManager {
     });
   }
 
-  /**
-   * Clear invalid theme from storage
+  /*** Clear invalid theme from storage
    */
   async clearInvalidTheme() {
     return new Promise((resolve) => {
@@ -79,8 +75,7 @@ export class ThemeManager {
     });
   }
 
-  /**
-   * Save theme settings
+  /*** Save theme settings
    * @param {string} theme  Theme name
    */
   saveTheme(theme) {
@@ -97,19 +92,18 @@ export class ThemeManager {
     });
   }
 
-  /**
-   * Apply theme
+  /*** Apply theme
    * @param {string} theme  Theme name
    */
   applyTheme(theme) {
     if (!this.availableThemes.includes(theme)) {
       console.warn(`Unknown theme: ${theme}, using default theme`);
       theme = this.DEFAULT_THEME;
-      // Also clear the invalid theme from storage
+      //Also clear the invalid theme from storage
       this.clearInvalidTheme();
     }
     
-    // Ensure applied to document.documentElement (i.e., <html> element)
+    //Ensure applied to document.documentElement (i.e., <html> element)
     document.documentElement.removeAttribute('data-theme');
     
     if (theme !== 'default') {
@@ -117,11 +111,10 @@ export class ThemeManager {
     }
     
     this.currentTheme = theme;
-    console.log(`Applied theme: ${theme}`); // Add debug log
+    console.log(`Applied theme: ${theme}`); //Add debug log
   }
 
-  /**
-   * Switch theme
+  /*** Switch theme
    * @param {string} theme  Theme name
    */
   async switchTheme(theme) {
@@ -135,15 +128,14 @@ export class ThemeManager {
     }
   }
 
-  /**
-   * Set up system theme change listener
+  /*** Set up system theme change listener
    */
   setupSystemThemeListener() {
     if (window.matchMedia) {
       const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       
       const handleThemeChange = (e) => {
-        // Respond to system theme change only when user hasn't manually set theme
+        //Respond to system theme change only when user hasn't manually set theme
         this.getSavedTheme().then(savedTheme => {
           if (!savedTheme) {
             this.applyTheme(e.matches ? 'dark' : 'default');
@@ -151,26 +143,24 @@ export class ThemeManager {
         });
       };
       
-      // Use new addEventListener method (if available)
+      //Use new addEventListener method (if available)
       if (darkModeMediaQuery.addEventListener) {
         darkModeMediaQuery.addEventListener('change', handleThemeChange);
       } else {
-        // Fallback to old addListener method
+        //Fallback to old addListener method
         darkModeMediaQuery.addListener(handleThemeChange);
       }
     }
   }
 
-  /**
-   * Get current theme
+  /*** Get current theme
    * @returns {string} Current theme name
    */
   getCurrentTheme() {
     return this.currentTheme;
   }
 
-  /**
-   * Get available themes list
+  /*** Get available themes list
    * @returns {Array} Available themes array
    */
   getAvailableThemes() {
@@ -178,5 +168,5 @@ export class ThemeManager {
   }
 }
 
-// Export singleton
+//Export singleton
 export const themeManager = new ThemeManager();

@@ -4,19 +4,17 @@ export class ColumnManager {
   constructor(bookmarkManager, notificationService) {
     this.bookmarkManager = bookmarkManager;
     this.notificationService = notificationService;
-    this.bookmarkRenderer = null; // Will be set later via setter
+    this.bookmarkRenderer = null; //Will be set later via setter
   }
 
-  /**
-   * Set the bookmark renderer
+  /*** Set the bookmark renderer
    * @param {BookmarkRenderer} renderer The bookmark renderer instance
    */
   setBookmarkRenderer(renderer) {
     this.bookmarkRenderer = renderer;
   }
 
-  /**
-   * Create an empty state element
+  /*** Create an empty state element
    * @returns {HTMLElement}
    */
   createEmptyState() {
@@ -25,8 +23,7 @@ export class ColumnManager {
     return empty;
   }
 
-  /**
-   * Render a folder column
+  /*** Render a folder column
    * @param {Object} folder Folder data
    * @param {HTMLElement} container Container to append to
    * @param {Object} savedBookmarkOrder Saved bookmark order
@@ -36,14 +33,14 @@ export class ColumnManager {
     column.dataset.columnType = 'folder';
     column.dataset.folderId = folder.id;
 
-    // Create header
+    //Create header
     const header = this.createColumnHeader(folder.title, this.countBookmarksInFolder(folder));
     column.appendChild(header);
     
-    // Add double-click event handling for title editing
+    //Add double-click event handling for title editing
     this.setupTitleEditHandling(header, column);
     
-    // Create bookmark list
+    //Create bookmark list
     const bookmarkList = createElement('div', 'bookmark-list');
     
     if (folder.children) {
@@ -73,8 +70,7 @@ export class ColumnManager {
     container.appendChild(column);
   }
   
-  /**
-   * Render a special column (uncategorized or system folder)
+  /*** Render a special column (uncategorized or system folder)
    * @param {string} title Column title
    * @param {Array} bookmarks Bookmarks array
    * @param {HTMLElement} container Container to append to
@@ -87,17 +83,17 @@ export class ColumnManager {
     column.dataset.columnType = type;
     column.dataset.folderId = folderId;
     
-    // Create header
+    //Create header
     const header = this.createColumnHeader(title, this.countBookmarksInList(bookmarks));
     column.appendChild(header);
     
-    // Add double-click event handling for title editing
+    //Add double-click event handling for title editing
     this.setupTitleEditHandling(header, column);
     
-    // Create bookmark list
+    //Create bookmark list
     const bookmarkList = createElement('div', 'bookmark-list');
     
-    // Determine the correct column ID for storage
+    //Determine the correct column ID for storage
     const columnStorageId = column.dataset.columnType === 'uncategorized' ? 
       'uncategorized' : folderId;
     
@@ -105,12 +101,12 @@ export class ColumnManager {
 
     const directBookmarks = bookmarks.filter(bookmark => bookmark.url);
 
-    // If there's saved bookmark order, render in order
+    //If there's saved bookmark order, render in order
     if (columnStorageId && savedBookmarkOrder && savedBookmarkOrder[columnStorageId]) {
       const appended = this.renderOrderedBookmarks(directBookmarks, bookmarkList, savedBookmarkOrder[columnStorageId]);
       renderedContent = renderedContent || appended;
       
-      // Render subfolders
+      //Render subfolders
       bookmarks.forEach(bookmark => {
         if (bookmark.children) {
           const groupRendered = this.renderSubfolderGroup(bookmark, bookmarkList, savedBookmarkOrder);
@@ -118,7 +114,7 @@ export class ColumnManager {
         }
       });
     } else {
-      // Render in original order
+      //Render in original order
       bookmarks.forEach(bookmark => {
         if (bookmark.url) {
           const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmark);
@@ -139,8 +135,7 @@ export class ColumnManager {
     container.appendChild(column);
   }
   
-  /**
-   * Create column header with title and count
+  /*** Create column header with title and count
    * @param {string} title Column title
    * @param {number} count Item count
    * @returns {HTMLElement} Header element
@@ -148,17 +143,17 @@ export class ColumnManager {
   createColumnHeader(title, count) {
     const header = createElement('div', 'column-header');
     
-    // Add drag handle
+    //Add drag handle
     const dragHandle = createElement('div', 'column-drag-handle');
     dragHandle.innerHTML = '⠿';
     dragHandle.title = 'Drag to reorder';
     header.appendChild(dragHandle);
     
-    // Add title
+    //Add title
     const titleElement = createElement('div', 'column-title');
     titleElement.textContent = title;
     
-    // Add count
+    //Add count
     const countElement = createElement('div', 'column-count');
     countElement.textContent = count;
     
@@ -168,14 +163,13 @@ export class ColumnManager {
     return header;
   }
   
-  /**
-   * Set up double-click handler for title editing
+  /*** Set up double-click handler for title editing
    * @param {HTMLElement} header Header element
    * @param {HTMLElement} column Column element
    */
   setupTitleEditHandling(header, column) {
     header.addEventListener('dblclick', (e) => {
-      // Ensure click is on title, not drag handle or count
+      //Ensure click is on title, not drag handle or count
       if (e.target.classList.contains('column-title') ||
           e.target.closest('.column-title')) {
         this.handleColumnTitleEdit(column);
@@ -183,18 +177,17 @@ export class ColumnManager {
     });
   }
   
-  /**
-   * Handle column title edit
+  /*** Handle column title edit
    * @param {HTMLElement} columnElement Column element
    */
   handleColumnTitleEdit(columnElement) {
-    // Get column type and ID
+    //Get column type and ID
     const columnType = columnElement.dataset.columnType;
     const folderId = columnElement.dataset.folderId;
     const titleElement = columnElement.querySelector('.column-title');
     const originalTitle = titleElement.textContent;
     
-    // Check if it's a special column
+    //Check if it's a special column
     if (columnType === 'uncategorized') {
       this.notificationService.showToast(
         'Uncategorized column cannot be renamed. You can drag these bookmarks to other columns to organize them.',
@@ -204,7 +197,7 @@ export class ColumnManager {
       return;
     }
     
-    // Check if it's a Chrome special folder
+    //Check if it's a Chrome special folder
     if (folderId === '2' || folderId === '3') {
       const folderName = folderId === '2' ? 'Other Bookmarks' : 'Mobile Bookmarks';
       this.notificationService.showToast(
@@ -215,7 +208,7 @@ export class ColumnManager {
       return;
     }
     
-    // Create edit input box
+    //Create edit input box
     const inputElement = document.createElement('input');
     inputElement.type = 'text';
     inputElement.className = 'column-title-edit';
@@ -226,40 +219,40 @@ export class ColumnManager {
     inputElement.style.borderRadius = 'var(--border-radius)';
     inputElement.style.fontSize = titleElement.style.fontSize || '1.2rem';
     
-    // Replace title element with input box
+    //Replace title element with input box
     titleElement.style.display = 'none';
     titleElement.parentNode.insertBefore(inputElement, titleElement.nextSibling);
     
-    // Focus input box and select all text
+    //Focus input box and select all text
     inputElement.focus();
     inputElement.select();
     
-    // Handle input box events
+    //Handle input box events
     inputElement.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const newTitle = inputElement.value.trim();
         
-        // Validate new title
+        //Validate new title
         if (!newTitle) {
           inputElement.style.borderColor = 'var(--danger-color)';
           return;
         }
         
-        // Save changes
+        //Save changes
         await this.saveColumnTitle(folderId, newTitle, titleElement);
         
-        // Restore UI
+        //Restore UI
         this.finishTitleEdit(inputElement, titleElement);
       } else if (e.key === 'Escape') {
-        // Cancel edit
+        //Cancel edit
         this.finishTitleEdit(inputElement, titleElement);
       }
     });
     
-    // Handle blur event
+    //Handle blur event
     inputElement.addEventListener('blur', () => {
-      // Simple delay to allow Enter key event to process first
+      //Simple delay to allow Enter key event to process first
       setTimeout(() => {
         if (document.body.contains(inputElement)) {
           this.finishTitleEdit(inputElement, titleElement);
@@ -268,8 +261,7 @@ export class ColumnManager {
     });
   }
   
-  /**
-   * Complete title editing
+  /*** Complete title editing
    * @param {HTMLInputElement} inputElement Input element
    * @param {HTMLElement} titleElement Title element
    */
@@ -280,21 +272,20 @@ export class ColumnManager {
     }
   }
   
-  /**
-   * Save column title
+  /*** Save column title
    * @param {string} folderId Folder ID
    * @param {string} newTitle New title
    * @param {HTMLElement} titleElement Title element
    */
   async saveColumnTitle(folderId, newTitle, titleElement) {
     try {
-      // Update bookmark folder title using Chrome API
+      //Update bookmark folder title using Chrome API
       const result = await chrome.bookmarks.update(folderId, { title: newTitle });
       
-      // Update UI
+      //Update UI
       titleElement.textContent = result.title;
       
-      // Show success message
+      //Show success message
       this.notificationService.showToast(`Column title updated to "${newTitle}"`, 'success');
       
       return true;
@@ -305,8 +296,7 @@ export class ColumnManager {
     }
   }
   
-  /**
-   * Render bookmarks according to saved order
+  /*** Render bookmarks according to saved order
    * @param {Array} bookmarks Bookmarks array
    * @param {HTMLElement} container Container to render into
    * @param {Array} savedOrder Saved order array of bookmark IDs
@@ -314,7 +304,7 @@ export class ColumnManager {
   renderOrderedBookmarks(bookmarks, container, savedOrder) {
     let appended = false;
 
-    // Create a bookmark map for quick lookup by id
+    //Create a bookmark map for quick lookup by id
     const bookmarkMap = {};
     bookmarks.forEach(bookmark => {
       if (bookmark.url) {
@@ -322,18 +312,18 @@ export class ColumnManager {
       }
     });
     
-    // Add bookmarks in saved order
+    //Add bookmarks in saved order
     savedOrder.forEach(bookmarkId => {
       if (bookmarkMap[bookmarkId]) {
         const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmarkMap[bookmarkId]);
         container.appendChild(bookmarkItem);
         appended = true;
-        // Remove from map to avoid duplicate addition
+        //Remove from map to avoid duplicate addition
         delete bookmarkMap[bookmarkId];
       }
     });
     
-    // Add any bookmarks not in saved order
+    //Add any bookmarks not in saved order
     Object.values(bookmarkMap).forEach(bookmark => {
       const bookmarkItem = this.bookmarkRenderer.createBookmarkItem(bookmark);
       container.appendChild(bookmarkItem);
@@ -343,14 +333,13 @@ export class ColumnManager {
     return appended;
   }
   
-  /**
-   * Render subfolder group
+  /*** Render subfolder group
    * @param {Object} folder Subfolder data
    * @param {HTMLElement} container Container to append to
    * @param {Object} savedBookmarkOrder Saved bookmark order
    */
   renderSubfolderGroup(folder, container, savedBookmarkOrder) {
-    // Don't render if subfolder has no bookmarks
+    //Don't render if subfolder has no bookmarks
     if (!folder.children || folder.children.length === 0) return false;
 
     const directBookmarks = folder.children.filter(child => child.url);
@@ -394,8 +383,7 @@ export class ColumnManager {
     return false;
   }
   
-  /**
-   * Count bookmarks in folder (recursively)
+  /*** Count bookmarks in folder (recursively)
    * @param {Object} folder Folder object
    * @returns {number} Total bookmark count
    */
@@ -413,8 +401,7 @@ export class ColumnManager {
     return count;
   }
 
-  /**
-   * Count bookmarks within a generic list (direct children + subfolders)
+  /*** Count bookmarks within a generic list (direct children + subfolders)
    * @param {Array} items Array of bookmark or folder nodes
    * @returns {number} Total bookmark count
    */
@@ -434,8 +421,7 @@ export class ColumnManager {
     return count;
   }
   
-  /**
-   * Update column bookmark count
+  /*** Update column bookmark count
    * @param {string} columnId Column ID
    */
   updateColumnCount(columnId) {

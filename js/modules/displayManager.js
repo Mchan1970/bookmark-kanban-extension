@@ -1,5 +1,4 @@
-/**
- * Display Manager Class
+/*** Display Manager Class
  * Handles bookmark display mode (single/double line)
  */
 export class DisplayManager {
@@ -11,48 +10,45 @@ export class DisplayManager {
     this.initializeDisplayMode();
   }
 
-  /**
-   * Initialize display mode settings
+  /*** Initialize display mode settings
    */
   async initializeDisplayMode() {
     try {
-      // Get saved display mode settings
+      //Get saved display mode settings
       const savedMode = await this.getSavedMode();
       
-      // Apply mode
+      //Apply mode
       if (savedMode && this.availableModes.includes(savedMode)) {
         this.currentMode = savedMode;
       }
       
       this.applyDisplayMode(this.currentMode);
       
-      // Initialize display mode selector if available
+      //Initialize display mode selector if available
       this.initializeSelector();
     } catch (error) {
       console.error('Failed to initialize display mode:', error);
-      // In case of error, apply default mode
+      //In case of error, apply default mode
       this.applyDisplayMode(this.DEFAULT_MODE);
     }
   }
 
-  /**
-   * Initialize display mode selector
+  /*** Initialize display mode selector
    */
   initializeSelector() {
     const selector = document.getElementById('display-mode-selector');
     if (!selector) return;
     
-    // Set current mode
+    //Set current mode
     selector.value = this.currentMode;
     
-    // Add change event listener
+    //Add change event listener
     selector.addEventListener('change', (e) => {
       this.switchDisplayMode(e.target.value);
     });
   }
 
-  /**
-   * Get saved display mode settings
+  /*** Get saved display mode settings
    */
   getSavedMode() {
     return new Promise((resolve) => {
@@ -67,8 +63,7 @@ export class DisplayManager {
     });
   }
 
-  /**
-   * Save display mode settings
+  /*** Save display mode settings
    * @param {string} mode Display mode name
    */
   saveDisplayMode(mode) {
@@ -85,8 +80,7 @@ export class DisplayManager {
     });
   }
 
-  /**
-   * Apply display mode
+  /*** Apply display mode
    * @param {string} mode Display mode name
    */
   applyDisplayMode(mode) {
@@ -95,10 +89,10 @@ export class DisplayManager {
       mode = this.DEFAULT_MODE;
     }
     
-    // Set data attribute on body
+    //Set data attribute on body
     document.body.setAttribute('data-display-mode', mode);
     
-    // Update URL attribute for bookmark items in single-line mode
+    //Update URL attribute for bookmark items in single-line mode
     if (mode === 'single') {
       this.updateBookmarkUrlAttributes();
     }
@@ -107,8 +101,7 @@ export class DisplayManager {
     console.log(`Applied display mode: ${mode}`);
   }
 
-  /**
-   * Update bookmark items with URL attribute for tooltip
+  /*** Update bookmark items with URL attribute for tooltip
    */
   updateBookmarkUrlAttributes() {
     document.querySelectorAll('.bookmark-item').forEach(item => {
@@ -120,8 +113,7 @@ export class DisplayManager {
     });
   }
 
-  /**
-   * Switch display mode
+  /*** Switch display mode
    * @param {string} mode Display mode name
    */
   async switchDisplayMode(mode) {
@@ -135,16 +127,14 @@ export class DisplayManager {
     }
   }
 
-  /**
-   * Get current display mode
+  /*** Get current display mode
    * @returns {string} Current display mode name
    */
   getCurrentDisplayMode() {
     return this.currentMode;
   }
 
-  /**
-   * Get available display modes list
+  /*** Get available display modes list
    * @returns {Array} Available display modes array
    */
   getAvailableDisplayModes() {
@@ -152,5 +142,5 @@ export class DisplayManager {
   }
 }
 
-// Export singleton
+//Export singleton
 export const displayManager = new DisplayManager(); 

@@ -1,7 +1,6 @@
-// js/modules/storageManager.js
+//js/modules/storageManager.js
 
-/**
- * Storage Manager
+/*** Storage Manager
  * Handles saving and restoring layout and order
  */
 export class StorageManager {
@@ -11,28 +10,27 @@ export class StorageManager {
       BOOKMARK_ORDER: 'bookmark_board_bookmark_order'
     };
     
-    // Special column identifiers
+    //Special column identifiers
     this.SPECIAL_COLUMNS = {
       UNCATEGORIZED: 'uncategorized',
-      OTHER_BOOKMARKS: '2',  // Chrome assigns ID '2' to "Other Bookmarks"
-      MOBILE_BOOKMARKS: '3'  // Chrome assigns ID '3' to "Mobile Bookmarks"
+      OTHER_BOOKMARKS: '2',  //Chrome assigns ID '2' to "Other Bookmarks"
+      MOBILE_BOOKMARKS: '3'  //Chrome assigns ID '3' to "Mobile Bookmarks"
     };
   }
 
-  /**
-   * Save column order
+  /*** Save column order
    * @param {Array} columns Column elements array
    */
   saveColumnOrder(columns) {
     const columnOrder = Array.from(columns).map(column => {
-      // Check for special column types
+      //Check for special column types
       if (column.dataset.columnType === 'uncategorized') {
         return this.SPECIAL_COLUMNS.UNCATEGORIZED;
       }
       
-      // Otherwise use the folder ID
+      //Otherwise use the folder ID
       return column.dataset.folderId || null;
-    }).filter(id => id !== null); // Filter out any null values
+    }).filter(id => id !== null); //Filter out any null values
     
     chrome.storage.sync.set({ [this.STORAGE_KEYS.COLUMN_ORDER]: columnOrder }, () => {
       if (chrome.runtime.lastError) {
@@ -43,8 +41,7 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Save bookmark order
+  /*** Save bookmark order
    * @param {Object} bookmarkOrders Bookmark order object { folderId: [bookmarkId1, bookmarkId2, ...] }
    */
   saveBookmarkOrder(bookmarkOrders) {
@@ -57,8 +54,7 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Get saved column order
+  /*** Get saved column order
    * @returns {Promise<Array>} Column ID array
    */
   getColumnOrder() {
@@ -74,8 +70,7 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Get saved bookmark order
+  /*** Get saved bookmark order
    * @returns {Promise<Object>} Bookmark order object
    */
   getBookmarkOrder() {
@@ -91,8 +86,7 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Clear all saved order data
+  /*** Clear all saved order data
    */
   clearAllOrderData() {
     chrome.storage.sync.remove([
@@ -107,21 +101,20 @@ export class StorageManager {
     });
   }
 
-  /**
-   * Collect current bookmark order from DOM
+  /*** Collect current bookmark order from DOM
    * @returns {Object} Bookmark order object
    */
   collectBookmarkOrderFromDOM() {
     const bookmarkOrders = {};
     
-    // Get all columns
+    //Get all columns
     const columns = document.querySelectorAll('.kanban-column');
     
     columns.forEach(column => {
-      // Handle both folder ID and special column types
+      //Handle both folder ID and special column types
       let columnId = column.dataset.folderId;
       
-      // If it's an uncategorized column, use the special ID
+      //If it's an uncategorized column, use the special ID
       if (column.dataset.columnType === 'uncategorized') {
         columnId = this.SPECIAL_COLUMNS.UNCATEGORIZED;
       }
@@ -131,12 +124,12 @@ export class StorageManager {
       const bookmarkList = column.querySelector('.bookmark-list');
       if (!bookmarkList) return;
       
-      // Get all bookmark IDs in the column
+      //Get all bookmark IDs in the column
       const bookmarkIds = Array.from(
         bookmarkList.querySelectorAll('.bookmark-item')
       ).map(item => item.dataset.bookmarkId);
       
-      // Only save if there are bookmarks
+      //Only save if there are bookmarks
       if (bookmarkIds.length > 0) {
         bookmarkOrders[columnId] = bookmarkIds;
       }
@@ -146,5 +139,5 @@ export class StorageManager {
   }
 }
 
-// Export singleton
+//Export singleton
 export const storageManager = new StorageManager();

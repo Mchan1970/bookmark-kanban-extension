@@ -1,9 +1,8 @@
-// js/modules/commandPalette.js
+//js/modules/commandPalette.js
 
 import { createElement } from './utils.js';
 
-/**
- * Command Palette - VS Code style quick search
+/*** Command Palette - VS Code style quick search
  */
 export class CommandPalette {
   constructor(bookmarkManager) {
@@ -16,41 +15,39 @@ export class CommandPalette {
     this.boundKeydownHandler = this.handleGlobalKeydown.bind(this);
   }
 
-  /**
-   * Initialize command palette
+  /*** Initialize command palette
    */
   async initialize() {
     if (this.initialized) return;
     
-    // Create DOM elements
+    //Create DOM elements
     await this.createPalette();
     
-    // Setup event listeners
+    //Setup event listeners
     this.setupEventListeners();
     
     this.initialized = true;
   }
 
-  /**
-   * Create command palette DOM elements
+  /*** Create command palette DOM elements
    */
   async createPalette() {
-    // Create overlay
+    //Create overlay
     this.overlay = createElement('div', 'command-palette-overlay');
     
-    // Create palette container
+    //Create palette container
     this.palette = createElement('div', 'command-palette');
     
-    // Create search input
+    //Create search input
     this.input = createElement('input', 'command-input');
     this.input.type = 'text';
     this.input.placeholder = 'Search bookmarks...';
     this.input.setAttribute('spellcheck', 'false');
     
-    // Create results container
+    //Create results container
     this.results = createElement('div', 'command-results');
     
-    // Create shortcuts help
+    //Create shortcuts help
     this.shortcuts = createElement('div', 'command-shortcuts');
     this.shortcuts.innerHTML = `
       <div class="command-shortcut">
@@ -71,54 +68,51 @@ export class CommandPalette {
       </div>
     `;
     
-    // Assemble palette
+    //Assemble palette
     this.palette.appendChild(this.input);
     this.palette.appendChild(this.results);
     this.palette.appendChild(this.shortcuts);
     this.overlay.appendChild(this.palette);
     
-    // Add to DOM
+    //Add to DOM
     document.body.appendChild(this.overlay);
   }
 
-  /**
-   * Setup event listeners
+  /*** Setup event listeners
    */
   setupEventListeners() {
-    // Input events
+    //Input events
     this.input.addEventListener('input', () => this.handleSearch());
     this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
     
-    // Overlay click to close
+    //Overlay click to close
     this.overlay.addEventListener('click', (e) => {
       if (e.target === this.overlay) {
         this.hide();
       }
     });
     
-    // Add global keyboard shortcut
+    //Add global keyboard shortcut
     document.addEventListener('keydown', this.boundKeydownHandler);
   }
 
-  /**
-   * Handle global keyboard shortcuts
+  /*** Handle global keyboard shortcuts
    */
   handleGlobalKeydown(e) {
-    // Cmd/Ctrl + Shift + P to show
+    //Cmd/Ctrl + Shift + P to show
     if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
       e.preventDefault();
       this.toggle();
     }
     
-    // Esc to hide
+    //Esc to hide
     if (e.key === 'Escape' && this.isVisible) {
       e.preventDefault();
       this.hide();
     }
   }
 
-  /**
-   * Toggle command palette visibility
+  /*** Toggle command palette visibility
    */
   async toggle() {
     if (!this.initialized) {
@@ -132,33 +126,31 @@ export class CommandPalette {
     }
   }
 
-  /**
-   * Show command palette
+  /*** Show command palette
    */
   async show() {
     if (this.isVisible) return;
     
-    // Load bookmarks
+    //Load bookmarks
     await this.loadBookmarks();
     
-    // Show palette
+    //Show palette
     this.overlay.classList.add('active');
     this.isVisible = true;
     
-    // Focus input
+    //Focus input
     setTimeout(() => {
       this.input.focus();
     }, 50);
     
-    // Reset state
+    //Reset state
     this.input.value = '';
     this.filteredBookmarks = [];
     this.selectedIndex = 0;
     this.renderResults();
   }
 
-  /**
-   * Hide command palette
+  /*** Hide command palette
    */
   hide() {
     this.overlay.classList.remove('active');
@@ -166,8 +158,7 @@ export class CommandPalette {
     this.input.blur();
   }
 
-  /**
-   * 加载所有书签
+  /*** Load所有Bookmark
    */
   async loadBookmarks() {
     try {
@@ -179,10 +170,9 @@ export class CommandPalette {
     }
   }
 
-  /**
-   * 递归提取书签
-   * @param {Object} node 书签节点
-   * @param {Array} path 当前路径
+  /*** 递归提取Bookmark
+   * @param {Object} node Bookmark节点
+   * @param {Array} path When前路径
    */
   extractBookmarks(node, path = []) {
     if (!node) return;
@@ -209,8 +199,7 @@ export class CommandPalette {
     }
   }
 
-  /**
-   * 处理搜索输入
+  /*** HandleSearch输入
    */
   handleSearch() {
     const query = this.input.value.toLowerCase().trim();
@@ -221,14 +210,14 @@ export class CommandPalette {
       return;
     }
     
-    // Filter bookmarks
+    //Filter bookmarks
     this.filteredBookmarks = this.allBookmarks.filter(bookmark => {
       const titleMatch = bookmark.title.toLowerCase().includes(query);
       const urlMatch = bookmark.url.toLowerCase().includes(query);
       return titleMatch || urlMatch;
     });
     
-    // Sort results (title matches first)
+    //Sort results (title matches first)
     this.filteredBookmarks.sort((a, b) => {
       const aTitle = a.title.toLowerCase();
       const bTitle = b.title.toLowerCase();
@@ -238,20 +227,19 @@ export class CommandPalette {
       if (aInTitle && !bInTitle) return -1;
       if (!aInTitle && bInTitle) return 1;
       
-      // If both match title or both don't, sort by title
+      //If both match title or both don't, sort by title
       return aTitle.localeCompare(bTitle);
     });
     
-    // Reset selection
+    //Reset selection
     this.selectedIndex = this.filteredBookmarks.length > 0 ? 0 : -1;
     
-    // Render results
+    //Render results
     this.renderResults();
   }
 
-  /**
-   * 处理键盘导航
-   * @param {KeyboardEvent} e 键盘事件
+  /*** HandleKey盘导航
+   * @param {KeyboardEvent} e Key盘Event
    */
   handleKeydown(e) {
     if (!this.isVisible) return;
@@ -283,8 +271,7 @@ export class CommandPalette {
     }
   }
 
-  /**
-   * 移动选择
+  /*** 移动Select
    * @param {number} direction 方向 (1：向下，-1：向上)
    */
   moveSelection(direction) {
@@ -300,15 +287,14 @@ export class CommandPalette {
     
     this.renderResults();
     
-    // Ensure selected item is visible
+    //Ensure selected item is visible
     const selectedElement = this.results.querySelector('.selected');
     if (selectedElement) {
       selectedElement.scrollIntoView({ block: 'nearest' });
     }
   }
 
-  /**
-   * 渲染搜索结果
+  /*** 渲染Search结果
    */
   renderResults() {
     this.results.innerHTML = '';
@@ -358,18 +344,16 @@ export class CommandPalette {
     this.results.appendChild(fragment);
   }
 
-  /**
-   * 打开书签
-   * @param {Object} bookmark 书签对象
+  /*** OpenBookmark
+   * @param {Object} bookmark BookmarkObject
    */
   openBookmark(bookmark) {
     window.open(bookmark.url, '_blank');
     this.hide();
   }
 
-  /**
-   * 定位到书签
-   * @param {Object} bookmark 书签对象
+  /*** 定位到Bookmark
+   * @param {Object} bookmark BookmarkObject
    */
   locateBookmark(bookmark) {
     const element = document.querySelector(`[data-bookmark-id="${bookmark.id}"]`);

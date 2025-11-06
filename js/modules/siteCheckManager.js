@@ -6,13 +6,13 @@ export class SiteCheckManager {
   async handleSiteCheck() {
     const checkButton = document.getElementById('check-sites-button');
     
-    // 防止多次点击
+    //防止多次Click
     if (checkButton.classList.contains('checking')) {
       return;
     }
     
     try {
-      // 发送消息到后台服务
+      //发送Message到后台服务
       await chrome.runtime.sendMessage({ 
         type: 'CHECK_BOOKMARKS'
       });
@@ -20,7 +20,7 @@ export class SiteCheckManager {
       console.error('Site check error:', error);
       this.app.notificationManager.showErrorToast('An error occurred during bookmark check');
       
-      // 恢复按钮状态
+      //恢复ButtonState
       const checkButton = document.getElementById('check-sites-button');
       const progressElement = checkButton.querySelector('.check-progress');
       if (checkButton && progressElement) {
@@ -38,16 +38,16 @@ export class SiteCheckManager {
       const status = siteStatus[bookmarkId];
       
       if (status === false) {
-        // 完全无法访问
+        //完全None法访问
         item.setAttribute('data-site-status', 'dead');
       } else if (status === 'certificate-error') {
-        // 证书错误但域名存在
+        //证书Error但Domain存在
         item.setAttribute('data-site-status', 'cert-error');
       } else if (status === 'no-https') {
-        // 只支持 HTTP 访问
+        //只Support HTTP 访问
         item.setAttribute('data-site-status', 'no-https');
       } else {
-        // 完全可用
+        //完全可用
         item.removeAttribute('data-site-status');
       }
     });
@@ -78,10 +78,10 @@ export class SiteCheckManager {
     progressElement.style.display = 'none';
     checkButton.title = "Check bookmarks availability";
     
-    // 更新 UI 以反映检查结果
+    //Update UI 以反映Check结果
     this.updateBookmarkStatus(siteStatus);
     
-    // 显示完成消息
+    //Show完成Message
     const deadLinks = Object.values(siteStatus).filter(status => !status).length;
     this.app.notificationManager.showToast(`Bookmark check completed! ${deadLinks} dead links found.`);
   }

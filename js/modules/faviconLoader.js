@@ -1,6 +1,5 @@
-// js/modules/faviconLoader.js
-/**
- * Website Icon Loader
+//js/modules/faviconLoader.js
+/*** Website Icon Loader
  * 
  * Handles lazy loading, caching, and error handling of website icons
  */
@@ -44,20 +43,19 @@ export class FaviconLoader {
     return this;
   }
 
-  /**
-   * Load icon
+  /*** Load icon
    * @param {HTMLImageElement} iconElement Icon element
    * @param {string} hostname Hostname
    */
   async loadIcon(iconElement, hostname) {
-    // Check cache
+    //Check cache
     if (this.iconCache.has(hostname)) {
       this.updateIconWithCache(iconElement, hostname);
       return;
     }
 
     try {
-      // Try to load icon
+      //Try to load icon
       const iconUrl = await this.tryLoadIcon(hostname);
       if (iconUrl) {
         this.iconCache.set(hostname, iconUrl);
@@ -65,13 +63,13 @@ export class FaviconLoader {
         return;
       }
 
-      // If icon loading fails, check website availability
+      //If icon loading fails, check website availability
       const isAvailable = await siteChecker.checkSite(hostname);
       if (isAvailable) {
-        // Website is available but has no icon, use default icon
+        //Website is available but has no icon, use default icon
         this.updateIconStatus(iconElement, true, this.defaultIcon);
       } else {
-        // Website may be unavailable, mark as failed state
+        //Website may be unavailable, mark as failed state
         this.updateIconStatus(iconElement, false, this.defaultIcon);
       }
     } catch (error) {
@@ -80,13 +78,12 @@ export class FaviconLoader {
     }
   }
 
-  /**
-   * Try to load icon from different sources
+  /*** Try to load icon from different sources
    * @param {string} hostname Hostname
    * @returns {Promise<string|null>} Icon URL or null
    */
   async tryLoadIcon(hostname) {
-    // First try Google Favicon service
+    //First try Google Favicon service
     try {
       const googleUrl = `https://www.google.com/s2/favicons?sz=64&domain=${hostname}`;
       const available = await this.checkImageAvailable(googleUrl);
@@ -95,7 +92,7 @@ export class FaviconLoader {
       console.debug('Google Favicon service load failed', error);
     }
 
-    // Try website's own icons
+    //Try website's own icons
     const iconUrls = [
       `https://${hostname}/favicon.ico`,
       `https://${hostname}/apple-touch-icon.png`
@@ -113,8 +110,7 @@ export class FaviconLoader {
     return null;
   }
 
-  /**
-   * Check if image is available
+  /*** Check if image is available
    * @param {string} url Image URL
    * @returns {Promise<boolean>}
    */
@@ -125,13 +121,12 @@ export class FaviconLoader {
       img.onerror = () => resolve(false);
       img.src = url;
 
-      // Set timeout
+      //Set timeout
       setTimeout(() => resolve(false), 3000);
     });
   }
 
-  /**
-   * Update icon status
+  /*** Update icon status
    * @param {HTMLImageElement} element Icon element
    * @param {boolean} isAvailable Whether available
    * @param {string} iconUrl Icon URL
@@ -151,8 +146,7 @@ export class FaviconLoader {
     this.observer.unobserve(element);
   }
 
-  /**
-   * Update icon from cache
+  /*** Update icon from cache
    * @param {HTMLImageElement} element Icon element
    * @param {string} hostname Hostname
    */
@@ -167,7 +161,7 @@ export class FaviconLoader {
       const domain = new URL(url).hostname;
       icon.src = `https://www.google.com/s2/favicons?domain=${domain}`;
       icon.onerror = () => {
-        // Use local default icon when loading fails
+        //Use local default icon when loading fails
         icon.src = 'icons/default-favicon.png';
       };
     } catch (e) {

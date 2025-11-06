@@ -1,5 +1,4 @@
-/**
- * Debounce function
+/*** Debounce function
  * @param {Function} fn Function to execute
  * @param {number} delay Delay time in milliseconds
  * @returns {Function} Debounced function
@@ -12,8 +11,7 @@ export const debounce = (fn, delay) => {
   };
 };
 
-/**
- * Create element with class name
+/*** Create element with class name
  * @param {string} tag HTML tag name
  * @param {string} className CSS class name
  * @returns {HTMLElement} Created element
@@ -26,8 +24,7 @@ export const createElement = (tag, className) => {
   return element;
 };
 
-/**
- * Format date and time
+/*** Format date and time
  * @param {Date} date Date object
  * @returns {Object} Formatted time and date
  */
@@ -48,16 +45,14 @@ export const formatDateTime = (date) => {
   };
 };
 
-/**
- * Generate unique ID
+/*** Generate unique ID
  * @returns {string} Unique ID
  */
 export const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
-/**
- * Safely get domain from URL
+/*** Safely get domain from URL
  * @param {string} url URL string
  * @returns {string} Domain name
  */
@@ -69,8 +64,7 @@ export const getDomain = (url) => {
   }
 };
 
-/**
- * Parse title to extract tags
+/*** Parse title to extract tags
  * @param {string} title Bookmark title
  * @returns {{cleanTitle: string, tags: string[]}} Cleaned title and tags
  */
@@ -79,19 +73,18 @@ export const parseTitle = (title) => {
     return { cleanTitle: title || '', tags: [] };
   }
 
-  // 匹配 #标签 格式，支持中英文和数字
+  //匹配 #Tag 格式，Support中英文和Number
   const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
   const tags = (title.match(tagRegex) || []).map(match => match.substring(1));
 
-  // Remove tags and clean up whitespace
+  //Remove tags and clean up whitespace
   let cleanTitle = title.replace(tagRegex, '').trim();
-  cleanTitle = cleanTitle.replace(/\s+/g, ' '); // 合并多个空格
+  cleanTitle = cleanTitle.replace(/\s+/g, ' '); //合并多个Empty格
 
   return { cleanTitle, tags };
 };
 
-/**
- * Get a consistent color for a tag
+/*** Get a consistent color for a tag
  * @param {string} tag The tag string
  * @returns {string} HSL color string
  */
@@ -102,14 +95,13 @@ export const getTagColor = (tag) => {
   }
 
   const hue = Math.abs(hash) % 360;
-  const saturation = 60 + (Math.abs(hash) % 20); // 60-80%
-  const lightness = 45 + (Math.abs(hash) % 15);  // 45-60%
+  const saturation = 60 + (Math.abs(hash) % 20); //60-80%
+  const lightness = 45 + (Math.abs(hash) % 15);  //45-60%
 
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 };
 
-/**
- * Validate tag format
+/*** Validate tag format
  * @param {string} tag Tag string to validate
  * @returns {boolean} True if valid tag format
  */
@@ -118,15 +110,14 @@ export const isValidTag = (tag) => {
     return false;
   }
 
-  // Remove # if present and check
+  //Remove # if present and check
   const cleanTag = tag.startsWith('#') ? tag.substring(1) : tag;
 
-  // Should be 1-20 characters, alphanumeric + Chinese + underscore
+  //Should be 1-20 characters, alphanumeric + Chinese + underscore
   return /^[\w\u4e00-\u9fa5]{1,20}$/.test(cleanTag);
 };
 
-/**
- * Normalize tag string
+/*** Normalize tag string
  * @param {string} tag Tag string to normalize
  * @returns {string} Normalized tag (with # prefix)
  */
@@ -139,8 +130,7 @@ export const normalizeTag = (tag) => {
   return cleanTag.startsWith('#') ? cleanTag : `#${cleanTag}`;
 };
 
-/**
- * Remove tags from title
+/*** Remove tags from title
  * @param {string} title Title with tags
  * @returns {string} Title without tags
  */

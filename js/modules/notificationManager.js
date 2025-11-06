@@ -1,6 +1,6 @@
 export class NotificationManager {
   showToast(message, type = 'success') {
-    // 创建消息元素
+    //CreateMessageElement
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
@@ -16,15 +16,15 @@ export class NotificationManager {
     toast.style.opacity = '0';
     toast.style.transition = 'opacity 0.3s ease';
     
-    // 添加到页面
+    //Add到页面
     document.body.appendChild(toast);
     
-    // 淡入效果
+    //淡入效果
     setTimeout(() => {
       toast.style.opacity = '1';
     }, 10);
     
-    // 淡出并移除
+    //淡出并Remove
     setTimeout(() => {
       toast.style.opacity = '0';
       setTimeout(() => {

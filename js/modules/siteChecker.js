@@ -1,5 +1,4 @@
-/**
- * Website Status Checker
+/*** Website Status Checker
  * Used to detect website availability status
  */
 export class SiteChecker {
@@ -7,32 +6,31 @@ export class SiteChecker {
     this.siteStatus = new Map();
     this.checkTimes = new Map();
     
-    // Cache duration configuration (milliseconds)
+    //Cache duration configuration (milliseconds)
     this.CACHE_DURATION = {
-      SUCCESS: 24 * 60 * 60 * 1000,     // Success status cache 24 hours
-      FAILURE: 1 * 60 * 60 * 1000,      // Failure status cache 1 hour
-      CERT_ERROR: 12 * 60 * 60 * 1000,  // Certificate error cache 12 hours
-      NO_HTTPS: 12 * 60 * 60 * 1000     // No HTTPS support cache 12 hours
+      SUCCESS: 24 * 60 * 60 * 1000,     //Success status cache 24 hours
+      FAILURE: 1 * 60 * 60 * 1000,      //Failure status cache 1 hour
+      CERT_ERROR: 12 * 60 * 60 * 1000,  //Certificate error cache 12 hours
+      NO_HTTPS: 12 * 60 * 60 * 1000     //No HTTPS support cache 12 hours
     };
     
-    // Request timeout (milliseconds)
+    //Request timeout (milliseconds)
     this.TIMEOUT = 5000;
     
-    // Maximum cache size
+    //Maximum cache size
     this.MAX_CACHE_SIZE = 500;
     
-    // Total check timeout for each site (milliseconds)
+    //Total check timeout for each site (milliseconds)
     this.TOTAL_CHECK_TIMEOUT = 5000;
     
-    // Initialize periodic cache cleanup
+    //Initialize periodic cache cleanup
     this.initCacheCleanup();
     
-    // Debug mode flag - 设置为 false 以禁用调试日志
+    //Debug mode flag - Settings为 false 以Disable调试日志
     this.isDebug = false;
   }
 
-  /**
-   * Debug log helper
+  /*** Debug log helper
    * @private
    */
   _debug(...args) {
@@ -41,21 +39,19 @@ export class SiteChecker {
     }
   }
 
-  /**
-   * Initialize periodic cache cleanup
+  /*** Initialize periodic cache cleanup
    */
   initCacheCleanup() {
-    // Clean cache every 15 minutes
+    //Clean cache every 15 minutes
     setInterval(() => this.cleanupCache(), 15 * 60 * 1000);
   }
 
-  /**
-   * Check if hostname is a local network address
+  /*** Check if hostname is a local network address
    * @param {string} hostname Hostname to check
    * @returns {boolean} True if it's a local network address
    */
   isLocalNetwork(hostname) {
-    // Check for localhost and IP formats
+    //Check for localhost and IP formats
     if (hostname === 'localhost' || 
         hostname === '127.0.0.1' || 
         hostname.startsWith('192.168.') || 
@@ -64,7 +60,7 @@ export class SiteChecker {
       return true;
     }
     
-    // Check for 172.16.x.x to 172.31.x.x range
+    //Check for 172.16.x.x to 172.31.x.x range
     if (hostname.startsWith('172.')) {
       const parts = hostname.split('.');
       if (parts.length >= 2) {
@@ -78,29 +74,28 @@ export class SiteChecker {
     return false;
   }
 
-  /**
-   * Check website status with overall timeout
+  /*** Check website status with overall timeout
    * @param {string} hostname Hostname
    * @returns {Promise<boolean|string>} Whether website is available or certificate error
    */
   async checkSite(hostname) {
-    // Skip checking for local network addresses
+    //Skip checking for local network addresses
     if (this.isLocalNetwork(hostname)) {
       return true;
     }
     
-    // Check cache
+    //Check cache
     if (!this.shouldRecheck(hostname)) {
       return this.getCachedStatus(hostname);
     }
 
     try {
-      // Create a promise that rejects after TOTAL_CHECK_TIMEOUT
+      //Create a promise that rejects after TOTAL_CHECK_TIMEOUT
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Check timeout')), this.TOTAL_CHECK_TIMEOUT);
       });
 
-      // Race between the check and the timeout
+      //Race between the check and the timeout
       const status = await Promise.race([
         this.checkAvailability(hostname),
         timeoutPromise
@@ -115,8 +110,7 @@ export class SiteChecker {
     }
   }
 
-  /**
-   * Get cached status
+  /*** Get cached status
    * @param {string} hostname Hostname
    * @returns {boolean|string|null} Cached status, null if no cache
    */
@@ -127,8 +121,7 @@ export class SiteChecker {
     return null;
   }
 
-  /**
-   * Determine if recheck is needed
+  /*** Determine if recheck is needed
    * @param {string} hostname Hostname
    * @returns {boolean}
    */
@@ -144,8 +137,7 @@ export class SiteChecker {
     return Date.now() - lastCheck > cacheDuration;
   }
 
-  /**
-   * Get cache duration based on status
+  /*** Get cache duration based on status
    * @param {boolean|string} status Status
    * @returns {number} Cache duration in milliseconds
    */
@@ -156,20 +148,19 @@ export class SiteChecker {
     return this.CACHE_DURATION.FAILURE;
   }
 
-  /**
-   * Perform availability check
+  /*** Perform availability check
    * @param {string} hostname Hostname
    * @returns {Promise<boolean|string>}
    */
   async checkAvailability(hostname) {
-    // 首先尝试 HTTPS
+    //First尝试 HTTPS
     const httpsUrls = [
       `https://${hostname}/favicon.ico`,
       `https://${hostname}/robots.txt`,
       `https://${hostname}`
     ];
 
-    // 然后尝试 HTTP
+    //Then尝试 HTTP
     const httpUrls = [
       `http://${hostname}/favicon.ico`,
       `http://${hostname}/robots.txt`,
@@ -178,48 +169,47 @@ export class SiteChecker {
 
     let httpsError = null;
 
-    // 先尝试 HTTPS
+    //先尝试 HTTPS
     for (const url of httpsUrls) {
       try {
         const available = await this.tryHeadRequest(url);
         if (available) {
-          return true; // HTTPS 访问成功
+          return true; //HTTPS 访问Success
         }
       } catch (error) {
         httpsError = error;
-        this._debug(`HTTPS check failed: ${url}`); // 简化错误输出
+        this._debug(`HTTPS check failed: ${url}`); //简化Error输出
         continue;
       }
     }
 
-    // 如果 HTTPS 失败，尝试 HTTP
+    //If HTTPS Failed，尝试 HTTP
     for (const url of httpUrls) {
       try {
         const available = await this.tryHeadRequest(url);
         if (available) {
-          return 'no-https'; // HTTP 访问成功，但不支持 HTTPS
+          return 'no-https'; //HTTP 访问Success，但不Support HTTPS
         }
       } catch (error) {
-        this._debug(`HTTP check failed: ${url}`); // 简化错误输出
+        this._debug(`HTTP check failed: ${url}`); //简化Error输出
         continue;
       }
     }
 
-    // 如果 HTTP 和 HTTPS 都失败，检查域名是否存在
+    //If HTTP 和 HTTPS 都Failed，CheckDomainWhether存在
     const domainExists = await this.checkDomainExists(hostname);
     if (domainExists) {
-      // 如果域名存在，且之前的 HTTPS 错误是证书相关的，则标记为证书错误
+      //IfDomain存在，且之前的 HTTPS Error是证书相关的，则Mark为证书Error
       if (httpsError && 
           (httpsError.name === 'TypeError' && httpsError.message.includes('Failed to fetch'))) {
         return 'certificate-error';
       }
     }
 
-    return false; // 完全无法访问
+    return false; //完全None法访问
   }
 
-  /**
-   * Check if domain exists through DNS
+  /*** Check if domain exists through DNS
    * @param {string} hostname Hostname
    * @returns {Promise<boolean>} Whether domain resolves
    */
@@ -240,8 +230,7 @@ export class SiteChecker {
     });
   }
 
-  /**
-   * Try HEAD request
+  /*** Try HEAD request
    * @param {string} url URL
    * @returns {Promise<boolean>}
    */
@@ -263,16 +252,15 @@ export class SiteChecker {
       return true;
     } catch (error) {
       if (error.name === 'AbortError') {
-        this._debug(`Request timeout: ${url}`); // 使用 debug helper
+        this._debug(`Request timeout: ${url}`); //使用 debug helper
       } else {
-        this._debug(`Request failed: ${url}`); // 简化错误输出
+        this._debug(`Request failed: ${url}`); //简化Error输出
       }
       throw error;
     }
   }
 
-  /**
-   * Check if cache is valid
+  /*** Check if cache is valid
    * @param {string} hostname Hostname
    * @returns {boolean}
    */
@@ -288,13 +276,12 @@ export class SiteChecker {
     return Date.now() - lastCheck <= cacheDuration;
   }
 
-  /**
-   * Update cache
+  /*** Update cache
    * @param {string} hostname Hostname
    * @param {boolean|string} status Status
    */
   updateCache(hostname, status) {
-    // 检查缓存大小限制
+    //CheckCacheSize限制
     if (this.siteStatus.size >= this.MAX_CACHE_SIZE) {
       this.limitCacheSize();
     }
@@ -303,8 +290,7 @@ export class SiteChecker {
     this.checkTimes.set(hostname, Date.now());
   }
 
-  /**
-   * Clean up expired cache entries
+  /*** Clean up expired cache entries
    */
   cleanupCache() {
     const now = Date.now();
@@ -324,11 +310,10 @@ export class SiteChecker {
       this.checkTimes.delete(hostname);
     });
     
-    this._debug(`Cache cleanup: removed ${expiredHosts.length} entries`); // 使用 debug helper
+    this._debug(`Cache cleanup: removed ${expiredHosts.length} entries`); //使用 debug helper
   }
 
-  /**
-   * Limit cache size by removing oldest entries
+  /*** Limit cache size by removing oldest entries
    */
   limitCacheSize() {
     const entries = Array.from(this.checkTimes.entries());
@@ -342,9 +327,9 @@ export class SiteChecker {
       this.checkTimes.delete(hostname);
     });
     
-    this._debug(`Cache size limited: removed ${toRemove.length} entries`); // 使用 debug helper
+    this._debug(`Cache size limited: removed ${toRemove.length} entries`); //使用 debug helper
   }
 }
 
-// Export singleton
+//Export singleton
 export const siteChecker = new SiteChecker(); 
