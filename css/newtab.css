@@ -195,12 +195,16 @@ header {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
-.check-icon {
+.check-icon,
+.cleanup-icon,
+.settings-icon {
   font-size: 1.1rem;
   color: white;
 }
 
-.check-text {
+.check-text,
+.cleanup-text,
+.settings-text {
   color: white;
   font-size: 0.9rem;
   font-weight: 500;
@@ -1210,32 +1214,11 @@ main {
   color: var(--primary-color);
 }
 
-#settings-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: var(--border-radius);
-  padding: 0.3rem 0.7rem;
-  cursor: pointer;
-  transition: var(--transition-fast);
-}
+/* settings-button uses common .header-button styles */
 
-#settings-button:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
+/* settings-button:hover uses common .header-button:hover styles */
 
-.settings-icon {
-  font-size: 1.1rem;
-  color: white;
-}
-
-.settings-text {
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
+/* Settings styles moved to unified header-button styles above */
 
 /* Button styles */
 .btn-primary {
@@ -1313,11 +1296,13 @@ main {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .settings-text {
+  .settings-text,
+  .cleanup-text,
+  .check-text {
     display: none;
   }
-  
-  #settings-button {
+
+  .header-button {
     padding: 0.3rem;
   }
   
