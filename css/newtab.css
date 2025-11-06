@@ -40,7 +40,7 @@ body {
   color: var(--text-primary);
   line-height: 1.6;
   margin: 0;
-  padding: calc(var(--header-height) + 12px) 0 0;
+  padding: calc(var(--header-height) + 15px) 0 0;
   transition: var(--transition);
 }
 
@@ -48,7 +48,7 @@ body {
 header {
   background-color: var(--primary-color);
   color: var(--card-bg);
-  padding: 1rem 2rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -206,7 +206,7 @@ header {
   font-weight: 500;
 }
 
-/* 进度指示器样式 */
+/* Progress indicator styles */
 .check-progress {
   color: white;
   font-size: 0.85rem;
@@ -218,7 +218,7 @@ header {
   text-align: center;
 }
 
-/* 当显示进度时，隐藏文字 */
+/* Hide text while progress indicator is visible */
 .checking .check-text {
   display: none;
 }
@@ -273,7 +273,7 @@ body[data-display-mode="single"] .bookmark-title {
 
 body[data-display-mode="single"] .bookmark-text-container {
   width: 100%;
-  padding-right: 48px; /* 留出操作按钮的空间 */
+  padding-right: 48px; /* Reserve space for action buttons */
 }
 
 body[data-display-mode="single"] .bookmark-actions {
@@ -325,7 +325,7 @@ body[data-display-mode="single"] .bookmark-item:nth-last-child(-n+3):hover::afte
   top: auto;
 }
 
-/* 确保 tooltip 显示在书签列表的最上层 */
+/* Ensure tooltips appear above the bookmark list */
 .bookmark-list {
   position: relative;
   z-index: 1;
@@ -368,7 +368,7 @@ body[data-display-mode="double"] .bookmark-domain {
 /* Main Container */
 main {
   max-width: 100%;
-  margin: 1.5rem auto 0;
+  margin: 0 auto;
   padding: 0;
   background-color: var(--bg-color);
   min-height: calc(100vh - var(--header-height));
@@ -409,6 +409,7 @@ main {
   margin: 0 auto;
   background-color: var(--bg-color);
   justify-content: flex-start;
+  align-items: flex-start;
   padding-left: 30px;
   padding-right: 30px;
 }
@@ -445,7 +446,6 @@ main {
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 180px);
   transition: background-color 0.3s, box-shadow 0.3s;
   border: 1px solid var(--border-color);
 }
@@ -476,13 +476,16 @@ main {
   margin: 0 0.5rem;
   position: relative;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* 排除特殊列的 tooltip */
-.kanban-column[data-column-type="uncategorized"] .column-title,
-.kanban-column[data-folder-id="2"] .column-title,
-.kanban-column[data-folder-id="3"] .column-title {
+/* Exclude rename tooltip for special columns */
+.column-title--special {
   position: static;
+  color: var(--text-secondary);
+  cursor: default;
 }
 
 .column-title:hover::before {
@@ -501,34 +504,47 @@ main {
   pointer-events: none;
 }
 
-.kanban-column[data-column-type="uncategorized"] .column-title:hover::before,
-.kanban-column[data-folder-id="2"] .column-title:hover::before,
-.kanban-column[data-folder-id="3"] .column-title:hover::before {
+.column-title--special:hover::before {
+  content: none;
+}
+.column-title--special:hover::after {
   content: none;
 }
 
-.kanban-column[data-column-type="uncategorized"] .column-title,
-.kanban-column[data-folder-id="2"] .column-title,
-.kanban-column[data-folder-id="3"] .column-title {
-  cursor: default;
+.column-info {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--text-light);
+  cursor: help;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
 }
 
-.kanban-column[data-column-type="uncategorized"] .column-title:hover::after,
-.kanban-column[data-folder-id="2"] .column-title:hover::after,
-.kanban-column[data-folder-id="3"] .column-title:hover::after {
-  content: "Special column - Cannot be renamed";
+.column-info::after {
+  content: attr(data-tooltip);
   position: absolute;
-  bottom: -30px;
+  bottom: -32px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffffff;
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 12px;
   white-space: nowrap;
-  z-index: 100;
+  z-index: 150;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.column-info:hover::after {
+  opacity: 1;
 }
 
 .bookmark-count {
@@ -544,8 +560,6 @@ main {
 
 .bookmark-list {
   padding: 0.5rem;
-  overflow-y: auto;
-  flex-grow: 1;
 }
 
 /* Bookmark Items */
@@ -984,25 +998,7 @@ main {
   position: relative;
 }
 
-.kanban-column[data-column-type="uncategorized"] .column-header::after,
-.kanban-column[data-folder-id="2"] .column-header::after,
-.kanban-column[data-folder-id="3"] .column-header::after {
-  content: "ⓘ";
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 12px;
-  color: var(--text-light);
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: help;
-}
-
-/* 死站标识样式 */
+/* Styles for bookmarks that are unreachable */
 .bookmark-item[data-site-status="dead"] {
   opacity: 0.7;
   border-left: 3px solid var(--danger-color);
@@ -1012,14 +1008,14 @@ main {
   color: var(--danger-color);
 }
 
-/* 所有模式下的死站标识统一使用图标 */
+/* Use icons to indicate unreachable bookmarks in all themes */
 .bookmark-item[data-site-status="dead"] .bookmark-title::before {
-  content: "🚫 ";  /* 改用禁止图标表示完全无法访问 */
+  content: "🚫 ";  /* Use a prohibition icon for completely unreachable sites */
   font-size: 0.8rem;
   color: var(--danger-color);
 }
 
-/* 暗色主题下的死站标识 */
+/* Unreachable bookmark styling in dark theme */
 [data-theme="dark"] .bookmark-item[data-site-status="dead"] {
   border-left-color: var(--danger-dark);
 }
@@ -1032,10 +1028,10 @@ main {
   color: var(--danger-dark);
 }
 
-/* 证书错误但域名存在的样式 */
+/* Styling for certificate issues when the domain resolves */
 .bookmark-item[data-site-status="cert-error"] {
   opacity: 0.85;
-  border-left: 3px solid var(--warning-color); /* 使用警告色，如黄色 */
+  border-left: 3px solid var(--warning-color); /* Highlight issues with a warning color */
 }
 
 .bookmark-item[data-site-status="cert-error"] .bookmark-title {
@@ -1043,24 +1039,24 @@ main {
 }
 
 .bookmark-item[data-site-status="cert-error"] .bookmark-title::before {
-  content: "⚠️ ";  /* 警告图标表示证书问题 */
+  content: "⚠️ ";  /* Warning icon to denote certificate issues */
   font-size: 0.8rem;
   color: var(--warning-color);
 }
 
-/* 只支持 HTTP 的站点样式 */
+/* Styling for sites that only support HTTP */
 .bookmark-item[data-site-status="no-https"] {
   opacity: 0.9;
   border-left: 3px solid var(--secondary-color);
 }
 
 .bookmark-item[data-site-status="no-https"] .bookmark-title::before {
-  content: "🔓 ";  /* 未锁定图标表示无 HTTPS */
+  content: "🔓 ";  /* Unlocked icon indicates lack of HTTPS */
   font-size: 0.8rem;
   color: var(--secondary-color);
 }
 
-/* 鼠标悬停提示 */
+/* Hover state tooltip */
 .bookmark-item[data-site-status="dead"]:hover::after {
   content: "This website is completely inaccessible";
   position: absolute;

@@ -48,8 +48,14 @@ export class UIManager {
   initializeTimeUpdate() {
     const updateDateTime = () => {
       const { time, date } = formatDateTime(new Date());
-      document.getElementById('current-time').textContent = time;
-      document.getElementById('current-date').textContent = date;
+      const timeElement = document.getElementById('current-time');
+      const dateElement = document.getElementById('current-date');
+      if (timeElement) {
+        timeElement.textContent = time;
+      }
+      if (dateElement) {
+        dateElement.textContent = date;
+      }
     };
 
     updateDateTime();

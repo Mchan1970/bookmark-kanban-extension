@@ -20,9 +20,9 @@ export class TagRenderer {
     this.onTagClick = callback;
   }
 
-  /*** SettingsTag过滤Callback
-   * @param {Function} callback 过滤CallbackFunction
-   */
+  /*** Set the tag filter callback
+   * @param {Function} callback Filter callback function
+  */
   setTagFilterCallback(callback) {
     this.onTagFilter = callback;
   }
@@ -34,24 +34,24 @@ export class TagRenderer {
    */
   createTagElement(tag, options = {}) {
     const {
-      size = 'small',      //small, medium, large
-      clickable = true,    //Whether可Click
-      removable = false,   //Whether可Delete
-      showCount = false    //WhetherShowCount
+      size = 'small',      // small, medium, large
+      clickable = true,    // Whether the tag is clickable
+      removable = false,   // Whether the tag can be removed
+      showCount = false    // Whether to display usage count
     } = options;
 
     const tagElement = createElement('span', `bookmark-tag bookmark-tag--${size}`);
     tagElement.textContent = tag;
     tagElement.setAttribute('data-tag', tag);
 
-    //SettingsTagColor
+    // Apply tag color
     const color = tagManager.getTagColor(tag);
     tagElement.style.backgroundColor = color;
 
-    //根据Background色调整文字Color（确保可读性）
+    // Adjust text color for readability
     tagElement.style.color = this.getContrastColor(color);
 
-    //AddClickEvent
+    // Attach click handler if applicable
     if (clickable) {
       tagElement.classList.add('bookmark-tag--clickable');
       tagElement.addEventListener('click', (e) => {
@@ -60,7 +60,7 @@ export class TagRenderer {
       });
     }
 
-    //AddDeleteButton
+    // Append a remove button when tags are removable
     if (removable) {
       const removeButton = createElement('button', 'bookmark-tag__remove');
       removeButton.innerHTML = '×';
@@ -71,7 +71,7 @@ export class TagRenderer {
       tagElement.appendChild(removeButton);
     }
 
-    //AddCountShow
+    // Show usage count when requested
     if (showCount) {
       const count = tagManager.getStatistics().tagUsage.get(tag) || 0;
       if (count > 1) {
@@ -103,23 +103,23 @@ export class TagRenderer {
 
     const container = createElement('div', 'bookmark-tags');
 
-    //Show前N个Tag
+    // Render the first N tags
     const visibleTags = tags.slice(0, maxTags);
     const hiddenTags = tags.slice(maxTags);
 
-    //渲染VisibleTag
+    // Render visible tags
     visibleTags.forEach(tag => {
       const tagElement = this.createTagElement(tag, { size, clickable });
       container.appendChild(tagElement);
     });
 
-    //If有MoreTag，Show"More"Indicator
+    // If there are hidden tags, display a “more” indicator
     if (showMore && hiddenTags.length > 0) {
       const moreElement = createElement('span', 'bookmark-tags__more');
       moreElement.textContent = `+${hiddenTags.length}`;
       moreElement.title = hiddenTags.join(', ');
 
-      //为"More"IndicatorAddHover效果
+      // Show hidden tags on hover
       moreElement.addEventListener('mouseenter', (e) => {
         this.showHiddenTagsTooltip(e, hiddenTags);
       });
@@ -130,23 +130,23 @@ export class TagRenderer {
     return container;
   }
 
-  /*** CreateTagFilter
-   * @param {Array} availableTags 可用TagArray
-   * @param {Array} activeTags When前Active的TagArray
-   * @returns {HTMLElement} TagFilterElement
-   */
+  /*** Create the tag filter markup
+   * @param {Array} availableTags Available tag list
+   * @param {Array} activeTags Currently active tag list
+   * @returns {HTMLElement} Tag filter element
+  */
   createTagFilter(availableTags, activeTags = []) {
     const filterContainer = createElement('div', 'tag-filter');
 
-    //CreateTitle
+    // Create title element
     const title = createElement('div', 'tag-filter__title');
     title.textContent = 'Filter by Tags';
     filterContainer.appendChild(title);
 
-    //CreateTagList
+    // Container for tag chips
     const tagList = createElement('div', 'tag-filter__list');
 
-    //Add"All"Options
+    // Add the “All” option
     const allTag = this.createTagElement('All', {
       size: 'medium',
       clickable: false,
@@ -159,7 +159,7 @@ export class TagRenderer {
     });
     tagList.appendChild(allTag);
 
-    //Add各个TagOptions
+    // Add each tag option
     availableTags.forEach(tag => {
       const tagElement = this.createTagElement(tag, {
         size: 'medium',
@@ -168,12 +168,12 @@ export class TagRenderer {
       });
       tagElement.classList.add('bookmark-tag--clickable');
 
-      //Mark为ActiveState
+      // Mark as active when currently selected
       if (activeTags.includes(tag)) {
         tagElement.classList.add('tag-filter__item--active');
       }
 
-      //AddClickEvent
+      // Wire up click handler
       tagElement.addEventListener('click', () => {
         this.handleFilterToggle(tag);
       });
@@ -183,7 +183,7 @@ export class TagRenderer {
 
     filterContainer.appendChild(tagList);
 
-    //Add清除Button
+    // Append a clear button when filters are active
     if (activeTags.length > 0) {
       const clearButton = createElement('button', 'tag-filter__clear');
       clearButton.textContent = 'Clear Filter';
@@ -206,60 +206,60 @@ export class TagRenderer {
     }
   }
 
-  /*** HandleTagDeleteEvent
-   * @param {string} tag TagName
-   * @param {Event} event ClickEvent
-   */
+  /*** Handle a request to remove a tag chip
+   * @param {string} tag Tag name
+   * @param {Event} event Click event
+  */
   handleTagRemove(tag, event) {
-    //TODO: 实现TagDelete逻辑
+    // TODO: Implement tag removal logic when tag editing is enabled
     console.log(`Remove tag: ${tag}`);
   }
 
-  /*** HandleFilter切换Event
-   * @param {string} tag TagName
-   */
+  /*** Handle tag filter toggles
+   * @param {string} tag Tag name
+  */
   handleFilterToggle(tag) {
     if (this.onTagFilter) {
       this.onTagFilter(tag);
     }
   }
 
-  /*** Handle清除FilterEvent
-   */
+  /*** Clear the active tag filter
+  */
   handleFilterClear() {
     if (this.onTagFilter) {
-      this.onTagFilter(null); //null 表示清除所有Filter
+      this.onTagFilter(null); // null means clear all filters
     }
   }
 
-  /*** ShowHiddenTag的Tooltip框
-   * @param {Event} event 鼠标Event
-   * @param {Array} hiddenTags Hidden的TagArray
-   */
+  /*** Show a tooltip for hidden tags
+   * @param {Event} event Mouse event
+   * @param {Array} hiddenTags Hidden tag array
+  */
   showHiddenTagsTooltip(event, hiddenTags) {
-    //TODO: 实现工具TooltipShow逻辑
+    // TODO: Provide a richer tooltip UI if needed
     console.log('Hidden tags:', hiddenTags);
   }
 
-  /*** 根据Background色Get对比色（确保文字可读性）
-   * @param {string} backgroundColor Background色（HSL格式）
-   * @returns {string} 对比色
-   */
+  /*** Get a contrasting text color for the given background
+   * @param {string} backgroundColor Background color in HSL format
+   * @returns {string} Contrast color
+  */
   getContrastColor(backgroundColor) {
-    //解析HSLColor
+    // Parse the HSL color
     const match = backgroundColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     if (!match) return '#ffffff';
 
     const lightness = parseInt(match[3]);
 
-    //根据亮度Select合适的文字Color
+    // Choose an appropriate foreground color based on lightness
     return lightness > 55 ? '#333333' : '#ffffff';
   }
 
-  /*** UpdateTagActiveState
-   * @param {HTMLElement} filterContainer FilterContainer
-   * @param {Array} activeTags Active的TagArray
-   */
+  /*** Update the active-state styling and clear button
+   * @param {HTMLElement} filterContainer Filter container element
+  * @param {Array} activeTags Active tag array
+  */
   updateFilterActiveState(filterContainer, activeTags) {
     const tagItems = filterContainer.querySelectorAll('.tag-filter__item');
 
@@ -272,30 +272,30 @@ export class TagRenderer {
       }
     });
 
-    //Update清除ButtonShowState
+    // Toggle the visibility of the clear button
     const clearButton = filterContainer.querySelector('.tag-filter__clear');
     if (clearButton) {
       clearButton.style.display = activeTags.length > 0 ? 'block' : 'none';
     }
   }
 
-  /*** CreateTagEdit器
-   * @param {Array} currentTags When前TagArray
-   * @returns {HTMLElement} TagEdit器Element
-   */
+  /*** Create the inline tag editor
+   * @param {Array} currentTags Current tag array
+   * @returns {HTMLElement} Tag editor element
+  */
   createTagEditor(currentTags = []) {
     const editorContainer = createElement('div', 'tag-editor');
 
-    //CreateInput
+    // Create input element
     const input = createElement('input', 'tag-editor__input');
     input.type = 'text';
-    input.placeholder = '输入标签，按回车添加';
+    input.placeholder = 'Enter a tag and press Enter';
     input.setAttribute('data-current-tags', JSON.stringify(currentTags));
 
-    //CreateTagShow区域
+    // Container to display current tags
     const tagDisplay = createElement('div', 'tag-editor__display');
 
-    //ShowWhen前Tag
+    // Render existing tags
     currentTags.forEach(tag => {
       const tagElement = this.createTagElement(tag, {
         size: 'medium',
@@ -304,13 +304,13 @@ export class TagRenderer {
       tagDisplay.appendChild(tagElement);
     });
 
-    //Add输入EventHandle
+    // Handle keyboard input
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         this.handleTagAdd(input.value, tagDisplay, input);
       } else if (e.key === 'Backspace' && input.value === '') {
-        //DeleteFinally一个Tag
+        // Remove the last tag when backspace is pressed on empty input
         const lastTag = tagDisplay.querySelector('.bookmark-tag:last-child');
         if (lastTag) {
           lastTag.remove();
@@ -318,7 +318,7 @@ export class TagRenderer {
       }
     });
 
-    //Add失焦EventHandle
+    // Remove the editor when it loses focus
     input.addEventListener('blur', () => {
       if (input.value.trim()) {
         this.handleTagAdd(input.value, tagDisplay, input);
@@ -331,22 +331,22 @@ export class TagRenderer {
     return editorContainer;
   }
 
-  /*** HandleAddTagEvent
-   * @param {string} inputValue 输入Value
-   * @param {HTMLElement} tagDisplay TagShow区域
-   * @param {HTMLElement} input Input
-   */
+  /*** Handle manual tag additions
+   * @param {string} inputValue Raw input value
+   * @param {HTMLElement} tagDisplay Tag display container
+   * @param {HTMLElement} input Input element
+  */
   handleTagAdd(inputValue, tagDisplay, input) {
     const value = inputValue.trim();
     if (!value) return;
 
-    //CheckWhether是Tag格式
+    // Ensure the value is formatted as a tag
     let tag = value;
     if (!value.startsWith('#')) {
       tag = '#' + value;
     }
 
-    //CheckWhether已存在
+    // Avoid adding duplicates
     const existingTags = Array.from(tagDisplay.querySelectorAll('.bookmark-tag'))
       .map(el => el.getAttribute('data-tag'));
 
@@ -355,18 +355,18 @@ export class TagRenderer {
       return;
     }
 
-    //Add新Tag
+    // Append the new tag
     const tagElement = this.createTagElement(tag, {
       size: 'medium',
       removable: true
     });
     tagDisplay.appendChild(tagElement);
 
-    //ClearInput
+    // Reset the input field
     input.value = '';
     input.focus();
   }
 }
 
-//Create全局单例实例
+// Export a shared singleton instance
 export const tagRenderer = new TagRenderer();

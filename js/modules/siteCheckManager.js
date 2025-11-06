@@ -6,13 +6,13 @@ export class SiteCheckManager {
   async handleSiteCheck() {
     const checkButton = document.getElementById('check-sites-button');
     
-    //防止多次Click
+    // Ignore repeated clicks while a check is running
     if (checkButton.classList.contains('checking')) {
       return;
     }
     
     try {
-      //发送Message到后台服务
+      // Ask the background service to perform the site check
       await chrome.runtime.sendMessage({ 
         type: 'CHECK_BOOKMARKS'
       });
@@ -20,7 +20,7 @@ export class SiteCheckManager {
       console.error('Site check error:', error);
       this.app.notificationManager.showErrorToast('An error occurred during bookmark check');
       
-      //恢复ButtonState
+      // Restore button state on failure
       const checkButton = document.getElementById('check-sites-button');
       const progressElement = checkButton.querySelector('.check-progress');
       if (checkButton && progressElement) {
@@ -38,16 +38,16 @@ export class SiteCheckManager {
       const status = siteStatus[bookmarkId];
       
       if (status === false) {
-        //完全None法访问
+        // Completely unreachable
         item.setAttribute('data-site-status', 'dead');
       } else if (status === 'certificate-error') {
-        //证书Error但Domain存在
+        // Certificate issue but the domain resolves
         item.setAttribute('data-site-status', 'cert-error');
       } else if (status === 'no-https') {
-        //只Support HTTP 访问
+        // HTTP only (no HTTPS support)
         item.setAttribute('data-site-status', 'no-https');
       } else {
-        //完全可用
+        // Fully available
         item.removeAttribute('data-site-status');
       }
     });
@@ -78,10 +78,10 @@ export class SiteCheckManager {
     progressElement.style.display = 'none';
     checkButton.title = "Check bookmarks availability";
     
-    //Update UI 以反映Check结果
+    // Update the UI to reflect the check results
     this.updateBookmarkStatus(siteStatus);
     
-    //Show完成Message
+    // Show completion notification
     const deadLinks = Object.values(siteStatus).filter(status => !status).length;
     this.app.notificationManager.showToast(`Bookmark check completed! ${deadLinks} dead links found.`);
   }

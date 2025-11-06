@@ -176,7 +176,7 @@ export class CommandPalette {
     this.input.blur();
   }
 
-  /*** Load所有Bookmark
+  /*** Load all bookmarks
    */
   async loadBookmarks() {
     try {
@@ -188,9 +188,9 @@ export class CommandPalette {
     }
   }
 
-  /*** 递归提取Bookmark
-   * @param {Object} node Bookmark节点
-   * @param {Array} path When前路径
+  /*** Recursively extract bookmarks
+   * @param {Object} node Bookmark node
+   * @param {Array} path Current path
    */
   extractBookmarks(node, path = []) {
     if (!node) return;
@@ -217,7 +217,7 @@ export class CommandPalette {
     }
   }
 
-  /*** HandleSearch输入
+  /*** Handle search input
    */
   handleSearch() {
     const query = this.input.value.toLowerCase().trim();
@@ -256,8 +256,8 @@ export class CommandPalette {
     this.renderResults();
   }
 
-  /*** HandleKey盘导航
-   * @param {KeyboardEvent} e Key盘Event
+  /*** Handle keyboard navigation in the result list
+   * @param {KeyboardEvent} e Keyboard event
    */
   handleKeydown(e) {
     if (!this.isVisible) return;
@@ -289,8 +289,8 @@ export class CommandPalette {
     }
   }
 
-  /*** 移动Select
-   * @param {number} direction 方向 (1：向下，-1：向上)
+  /*** Move selection up or down
+   * @param {number} direction Direction (1: down, -1: up)
    */
   moveSelection(direction) {
     if (this.filteredBookmarks.length === 0) return;
@@ -312,15 +312,15 @@ export class CommandPalette {
     }
   }
 
-  /*** 渲染Search结果
+  /*** Render search results
    */
   renderResults() {
     this.results.innerHTML = '';
     
     if (this.filteredBookmarks.length === 0) {
       if (this.input.value.trim()) {
-        const empty = createElement('div', 'command-empty');
-        empty.textContent = '未找到匹配的书签';
+      const empty = createElement('div', 'command-empty');
+      empty.textContent = 'No matching bookmarks found';
         this.results.appendChild(empty);
       }
       return;
@@ -335,13 +335,13 @@ export class CommandPalette {
       }
       
       const title = createElement('div', 'command-item-title');
-      title.textContent = bookmark.title || '(无标题)';
+      title.textContent = bookmark.title || '(Untitled)';
       
       const url = createElement('div', 'command-item-url');
       url.textContent = bookmark.url;
       
       const path = createElement('div', 'command-item-path');
-      path.textContent = bookmark.path.join(' > ') || '书签栏';
+      path.textContent = bookmark.path.join(' > ') || 'Bookmarks Bar';
       
       item.appendChild(title);
       item.appendChild(url);
@@ -370,9 +370,9 @@ export class CommandPalette {
     this.hide();
   }
 
-  /*** 定位到Bookmark
-   * @param {Object} bookmark BookmarkObject
-   */
+  /*** Locate the bookmark within the board
+   * @param {Object} bookmark Bookmark object
+  */
   locateBookmark(bookmark) {
     const element = document.querySelector(`[data-bookmark-id="${bookmark.id}"]`);
     if (element) {

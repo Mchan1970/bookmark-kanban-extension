@@ -26,7 +26,7 @@ export class SiteChecker {
     //Initialize periodic cache cleanup
     this.initCacheCleanup();
     
-    //Debug mode flag - Settings为 false 以Disable调试日志
+    // Debug mode flag - set to false to silence debug logging
     this.isDebug = false;
   }
 
@@ -153,14 +153,14 @@ export class SiteChecker {
    * @returns {Promise<boolean|string>}
    */
   async checkAvailability(hostname) {
-    //First尝试 HTTPS
+    // Try HTTPS first
     const httpsUrls = [
       `https://${hostname}/favicon.ico`,
       `https://${hostname}/robots.txt`,
       `https://${hostname}`
     ];
 
-    //Then尝试 HTTP
+    // Then try HTTP if HTTPS fails
     const httpUrls = [
       `http://${hostname}/favicon.ico`,
       `http://${hostname}/robots.txt`,
@@ -169,44 +169,44 @@ export class SiteChecker {
 
     let httpsError = null;
 
-    //先尝试 HTTPS
+    // Attempt HTTPS first
     for (const url of httpsUrls) {
       try {
         const available = await this.tryHeadRequest(url);
         if (available) {
-          return true; //HTTPS 访问Success
+          return true; // HTTPS is reachable
         }
       } catch (error) {
         httpsError = error;
-        this._debug(`HTTPS check failed: ${url}`); //简化Error输出
+        this._debug(`HTTPS check failed: ${url}`); // Simplified debug output
         continue;
       }
     }
 
-    //If HTTPS Failed，尝试 HTTP
+    // If HTTPS fails, attempt HTTP
     for (const url of httpUrls) {
       try {
         const available = await this.tryHeadRequest(url);
         if (available) {
-          return 'no-https'; //HTTP 访问Success，但不Support HTTPS
+          return 'no-https'; // HTTP works but HTTPS is unavailable
         }
       } catch (error) {
-        this._debug(`HTTP check failed: ${url}`); //简化Error输出
+        this._debug(`HTTP check failed: ${url}`); // Simplified debug output
         continue;
       }
     }
 
-    //If HTTP 和 HTTPS 都Failed，CheckDomainWhether存在
+    // If both HTTP and HTTPS fail, check whether the domain resolves
     const domainExists = await this.checkDomainExists(hostname);
     if (domainExists) {
-      //IfDomain存在，且之前的 HTTPS Error是证书相关的，则Mark为证书Error
+      // If the domain exists and the earlier HTTPS error was certificate-related, mark it accordingly
       if (httpsError && 
           (httpsError.name === 'TypeError' && httpsError.message.includes('Failed to fetch'))) {
         return 'certificate-error';
       }
     }
 
-    return false; //完全None法访问
+    return false; // Site is completely unreachable
   }
 
   /*** Check if domain exists through DNS
@@ -252,9 +252,9 @@ export class SiteChecker {
       return true;
     } catch (error) {
       if (error.name === 'AbortError') {
-        this._debug(`Request timeout: ${url}`); //使用 debug helper
+        this._debug(`Request timeout: ${url}`); // Log using debug helper
       } else {
-        this._debug(`Request failed: ${url}`); //简化Error输出
+        this._debug(`Request failed: ${url}`); // Simplified debug output
       }
       throw error;
     }
@@ -281,7 +281,7 @@ export class SiteChecker {
    * @param {boolean|string} status Status
    */
   updateCache(hostname, status) {
-    //CheckCacheSize限制
+    // Enforce cache size limits
     if (this.siteStatus.size >= this.MAX_CACHE_SIZE) {
       this.limitCacheSize();
     }
@@ -310,7 +310,7 @@ export class SiteChecker {
       this.checkTimes.delete(hostname);
     });
     
-    this._debug(`Cache cleanup: removed ${expiredHosts.length} entries`); //使用 debug helper
+    this._debug(`Cache cleanup: removed ${expiredHosts.length} entries`); // Log using debug helper
   }
 
   /*** Limit cache size by removing oldest entries
@@ -327,7 +327,7 @@ export class SiteChecker {
       this.checkTimes.delete(hostname);
     });
     
-    this._debug(`Cache size limited: removed ${toRemove.length} entries`); //使用 debug helper
+    this._debug(`Cache size limited: removed ${toRemove.length} entries`); // Log using debug helper
   }
 }
 

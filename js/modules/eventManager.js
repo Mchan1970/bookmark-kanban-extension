@@ -10,14 +10,14 @@ export class EventManager {
 
   setupDocumentListeners() {
     document.addEventListener('click', (e) => {
-      //If正在Drag，不HandleClickEvent
+      // Ignore clicks while a drag operation is in progress
       if (this.app.dragManager && this.app.dragManager.isDragging) {
         return;
       }
       
       const target = e.target;
       
-      //HandleCheck站点ButtonClick
+      // Handle the “Check Sites” button
       if (target.closest('#check-sites-button')) {
         e.preventDefault();
         e.stopPropagation();
@@ -57,12 +57,12 @@ export class EventManager {
 
   setupKeyboardShortcuts() {
     document.addEventListener('keydown', (e) => {
-      //Ctrl/Cmd + F 触发Search
+      // Intercept Ctrl/Cmd + F to avoid clashing with the built-in browser search
       if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
         e.preventDefault();
       }
       
-      //Ctrl/Cmd + S ManualSaveWhen前Layout
+      // Ctrl/Cmd + S triggers a manual layout save
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         this.saveCurrentLayout();

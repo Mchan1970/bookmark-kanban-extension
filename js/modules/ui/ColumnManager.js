@@ -34,7 +34,10 @@ export class ColumnManager {
     column.dataset.folderId = folder.id;
 
     //Create header
-    const header = this.createColumnHeader(folder.title, this.countBookmarksInFolder(folder));
+    const header = this.createColumnHeader(folder.title, this.countBookmarksInFolder(folder), {
+      columnType: 'folder',
+      folderId: folder.id
+    });
     column.appendChild(header);
     
     //Add double-click event handling for title editing
@@ -84,7 +87,10 @@ export class ColumnManager {
     column.dataset.folderId = folderId;
     
     //Create header
-    const header = this.createColumnHeader(title, this.countBookmarksInList(bookmarks));
+    const header = this.createColumnHeader(title, this.countBookmarksInList(bookmarks), {
+      columnType: type,
+      folderId: folderId || ''
+    });
     column.appendChild(header);
     
     //Add double-click event handling for title editing
@@ -140,7 +146,7 @@ export class ColumnManager {
    * @param {number} count Item count
    * @returns {HTMLElement} Header element
    */
-  createColumnHeader(title, count) {
+  createColumnHeader(title, count, options = {}) {
     const header = createElement('div', 'column-header');
     
     //Add drag handle
@@ -158,9 +164,33 @@ export class ColumnManager {
     countElement.textContent = count;
     
     header.appendChild(titleElement);
+
+    const { columnType = '', folderId = '' } = options;
+    const infoMessage = this.getSpecialColumnInfo(columnType, folderId);
+    if (infoMessage) {
+      titleElement.classList.add('column-title--special');
+      const infoElement = createElement('span', 'column-info');
+      infoElement.textContent = 'ⓘ';
+      infoElement.setAttribute('data-tooltip', infoMessage);
+      titleElement.appendChild(infoElement);
+    }
+
     header.appendChild(countElement);
     
     return header;
+  }
+
+  getSpecialColumnInfo(columnType, folderId) {
+    if (columnType === 'uncategorized') {
+      return 'Bookmarks directly on the bookmarks bar – title cannot be edited';
+    }
+    if (folderId === '2') {
+      return 'Other Bookmarks – system column, title cannot be edited';
+    }
+    if (folderId === '3') {
+      return 'Mobile Bookmarks – system column, title cannot be edited';
+    }
+    return '';
   }
   
   /*** Set up double-click handler for title editing

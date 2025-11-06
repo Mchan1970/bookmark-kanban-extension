@@ -20,81 +20,81 @@ export class AppCoordinator {
     this.faviconObserver = null;
     this.siteStatus = new Map();
     
-    // 使 app 实例全局可访问
+    // Expose the app instance globally when needed
     window.app = this;
   }
 
   async initialize() {
     try {
-      // 初始化主题管理器
+      // Initialize the theme manager
       this.themeManager = themeManager;
       await this.themeManager.initializeTheme();
       
-      // 初始化显示模式管理器
+      // Initialize the display mode manager
       this.displayManager = displayManager;
       await this.displayManager.initializeDisplayMode();
       
-      // 初始化书签管理器
+      // Initialize the bookmark manager
       this.bookmarkManager = new BookmarkManager();
 
-      // 初始化标签管理器
+      // Initialize the tag manager
       this.tagManager = tagManager;
       this.tagRenderer = tagRenderer;
 
-      // 初始化 UI 管理器
+      // Initialize the UI manager
       this.uiManager = new UIManager(this.bookmarkManager);
       
-      // 初始化模态框管理器
+      // Initialize the modal manager
       this.modalManager = new ModalManager(this.bookmarkManager, this.uiManager);
       
-      // 初始化拖拽管理器
+      // Initialize the drag manager
       this.dragManager = new DragManager(this.bookmarkManager, this.uiManager);
       
-      // 初始化命令面板
+      // Initialize the command palette
       this.commandPalette = new CommandPalette(this.bookmarkManager);
       await this.commandPalette.initialize();
 
       this.setupHeaderSearch();
       
-      // 初始化事件管理器
+      // Initialize the event manager
       this.eventManager = new EventManager(this);
       
-      // 初始化消息处理器
+      // Initialize the message handler
       this.messageHandler = new MessageHandler(this);
       
-      // 初始化站点检查管理器
+      // Initialize the site check manager
       this.siteCheckManager = new SiteCheckManager(this);
       
-      // 初始化通知管理器
+      // Initialize the notification manager
       this.notificationManager = new NotificationManager();
       
-      // 检查是否启用新标签页
+      // Determine whether the new-tab replacement is enabled
       const enabled = await this.checkNewTabEnabled();
       if (!enabled) {
         this.uiManager.showDisabledMessage();
         return;
       }
 
-      // 显示加载状态
+      // Show loading state
       this.uiManager.showLoading();
       
-      // 设置书签变更监听器
+      // Set up listeners for bookmark changes
       this.bookmarkManager.setChangeListener(() => this.handleBookmarksChange());
       this.bookmarkManager.setRemoveListener((id) => {
-        // 直接处理 DOM，不触发完整刷新
+        // Update DOM directly without triggering a full refresh
         this.uiManager.removeBookmarkItem(id);
       });
       
-      // 渲染看板
+      // Render the kanban board
       await this.uiManager.renderKanban();
       
-      // 初始化拖拽功能
+      // Initialize drag-and-drop interactions
       this.dragManager.initialize();
 
-      // 添加全局事件监听器
+      // Register global event listeners
       this.eventManager.setupEventListeners();
 
-      // 初始化图标懒加载
+      // Initialize lazy loading for favicon icons
       this.initializeFaviconLoading();
 
     } catch (error) {
@@ -134,7 +134,7 @@ export class AppCoordinator {
   async checkNewTabEnabled() {
     return new Promise(resolve => {
       chrome.storage.sync.get(['showOnNewTab'], result => {
-        resolve(result.showOnNewTab !== false); // 默认为 true
+        resolve(result.showOnNewTab !== false); // Default is true
       });
     });
   }
@@ -145,7 +145,7 @@ export class AppCoordinator {
       this.faviconObserver = null;
     }
     
-    // 使用新的图标加载器
+    // Use the new favicon loader
     faviconLoader.initialize();
   }
 
@@ -156,39 +156,39 @@ export class AppCoordinator {
     
     this._bookmarkChangeTimer = setTimeout(async () => {
       try {
-        // 如果正在拖拽，不更新
+        // Skip updates while a drag operation is in progress
         if (this.dragManager && this.dragManager.isDragging) {
           return;
         }
         
         console.log('Processing bookmark changes, re-rendering board');
         
-        // 保存当前滚动位置
+        // Remember current scroll position
         const scrollPosition = window.scrollY;
         
-        // 在重新渲染前销毁拖拽实例
+        // Destroy drag instances before re-rendering
         if (this.dragManager) {
           this.dragManager.destroy();
         }
         
-        // 重新渲染
+        // Re-render the board
         await this.uiManager.renderKanban();
         
-        // 重新初始化拖拽
+        // Reinitialize drag interactions
         if (this.dragManager) {
           this.dragManager.initialize();
         }
 
         this.initializeFaviconLoading();
         
-        // 保存新布局
+        // Persist any new layout ordering
         this.dragManager.saveColumnOrder();
         this.dragManager.saveBookmarkOrder();
 
-        // 使用 setTimeout 和 requestAnimationFrame 确保 DOM 已更新
+        // Use setTimeout and requestAnimationFrame to wait for DOM updates
         setTimeout(() => {
           requestAnimationFrame(() => {
-            // 恢复滚动位置
+            // Restore scroll position
             window.scrollTo(0, scrollPosition);
           });
         }, 100);

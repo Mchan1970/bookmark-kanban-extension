@@ -11,7 +11,7 @@ import { siteChecker } from './modules/siteChecker.js';
 // Store check results in memory for current session
 let currentSessionResults = {};
 
-// Debug mode flag - 设置为 false 以禁用调试日志
+// Debug mode flag - set to false to silence debug logging
 const isDebug = false;
 
 // Debug log helper
@@ -212,13 +212,13 @@ async function checkAllBookmarks() {
     });
     
     // Process bookmarks in batches with concurrency control
-    const batchSize = 30; // 增加批处理大小
-    const maxConcurrent = 3; // 减少并发数，避免请求过于密集
+    const batchSize = 30; // Increased batch size to improve throughput
+    const maxConcurrent = 3; // Reduced concurrency to avoid overwhelming the network
     
     for (let i = 0; i < bookmarksToCheck.length; i += batchSize) {
       const batch = bookmarksToCheck.slice(i, i + batchSize);
       
-      // 使用 Promise.allSettled 处理并发
+      // Use Promise.allSettled to control per-batch concurrency
       const batchResults = await Promise.allSettled(
         batch.map(async ({ bookmark, url }) => {
           try {
@@ -254,7 +254,7 @@ async function checkAllBookmarks() {
         });
       });
       
-      // 添加小延迟，避免请求过于密集
+      // Add a short delay so requests are not sent too aggressively
       await new Promise(resolve => setTimeout(resolve, 200));
     }
     

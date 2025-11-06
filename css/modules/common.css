@@ -136,7 +136,7 @@ body {
   cursor: default; /* Keep default pointer in button area */
 }
 
-/* 书签文本容器 - 支持标签显示 */
+/* Bookmark text container with tag support */
 .bookmark-text-container {
   flex: 1;
   display: flex;
@@ -144,7 +144,7 @@ body {
   min-width: 0;
 }
 
-/* 域名样式 - 在标签容器中 */
+/* Domain styling inside the tag container */
 .bookmark-domain {
   font-size: 0.8em;
   color: var(--text-secondary);

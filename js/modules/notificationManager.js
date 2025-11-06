@@ -16,15 +16,15 @@ export class NotificationManager {
     toast.style.opacity = '0';
     toast.style.transition = 'opacity 0.3s ease';
     
-    //Add到页面
+    // Insert into the page
     document.body.appendChild(toast);
     
-    //淡入效果
+    // Fade in
     setTimeout(() => {
       toast.style.opacity = '1';
     }, 10);
     
-    //淡出并Remove
+    // Fade out and remove
     setTimeout(() => {
       toast.style.opacity = '0';
       setTimeout(() => {

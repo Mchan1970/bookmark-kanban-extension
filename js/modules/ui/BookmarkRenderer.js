@@ -37,7 +37,7 @@ export class BookmarkRenderer {
     //Add URL as data attribute for single-line mode tooltip
     item.setAttribute('data-url', bookmark.url);
 
-    //HandleBookmarkData，提取Tag信息
+    // Extract tag metadata for this bookmark
     const processedBookmark = tagManager.processBookmark(bookmark);
 
     const content = createElement('div', 'bookmark-content');
@@ -48,7 +48,7 @@ export class BookmarkRenderer {
     //Create text container for title and tags
     const textContainer = createElement('div', 'bookmark-text-container');
 
-    //Create title element (使用清理后的Title)
+    // Create title element (using the cleaned title)
     const title = createElement('div', 'bookmark-title');
     title.textContent = processedBookmark.cleanTitle || '(Untitled)';
     title.title = processedBookmark.cleanTitle || processedBookmark.url;

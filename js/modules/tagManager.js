@@ -1,6 +1,6 @@
 /*** Tag Manager - BookmarkTagDataManager
  *
- * 负责Tag的解析、Storage、管理等功能
+ * Responsible for parsing, storing, and managing tags
  */
 
 export class TagManager {
@@ -10,37 +10,37 @@ export class TagManager {
     this.tagColors = new Map();
   }
 
-  /*** 从BookmarkTitle中提取Tag
-   * @param {string} title BookmarkTitle
-   * @returns {{cleanTitle: string, tags: string[]}} 清理后的Title和TagArray
-   */
+  /*** Extract tags from a bookmark title
+   * @param {string} title Bookmark title
+   * @returns {{cleanTitle: string, tags: string[]}} Cleaned title and tag list
+  */
   extractTags(title) {
     if (!title || typeof title !== 'string') {
       return { cleanTitle: title || '', tags: [] };
     }
 
-    //匹配 #Tag 格式，Support中英文和Number
+    // Match the #tag pattern, supporting alphanumeric and CJK characters
     const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
     const tagMatches = title.match(tagRegex) || [];
 
-    //提取Tag（去掉#号）
+    // Remove the leading # character
     const tags = tagMatches.map(match => match.substring(1));
 
-    //从Title中RemoveTag，清理多余Empty格
+    // Remove tags from the title and collapse consecutive spaces
     let cleanTitle = title.replace(tagRegex, '').trim();
-    cleanTitle = cleanTitle.replace(/\s+/g, ' '); //合并多个Empty格
+    cleanTitle = cleanTitle.replace(/\s+/g, ' '); // Collapse multiple spaces
 
     return { cleanTitle, tags };
   }
 
-  /*** HandleBookmarkData，提取并CacheTag信息
-   * @param {Object} bookmark BookmarkObject
-   * @returns {Object} Handle后的BookmarkData（包含Tag信息）
-   */
+  /*** Process a bookmark, extract tags, and cache metadata
+   * @param {Object} bookmark Bookmark object
+   * @returns {Object} Processed bookmark data including tag info
+  */
   processBookmark(bookmark) {
     const { cleanTitle, tags } = this.extractTags(bookmark.title);
 
-    //Create增强的BookmarkObject
+    // Create an enhanced bookmark object
     const enhancedBookmark = {
       ...bookmark,
       originalTitle: bookmark.title,
@@ -48,43 +48,43 @@ export class TagManager {
       tags: tags
     };
 
-    //CacheTag信息
+    // Cache tag data
     if (tags.length > 0) {
       this.bookmarkTags.set(bookmark.id, tags);
 
-      //为每个Tag生成/GetColor
+      // Generate or reuse colors for each tag
       tags.forEach(tag => {
         if (!this.tagColors.has(tag)) {
           this.tagColors.set(tag, this.generateTagColor(tag));
         }
       });
     } else {
-      //NoneTag时清理Cache，避免残留旧Data
+      // Clear stale cache entries when the bookmark no longer has tags
       this.bookmarkTags.delete(bookmark.id);
     }
 
     return enhancedBookmark;
   }
 
-  /*** 批量HandleBookmarkArray
-   * @param {Array} bookmarks BookmarkArray
-   * @returns {Array} Handle后的BookmarkArray
-   */
+  /*** Process an array of bookmarks
+   * @param {Array} bookmarks Bookmark array
+   * @returns {Array} Processed bookmark array
+  */
   processBookmarks(bookmarks) {
     return bookmarks.map(bookmark => this.processBookmark(bookmark));
   }
 
-  /*** GetBookmark的Tag
-   * @param {string} bookmarkId BookmarkID
-   * @returns {Array} TagArray
-   */
+  /*** Get tags for a bookmark
+   * @param {string} bookmarkId Bookmark ID
+   * @returns {Array} Tag array
+  */
   getBookmarkTags(bookmarkId) {
     return this.bookmarkTags.get(bookmarkId) || [];
   }
 
-  /*** Get所有唯一Tag
-   * @returns {Array} TagArray
-   */
+  /*** Get all unique tags
+   * @returns {Array} Tag array
+  */
   getAllTags() {
     const allTags = new Set();
     this.bookmarkTags.forEach(tags => {
@@ -93,9 +93,9 @@ export class TagManager {
     return Array.from(allTags).sort();
   }
 
-  /*** 按TagGroupBookmarkID
-   * @returns {Map} Tag到BookmarkIDArray的映射
-   */
+  /*** Group bookmark IDs by tag
+   * @returns {Map} Mapping from tag to bookmark ID array
+  */
   groupBookmarksByTags() {
     const tagGroups = new Map();
 
@@ -111,18 +111,18 @@ export class TagManager {
     return tagGroups;
   }
 
-  /*** 生成Tag的统一Color
-   * @param {string} tag TagName
-   * @returns {string} HSLColorValue
-   */
+  /*** Generate a deterministic color for a tag
+   * @param {string} tag Tag name
+   * @returns {string} HSL color value
+  */
   generateTagColor(tag) {
-    //使用简单的哈希算法生成一致的Color
+    // Use a simple hash to provide consistent colors
     let hash = 0;
     for (let i = 0; i < tag.length; i++) {
       hash = tag.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    //生成HSLColor
+    // Convert the hash into an HSL color
     const hue = Math.abs(hash) % 360;
     const saturation = 60 + (Math.abs(hash) % 20); //60-80%
     const lightness = 45 + (Math.abs(hash) % 15);  //45-60%
@@ -130,18 +130,18 @@ export class TagManager {
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 
-  /*** GetTag的Color
-   * @param {string} tag TagName
-   * @returns {string} HSLColorValue
-   */
+  /*** Get the color associated with a tag
+   * @param {string} tag Tag name
+   * @returns {string} HSL color value
+  */
   getTagColor(tag) {
     return this.tagColors.get(tag) || this.generateTagColor(tag);
   }
 
-  /*** Search包含指定Tag的Bookmark
-   * @param {Array} tags 要Search的TagArray
-   * @returns {Array} 匹配的BookmarkIDArray
-   */
+  /*** Find bookmarks containing any of the provided tags
+   * @param {Array} tags Tags to search for
+   * @returns {Array} Matching bookmark IDs
+  */
   findBookmarksByTags(tags) {
     const matchingBookmarks = new Set();
 
@@ -156,11 +156,11 @@ export class TagManager {
     return Array.from(matchingBookmarks);
   }
 
-  /*** 过滤包含任一指定Tag的Bookmark
-   * @param {Array} bookmarkIds BookmarkIDArray
-   * @param {Array} filterTags 过滤TagArray
-   * @returns {Array} 过滤后的BookmarkIDArray
-   */
+  /*** Filter bookmark IDs by tags
+   * @param {Array} bookmarkIds Bookmark ID array
+   * @param {Array} filterTags Tag filter array
+   * @returns {Array} Filtered bookmark IDs
+  */
   filterBookmarksByTags(bookmarkIds, filterTags) {
     if (!filterTags || filterTags.length === 0) {
       return bookmarkIds;
@@ -180,8 +180,8 @@ export class TagManager {
     this.tagColors.clear();
   }
 
-  /*** GetStatistics信息
-   * @returns {Object} TagStatistics信息
+  /*** Get aggregated statistics for tag usage
+   * @returns {Object} Tag usage statistics
    */
   getStatistics() {
     const stats = {
@@ -190,7 +190,7 @@ export class TagManager {
       tagUsage: new Map()
     };
 
-    //Statistics每个Tag的使用次数
+    // Count how many times each tag is used
     this.bookmarkTags.forEach(tags => {
       tags.forEach(tag => {
         stats.tagUsage.set(tag, (stats.tagUsage.get(tag) || 0) + 1);
@@ -201,5 +201,5 @@ export class TagManager {
   }
 }
 
-//Create全局单例实例
+// Export a singleton instance for reuse throughout the app
 export const tagManager = new TagManager();
