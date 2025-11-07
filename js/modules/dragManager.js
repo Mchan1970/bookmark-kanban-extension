@@ -141,31 +141,117 @@ export class DragManager {
    * @param {Event} evt Drag event object
    */
   async handleBookmarkMove(evt) {
+    let rollbackItem = null;
+    let rollbackFrom = null;
+
     try {
-      const bookmarkId = evt.item.dataset.bookmarkId;
-      const targetColumn = evt.to.closest('.kanban-column');
-      let newFolderId;
-      
-      //Handle special column types
-      if (targetColumn.dataset.columnType === 'uncategorized') {
-        //Move to bookmarks bar (id: '1') when moving to uncategorized
-        newFolderId = '1'; 
-      } else {
-        newFolderId = targetColumn.dataset.folderId;
-      }
-      
-      //Get new position index
-      const newIndex = Array.from(evt.to.children).indexOf(evt.item);
-      
-      //Move bookmark
-      await this.bookmarkManager.moveBookmark(bookmarkId, {
-        parentId: newFolderId,
-        index: newIndex
-      });
+        const bookmarkId = evt.item.dataset.bookmarkId;
+        const targetColumn = evt.to.closest('.kanban-column');
+
+        // 1. Assign rollback data *before* any potential failure
+        rollbackItem = evt.item;
+        rollbackFrom = evt.from;
+
+        // 2. Validate inputs
+        if (!bookmarkId || !targetColumn) {
+            throw new Error('Invalid bookmark or target column.');
+        }
+
+        let newFolderId;
+        if (targetColumn.dataset.columnType === 'uncategorized') {
+            newFolderId = '1';
+        } else {
+            newFolderId = targetColumn.dataset.folderId;
+        }
+
+        // 3. Get the index DIRECTLY from the event. This is the correct fix.
+        const newIndex = evt.newIndex;
+
+        if (newIndex === undefined || newIndex < 0) {
+             throw new Error('Could not determine new bookmark position.');
+        }
+
+        // 4. Log and execute the move
+        console.log(`Moving bookmark: ${bookmarkId} to folder: ${newFolderId} at index: ${newIndex}`);
+
+        await this.bookmarkManager.moveBookmark(bookmarkId, {
+            parentId: newFolderId,
+            index: newIndex
+        });
+
+        console.log('✅ Bookmark moved successfully in Chrome.');
+
     } catch (error) {
-      console.error('Failed to move bookmark:', error);
-      //May need to rollback UI or show error message
+        console.error('❌ Failed to move bookmark:', error);
+
+        // 5. Execute UI rollback on failure
+        this.rollbackBookmarkMove(rollbackItem, rollbackFrom, evt.oldIndex);
+
+        // 6. Show error message
+        this.showErrorMessage(`Error moving bookmark: ${error.message}`);
     }
+  }
+
+  /**
+   * Rolls back the UI change if the API call fails.
+   * @param {HTMLElement} item - The element that was dragged.
+   * @param {HTMLElement} from - The original list element.
+   * @param {number} oldIndex - The original index in the 'from' list.
+   */
+  rollbackBookmarkMove(item, from, oldIndex) {
+    if (!item || !from) {
+      console.warn('Cannot rollback: missing item or source container');
+      return;
+    }
+
+    try {
+      // Remove from new parent (if it's still there)
+      if (item.parentNode) {
+        item.parentNode.removeChild(item);
+      }
+
+      // Re-insert into old parent at the correct index
+      const referenceNode = from.children[oldIndex];
+      from.insertBefore(item, referenceNode);
+
+      console.log('✅ UI rollback completed.');
+    } catch (rollbackError) {
+      console.error('❌ Failed to rollback UI:', rollbackError);
+      // At this point, a full UI refresh might be needed
+    }
+  }
+
+  /**
+   * Show error message to user
+   * @param {string} message Error message
+   */
+  showErrorMessage(message) {
+    // 创建简单的错误提示
+    const errorToast = document.createElement('div');
+    errorToast.className = 'error-toast';
+    errorToast.textContent = message;
+    errorToast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #dc3545;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      z-index: 10000;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease;
+    `;
+
+    document.body.appendChild(errorToast);
+
+    // 3秒后自动移除
+    setTimeout(() => {
+      if (errorToast.parentNode) {
+        errorToast.parentNode.removeChild(errorToast);
+      }
+    }, 3000);
   }
 
   /*** Save column order
