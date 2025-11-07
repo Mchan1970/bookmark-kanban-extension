@@ -171,6 +171,7 @@ Chen Yifeng
     - Removed site availability checking and related permissions
     - Simplified bookmark action menu
     - Focused on duplicate/archive/recycle flows without network probes
+    - Added on-device visit tracking to surface long-unvisited bookmarks
 
 - 1.2.3
   - Moved theme and display mode selectors to settings page

@@ -15,7 +15,6 @@ export class UIManager {
     this.tagFilterContainer = null;
     this.renderRequestId = 0;
     this.statusResolver = null;
-    this.currentStatusMap = {};
     
     //Initialize services
     this.notificationService = new NotificationService();
@@ -46,34 +45,6 @@ export class UIManager {
     this.initializeTimeUpdate();
   }
 
-  /*** Set status resolver provided by cleanup manager
-   * @param {Function} resolver Resolver returning status key for a bookmark
-   */
-  setStatusResolver(resolver) {
-    this.statusResolver = resolver;
-    this.currentStatusMap = {};
-  }
-
-  /*** Update bookmark statuses on the board
-   * @param {Object<string,string>} statusMap Bookmark ID -> status key
-   */
-  updateBookmarkStatuses(statusMap = {}) {
-    this.currentStatusMap = statusMap || {};
-    this.bookmarkRenderer.applyStatusMap(this.currentStatusMap);
-  }
-
-  resolveBookmarkStatus(bookmarkId) {
-    if (!bookmarkId) {
-      return null;
-    }
-    if (this.currentStatusMap && this.currentStatusMap[bookmarkId]) {
-      return this.currentStatusMap[bookmarkId];
-    }
-    if (typeof this.statusResolver === 'function') {
-      return this.statusResolver(bookmarkId);
-    }
-    return null;
-  }
 
   /*** Initialize time update
    */
@@ -92,6 +63,25 @@ export class UIManager {
 
     updateDateTime();
     setInterval(updateDateTime, 1000);
+  }
+
+  /*** Provide status key for bookmark badges
+   * Defaults to no status when no resolver is injected.
+   */
+  resolveBookmarkStatus(bookmarkId) {
+    if (typeof this.statusResolver === 'function') {
+      try {
+        return this.statusResolver(bookmarkId);
+      } catch (error) {
+        console.error('Status resolver error:', error);
+      }
+    }
+    return null;
+  }
+
+  /*** Allow external modules to supply bookmark status resolver */
+  setStatusResolver(resolver) {
+    this.statusResolver = typeof resolver === 'function' ? resolver : null;
   }
 
   /*** Render the kanban board
@@ -165,9 +155,6 @@ export class UIManager {
 
       this.container.replaceChildren(...nodes);
 
-      // Apply status badges after render
-      this.bookmarkRenderer.applyStatusMap(this.currentStatusMap);
-      
     } catch (error) {
       console.error('Failed to render kanban:', error);
       this.uiStateManager.showError('Failed to load bookmarks');

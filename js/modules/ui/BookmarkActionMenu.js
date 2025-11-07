@@ -1,10 +1,13 @@
 export class BookmarkActionMenu {
-  constructor(onAction) {
+  constructor(onAction, options = {}) {
     this.onAction = onAction;
     this.currentBookmark = null;
     this.menuElement = this.createMenuElement();
     document.body.appendChild(this.menuElement);
     this.visible = false;
+    this.getAccessStats = typeof options.getAccessStats === 'function'
+      ? options.getAccessStats
+      : () => null;
 
     document.addEventListener('click', (event) => {
       if (!this.visible) return;
@@ -75,6 +78,7 @@ export class BookmarkActionMenu {
     fragment.appendChild(this.createDivider());
 
     fragment.appendChild(this.createMenuButton('Copy link', 'copy-link'));
+    fragment.appendChild(this.createStatsSection());
 
     this.menuElement.innerHTML = '';
     this.menuElement.appendChild(fragment);
@@ -98,6 +102,44 @@ export class BookmarkActionMenu {
     const divider = document.createElement('div');
     divider.className = 'bookmark-action-menu__divider';
     return divider;
+  }
+
+  createStatsSection() {
+    const container = document.createElement('div');
+    container.className = 'bookmark-action-menu__stats';
+
+    const stats = this.currentBookmark
+      ? this.getAccessStats?.(this.currentBookmark.id)
+      : null;
+
+    const visits = document.createElement('div');
+    visits.className = 'bookmark-action-menu__stats-line';
+    visits.textContent = `Visits: ${stats?.visitCount ?? 0}`;
+
+    const lastVisited = document.createElement('div');
+    lastVisited.className = 'bookmark-action-menu__stats-line';
+    lastVisited.textContent = `Last visited: ${this.formatLastVisited(stats?.lastVisitedAt)}`;
+
+    container.appendChild(visits);
+    container.appendChild(lastVisited);
+    return container;
+  }
+
+  formatLastVisited(timestamp) {
+    if (!timestamp) {
+      return 'Not recorded yet';
+    }
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(new Date(timestamp));
+    } catch (error) {
+      return new Date(timestamp).toLocaleString();
+    }
   }
 
   positionMenu(options) {

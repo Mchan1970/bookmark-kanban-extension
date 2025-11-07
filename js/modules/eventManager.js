@@ -3,7 +3,12 @@ import { BookmarkActionMenu } from './ui/BookmarkActionMenu.js';
 export class EventManager {
   constructor(app) {
     this.app = app;
-    this.actionMenu = new BookmarkActionMenu((action, bookmark) => this.handleMenuAction(action, bookmark));
+    this.actionMenu = new BookmarkActionMenu(
+      (action, bookmark) => this.handleMenuAction(action, bookmark),
+      {
+        getAccessStats: (bookmarkId) => this.app.getBookmarkAccessStats?.(bookmarkId)
+      }
+    );
   }
 
   setupEventListeners() {

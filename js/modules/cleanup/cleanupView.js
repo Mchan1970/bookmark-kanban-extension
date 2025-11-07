@@ -1,4 +1,5 @@
 import { SECTION_KEYS } from './cleanupConstants.js';
+import { relativeTimeFromNow } from './cleanupUtils.js';
 
 export class CleanupView {
   constructor(options) {
@@ -104,6 +105,16 @@ export class CleanupView {
       return `Group of ${item.duplicateCount} • ${item.url}`;
     }
 
+    if (section === 'stale') {
+      const timeText = item.lastVisitedAt
+        ? `Last visited ${relativeTimeFromNow(item.lastVisitedAt)}`
+        : 'No recorded visits';
+      const visitText = item.visitCount > 0
+        ? `${item.visitCount} visit${item.visitCount > 1 ? 's' : ''}`
+        : '0 visits tracked';
+      return `${timeText} • ${visitText} • ${item.folderPath}`;
+    }
+
     return item.folderPath || '';
   }
 
@@ -111,6 +122,8 @@ export class CleanupView {
     switch (section) {
       case 'duplicates':
         return 'No duplicate bookmarks found.';
+      case 'stale':
+        return 'No long-unvisited bookmarks found.';
       default:
         return 'Nothing to clean up here.';
     }

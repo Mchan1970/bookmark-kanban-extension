@@ -24,6 +24,9 @@ export class CleanupActions {
     }
 
     const archived = await this.archiveManager.archiveBookmarks(bookmarkIds);
+    if (archived.length) {
+      await this.recycleManager.purgeBookmarks(archived.map(item => item.originalId || item.id));
+    }
     if (!archived.length) {
       return;
     }
@@ -44,6 +47,8 @@ export class CleanupActions {
     if (!Array.isArray(bookmarkIds) || !bookmarkIds.length) {
       return;
     }
+
+    await this.archiveManager.removeEntries(bookmarkIds);
 
     const trashed = await this.recycleManager.trashBookmarks(bookmarkIds);
     if (!trashed.length) {

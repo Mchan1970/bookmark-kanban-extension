@@ -216,6 +216,11 @@
   margin-right: 6px;
 }
 
+.cleanup-item.badge-stale::before {
+  content: "⌛";
+  margin-right: 6px;
+}
+
 .cleanup-item.cleanup-item--management {
   align-items: flex-start;
   flex-wrap: wrap;

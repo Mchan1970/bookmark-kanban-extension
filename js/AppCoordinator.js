@@ -15,11 +15,13 @@ import { tagRenderer } from './modules/tagRenderer.js';
 import { CleanupController } from './modules/cleanup/cleanupController.js';
 import { ArchiveManager } from './modules/cleanup/archiveManager.js';
 import { RecycleManager } from './modules/cleanup/recycleManager.js';
+import { AccessStatsClient } from './modules/accessStatsClient.js';
 
 export class AppCoordinator {
   constructor() {
     this._isDeleteOperation = false;
     this.faviconObserver = null;
+    this.accessStatsClient = new AccessStatsClient();
     
     // Expose the app instance globally when needed
     window.app = this;
@@ -37,6 +39,7 @@ export class AppCoordinator {
       
       // Initialize the bookmark manager
       this.bookmarkManager = new BookmarkManager();
+      await this.accessStatsClient.initialize();
 
       // Initialize the tag manager
       this.tagManager = tagManager;
@@ -80,11 +83,6 @@ export class AppCoordinator {
       await this.cleanupManager.initialize();
 
       // Wire status badges between cleanup manager and UI
-      this.uiManager.setStatusResolver((bookmarkId) => this.cleanupManager.getStatusForBookmark(bookmarkId));
-      this.cleanupManager.setStatusUpdateCallback((statusMap) => {
-        this.uiManager.updateBookmarkStatuses(statusMap);
-      });
-      
       // Determine whether the new-tab replacement is enabled
       const enabled = await this.checkNewTabEnabled();
       if (!enabled) {
@@ -252,4 +250,8 @@ export class AppCoordinator {
       return false;
     }
   }
-} 
+
+  getBookmarkAccessStats(bookmarkId) {
+    return this.accessStatsClient?.getStatsFor(bookmarkId);
+  }
+}

@@ -703,6 +703,21 @@ main {
   cursor: not-allowed;
 }
 
+.bookmark-action-menu__stats {
+  border-top: 1px solid var(--border-color);
+  margin-top: 6px;
+  padding: 8px 14px 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.bookmark-action-menu__stats-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 /* Modal Styles */
 .modal {
   display: none;

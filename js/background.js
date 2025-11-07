@@ -2,6 +2,13 @@
  * Background Service Worker for Bookmark Kanban
  */
 
+import { AccessTracker } from './modules/accessTracker.js';
+
+const accessTracker = new AccessTracker();
+accessTracker.initialize().catch(() => {
+  // Initialization failures shouldn't break other functionality
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case 'GET_BOOKMARKS':

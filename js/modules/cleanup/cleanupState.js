@@ -1,9 +1,6 @@
 import { CleanupRepository } from './cleanupRepository.js';
-import { SECTION_KEYS } from './cleanupConstants.js';
-import {
-  flattenBookmarks,
-  buildSections
-} from './cleanupEngine.js';
+import { SECTION_KEYS, DEFAULT_STALE_THRESHOLD_MS, ACCESS_STATS_STORAGE_KEY } from './cleanupConstants.js';
+import { flattenBookmarks, buildSections } from './cleanupEngine.js';
 
 export class CleanupState {
   constructor(bookmarkManager, options = {}) {
@@ -20,26 +17,39 @@ export class CleanupState {
       this.sections[section] = [];
     });
 
-    this.statusMap = {};
+    this.accessStats = {};
+    this.bookmarkIndex = {};
     this.subscribers = new Set();
+    this.storageListener = null;
+
+    this.staleThreshold = options.staleThreshold ?? DEFAULT_STALE_THRESHOLD_MS;
   }
 
   async initialize() {
-    const ignoreSets = await this.repository.loadIgnoreSets();
+    const [ignoreSets, accessStats] = await Promise.all([
+      this.repository.loadIgnoreSets(),
+      this.repository.loadAccessStats()
+    ]);
+
     SECTION_KEYS.forEach(section => {
       this.ignore[section] = ignoreSets[section] || new Set();
     });
+
+    this.accessStats = accessStats || {};
     await this.refresh();
+    this.subscribeToAccessStats();
   }
 
-  async refresh() {
-    const tree = await this.bookmarkManager.getBookmarkTree();
-    const bookmarkIndex = flattenBookmarks(tree);
-    this.sections = buildSections(bookmarkIndex, {
-      ignore: this.ignore
-    });
-    this.statusMap = {};
-    this.notify();
+  async refresh(options = {}) {
+    const { reuseIndex = false } = options;
+    const shouldReload = !reuseIndex || !this.hasBookmarkIndex();
+
+    if (shouldReload) {
+      const tree = await this.bookmarkManager.getBookmarkTree();
+      this.bookmarkIndex = flattenBookmarks(tree);
+    }
+
+    this.rebuildSections();
   }
 
   subscribe(callback) {
@@ -49,8 +59,7 @@ export class CleanupState {
     this.subscribers.add(callback);
     callback({
       counts: this.getCounts(),
-      sections: this.sections,
-      statusMap: this.statusMap
+      sections: this.sections
     });
     return () => {
       this.subscribers.delete(callback);
@@ -72,12 +81,12 @@ export class CleanupState {
     return {};
   }
 
-  getStatusForBookmark(bookmarkId) {
+  getStatusForBookmark() {
     return null;
   }
 
-  async updateStatus(statusMap) {
-    return;
+  async updateStatus() {
+    // no-op in lite mode
   }
 
   async ignoreItems(section, bookmarkIds) {
@@ -100,15 +109,49 @@ export class CleanupState {
     await this.refresh();
   }
 
-  async clearStatuses(bookmarkIds = []) {
-    return;
+  async clearStatuses() {
+    // no-op
+  }
+
+  subscribeToAccessStats() {
+    if (typeof chrome === 'undefined' || !chrome.storage?.onChanged) {
+      return;
+    }
+
+    this.storageListener = (changes, areaName) => {
+      if (areaName !== 'local') {
+        return;
+      }
+
+      const statsChange = changes[ACCESS_STATS_STORAGE_KEY];
+      if (!statsChange) {
+        return;
+      }
+
+      this.accessStats = statsChange.newValue || {};
+      this.refresh({ reuseIndex: true });
+    };
+
+    chrome.storage.onChanged.addListener(this.storageListener);
+  }
+
+  hasBookmarkIndex() {
+    return this.bookmarkIndex && Object.keys(this.bookmarkIndex).length > 0;
+  }
+
+  rebuildSections() {
+    this.sections = buildSections(this.bookmarkIndex || {}, {
+      ignore: this.ignore,
+      accessStats: this.accessStats,
+      staleThreshold: this.staleThreshold
+    });
+    this.notify();
   }
 
   notify() {
     const snapshot = {
       counts: this.getCounts(),
-      sections: this.sections,
-      statusMap: {}
+      sections: this.sections
     };
     this.subscribers.forEach(callback => {
       try {
@@ -117,5 +160,17 @@ export class CleanupState {
         console.error('CleanupState subscriber error:', error);
       }
     });
+  }
+
+  destroy() {
+    if (
+      this.storageListener &&
+      typeof chrome !== 'undefined' &&
+      chrome.storage?.onChanged
+    ) {
+      chrome.storage.onChanged.removeListener(this.storageListener);
+      this.storageListener = null;
+    }
+    this.subscribers.clear();
   }
 }

@@ -103,6 +103,13 @@ export class CleanupUIController {
           </div>
           <div class="cleanup-section-list" id="cleanup-duplicates-list"></div>
         </div>
+        <div class="cleanup-section" data-section="stale">
+          <div class="cleanup-section-header">
+            <h3>Stale Bookmarks</h3>
+            <span class="cleanup-count" id="cleanup-stale-count">0</span>
+          </div>
+          <div class="cleanup-section-list" id="cleanup-stale-list"></div>
+        </div>
       </div>
       <div class="cleanup-footer">
         <div class="cleanup-selection" id="cleanup-selection-count">No items selected</div>

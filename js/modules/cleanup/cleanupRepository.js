@@ -1,3 +1,5 @@
+import { ACCESS_STATS_STORAGE_KEY } from './cleanupConstants.js';
+
 export class CleanupRepository {
   constructor() {
     this.STORAGE_KEY = 'kanbanCleanupState';
@@ -8,7 +10,6 @@ export class CleanupRepository {
     const data = await this.readFromStorage(this.STORAGE_KEY);
     const ignore = data?.ignore || {};
     return {
-      dead: new Set(ignore.dead || []),
       duplicates: new Set(ignore.duplicates || []),
       stale: new Set(ignore.stale || [])
     };
@@ -17,7 +18,6 @@ export class CleanupRepository {
   async saveIgnoreSets(ignoreSets) {
     const payload = {
       ignore: {
-        dead: Array.from(ignoreSets.dead || []),
         duplicates: Array.from(ignoreSets.duplicates || []),
         stale: Array.from(ignoreSets.stale || [])
       }
@@ -25,41 +25,9 @@ export class CleanupRepository {
     await this.writeToStorage(this.STORAGE_KEY, payload);
   }
 
-  async loadMetadata() {
-    const data = await this.readFromStorage(this.METADATA_KEY);
-    return {
-      lastCheckedAt: data?.lastCheckedAt || {},
-      lastKnownStatus: data?.lastKnownStatus || {}
-    };
-  }
-
-  async saveMetadata(metadata) {
-    await this.writeToStorage(this.METADATA_KEY, metadata);
-  }
-
-  async syncSessionStatus(metadata) {
-    if (!chrome.storage.session) {
-      return;
-    }
-    return new Promise((resolve) => {
-      chrome.storage.session.get(['siteStatus'], (result) => {
-        if (chrome.runtime.lastError) {
-          console.error('Failed to read session site status:', chrome.runtime.lastError);
-          resolve();
-          return;
-        }
-
-        const statusMap = result.siteStatus;
-        if (statusMap) {
-          const now = Date.now();
-          Object.entries(statusMap).forEach(([bookmarkId, status]) => {
-            metadata.lastCheckedAt[bookmarkId] = now;
-            metadata.lastKnownStatus[bookmarkId] = status;
-          });
-        }
-        resolve();
-      });
-    });
+  async loadAccessStats() {
+    const data = await this.readFromStorage(ACCESS_STATS_STORAGE_KEY);
+    return data || {};
   }
 
   readFromStorage(key) {

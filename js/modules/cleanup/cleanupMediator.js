@@ -1,5 +1,4 @@
 import { CleanupState } from './cleanupState.js';
-import { CleanupStatusBridge } from './cleanupStatusBridge.js';
 import { CleanupActions } from './cleanupActions.js';
 import { CleanupUIController } from './cleanupUIController.js';
 
@@ -11,7 +10,6 @@ export class CleanupMediator {
     this.recycleManager = recycleManager;
 
     this.state = new CleanupState(bookmarkManager);
-    this.statusBridge = new CleanupStatusBridge();
     this.actions = new CleanupActions({
       archiveManager,
       recycleManager,
@@ -42,10 +40,7 @@ export class CleanupMediator {
 
     await this.state.initialize();
 
-    this.statusBridge.setResolver((bookmarkId) => this.state.getStatusForBookmark(bookmarkId));
-
     this.unsubscribe = this.state.subscribe((snapshot) => {
-      this.statusBridge.update(snapshot.statusMap);
       this.ui.renderSnapshot(snapshot);
     });
 
@@ -55,22 +50,11 @@ export class CleanupMediator {
 
   destroy() {
     this.unsubscribe?.();
+    this.state?.destroy?.();
   }
 
   async refresh() {
     await this.state.refresh();
-  }
-
-  async applySiteStatus(statusMap) {
-    await this.state.updateStatus(statusMap);
-  }
-
-  setStatusUpdateCallback(callback) {
-    this.statusBridge.setUpdateCallback(callback);
-  }
-
-  getStatusForBookmark(bookmarkId) {
-    return this.statusBridge.getStatus(bookmarkId);
   }
 
   async handleBulkAction(action, selection) {
@@ -176,13 +160,5 @@ export class CleanupMediator {
       return;
     }
     await this.actions.archive(bookmarkIds);
-  }
-
-  async clearStatuses(bookmarkIds) {
-    if (!bookmarkIds?.length) {
-      return;
-    }
-    await this.state.clearStatuses(bookmarkIds);
-    this.notificationManager?.showToast('Status cleared');
   }
 }
