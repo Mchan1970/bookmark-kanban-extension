@@ -45,7 +45,7 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 2. Drag and drop bookmarks between columns to organize them
 3. Click on a bookmark to open it in a new tab
 4. Use the edit and delete buttons to manage your bookmarks
-5. Access settings by clicking the 'Settings' button in the new tab page header
+5. Access settings through the extension popup by clicking the extension icon in your toolbar
 6. Use the theme selector in the header to switch between different visual themes
 
 ## Features in Detail
@@ -112,75 +112,40 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 ```
 bookmark-kanban/
 ├── js/
-│   ├── AppCoordinator.js    # Main application coordinator
 │   ├── background.js        # Background service worker
 │   ├── popup.js             # Popup window script
 │   ├── newtab.js            # New tab page script
-│   └── modules/             # Core modules directory
+│   ├── app.js               # Main application controller
+│   └── modules/             # Module directory
 │       ├── ui/              # UI components
-│       │   ├── UIManager.js
+│       │   ├── UIManager.js # Main UI coordinator
 │       │   ├── BookmarkRenderer.js
-│       │   ├── BookmarkActionMenu.js
 │       │   ├── ColumnManager.js
 │       │   ├── KanbanRenderer.js
 │       │   ├── NotificationService.js
 │       │   └── UIStateManager.js
-│       ├── cleanup/         # Cleanup system modules
-│       │   ├── cleanupActions.js
-│       │   ├── cleanupConstants.js
-│       │   ├── cleanupEngine.js
-│       │   ├── cleanupMediator.js
-│       │   ├── cleanupRepository.js
-│       │   ├── cleanupState.js
-│       │   ├── cleanupUIController.js
-│       │   ├── cleanupView.js
-│       │   ├── cleanupUtils.js
-│       │   ├── archiveManager.js
-│       │   ├── recycleManager.js
-│       │   ├── archivePanelController.js
-│       │   └── recyclePanelController.js
-│       │   └── cleanupPreferences.js
-│       ├── bookmarkManager.js    # Bookmark data management
-│       ├── modalManager.js        # Modal dialogs management
-│       ├── dragManager.js         # Drag and drop functionality
-│       ├── tagManager.js          # Tag system management
-│       ├── tagRenderer.js         # Tag rendering components
-│       ├── tagPalettes.js         # Tag color palettes
-│       ├── themeManager.js        # Theme management
-│       ├── displayManager.js      # Display mode management
-│       ├── faviconLoader.js       # Favicon loading
-│       ├── faviconPreferenceManager.js
-│       ├── accessStatsClient.js   # Access frequency tracking
-│       ├── accessTracker.js       # Background access tracking
-│       ├── eventManager.js        # Event handling
-│       ├── messageHandler.js      # Message communication
-│       ├── notificationManager.js  # Notification system
-│       ├── storageManager.js      # Storage management
-│       ├── utils.js               # Utility functions
-│       └── Modal.js               # Unified modal factory
+│       ├── bookmarkManager.js # Bookmark data management
+│       ├── modalManager.js   # Modal dialogs
+│       ├── dragManager.js    # Drag and drop functionality
+│       └── ...
 ├── css/
 │   ├── popup.css
-│   ├── newtab.css            # Main stylesheet
-│   ├── themes.css            # Theme definitions
-│   └── modules/              # CSS modules
-│       ├── modal-unified.css # Unified modal styles
-│       ├── cleanup.css        # Cleanup system styles
-│       ├── tags.css          # Tag system styles
-│       ├── common.css        # Common utilities
-│       ├── drag.css          # Drag and drop styles
-│       ├── modal.css         # Legacy modal styles
-│       └── commandPalette.css # Command palette styles
+│   ├── newtab.css
+│   ├── themes.css          # Theme definitions
+│   └── modules/            # CSS modules
+│       ├── common.css
+│       ├── drag.css
+│       ├── modal.css
+│       └── commandPalette.css
 ├── lib/
-│   └── Sortable.min.js       # Third-party drag and drop library
+│   └── Sortable.min.js     # Third-party drag and drop library
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
-│   ├── icon128.png
-│   └── default-favicon.png   # Default bookmark favicon
+│   └── icon128.png
 ├── popup.html
 ├── newtab.html
-├── manifest.json
-└── README.md                 # This file
+└── manifest.json
 ```
 
 ### External Libraries
@@ -263,6 +228,13 @@ Chen Yifeng
     - All data processing remains local and private
     - Simplified permission model reduces security surface
     - Chrome extension favicon API integration for safer icon loading
+
+- 1.2.4
+  - Cleanup Lite release
+    - Removed site availability checking and related permissions
+    - Simplified bookmark action menu
+    - Focused on duplicate/archive/recycle flows without network probes
+    - Added on-device visit tracking to surface long-unvisited bookmarks
 
 - 1.2.3
   - Moved theme and display mode selectors to settings page
