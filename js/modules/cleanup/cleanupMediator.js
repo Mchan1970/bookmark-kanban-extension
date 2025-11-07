@@ -3,13 +3,14 @@ import { CleanupActions } from './cleanupActions.js';
 import { CleanupUIController } from './cleanupUIController.js';
 
 export class CleanupMediator {
-  constructor({ bookmarkManager, notificationManager, archiveManager, recycleManager }) {
+  constructor({ bookmarkManager, notificationManager, archiveManager, recycleManager, preferences }) {
     this.bookmarkManager = bookmarkManager;
     this.notificationManager = notificationManager;
     this.archiveManager = archiveManager;
     this.recycleManager = recycleManager;
+    this.preferences = preferences;
 
-    this.state = new CleanupState(bookmarkManager);
+    this.state = new CleanupState(bookmarkManager, { preferences });
     this.actions = new CleanupActions({
       archiveManager,
       recycleManager,

@@ -1071,9 +1071,9 @@ main {
 }
 
 .settings-container {
-  max-height: 70vh;
-  overflow-y: auto;
-  padding-right: 10px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .settings-group {
@@ -1091,6 +1091,20 @@ main {
   font-size: 1.1rem;
   margin-bottom: 16px;
   color: var(--primary-color);
+}
+
+.stale-threshold-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.stale-threshold-control input {
+  width: 90px;
+  text-align: center;
 }
 
 /* settings-button uses common .header-button styles */

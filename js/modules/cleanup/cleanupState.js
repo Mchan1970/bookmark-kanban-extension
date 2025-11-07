@@ -1,11 +1,16 @@
 import { CleanupRepository } from './cleanupRepository.js';
-import { SECTION_KEYS, DEFAULT_STALE_THRESHOLD_MS, ACCESS_STATS_STORAGE_KEY } from './cleanupConstants.js';
+import {
+  SECTION_KEYS,
+  DEFAULT_STALE_THRESHOLD_MS,
+  ACCESS_STATS_STORAGE_KEY
+} from './cleanupConstants.js';
 import { flattenBookmarks, buildSections } from './cleanupEngine.js';
 
 export class CleanupState {
   constructor(bookmarkManager, options = {}) {
     this.bookmarkManager = bookmarkManager;
     this.repository = options.repository || new CleanupRepository();
+    this.preferences = options.preferences || null;
 
     this.ignore = {};
     SECTION_KEYS.forEach(section => {
@@ -21,8 +26,11 @@ export class CleanupState {
     this.bookmarkIndex = {};
     this.subscribers = new Set();
     this.storageListener = null;
+    this.preferenceUnsubscribe = null;
 
-    this.staleThreshold = options.staleThreshold ?? DEFAULT_STALE_THRESHOLD_MS;
+    this.staleThreshold = options.staleThreshold
+      ?? this.preferences?.getCurrentThresholdMs?.()
+      ?? DEFAULT_STALE_THRESHOLD_MS;
   }
 
   async initialize() {
@@ -36,8 +44,10 @@ export class CleanupState {
     });
 
     this.accessStats = accessStats || {};
+    this.refreshStaleThreshold();
     await this.refresh();
     this.subscribeToAccessStats();
+    this.subscribeToPreferences();
   }
 
   async refresh(options = {}) {
@@ -113,6 +123,12 @@ export class CleanupState {
     // no-op
   }
 
+  refreshStaleThreshold() {
+    if (this.preferences?.getCurrentThresholdMs) {
+      this.staleThreshold = this.preferences.getCurrentThresholdMs();
+    }
+  }
+
   subscribeToAccessStats() {
     if (typeof chrome === 'undefined' || !chrome.storage?.onChanged) {
       return;
@@ -133,6 +149,21 @@ export class CleanupState {
     };
 
     chrome.storage.onChanged.addListener(this.storageListener);
+  }
+
+  subscribeToPreferences() {
+    if (!this.preferences?.onThresholdChange) {
+      return;
+    }
+    this.preferenceUnsubscribe = this.preferences.onThresholdChange(({ milliseconds }) => {
+      if (typeof milliseconds !== 'number' || milliseconds === this.staleThreshold) {
+        return;
+      }
+      this.staleThreshold = milliseconds;
+      this.refresh({ reuseIndex: true }).catch(error => {
+        console.error('Failed to refresh cleanup after threshold change:', error);
+      });
+    });
   }
 
   hasBookmarkIndex() {
@@ -172,5 +203,13 @@ export class CleanupState {
       this.storageListener = null;
     }
     this.subscribers.clear();
+    if (this.preferenceUnsubscribe) {
+      try {
+        this.preferenceUnsubscribe();
+      } catch (error) {
+        console.error('Failed to unsubscribe cleanup preferences:', error);
+      }
+      this.preferenceUnsubscribe = null;
+    }
   }
 }

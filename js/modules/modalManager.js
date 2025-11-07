@@ -144,6 +144,15 @@ export class ModalManager {
         <div class="settings-group">
           <h3>Cleanup</h3>
           <div class="form-group">
+            <label for="stale-threshold-input">Stale bookmark threshold</label>
+            <div class="stale-threshold-control">
+              <span>Mark a bookmark as stale after</span>
+              <input type="number" id="stale-threshold-input" min="7" max="3650" step="1" inputmode="numeric">
+              <span>days without a visit.</span>
+            </div>
+            <p class="form-help-text">Changes apply immediately to Cleanup suggestions.</p>
+          </div>
+          <div class="form-group">
             <button id="open-archive-view" class="btn-secondary">View Archived Bookmarks</button>
           </div>
           <div class="form-group">
@@ -192,6 +201,11 @@ export class ModalManager {
         const paletteField = modal.element.querySelector('#tag-palette-config');
         if (paletteField) {
           paletteField.value = tagManager.getCustomPaletteJSON();
+        }
+
+        const staleThresholdInput = modal.element.querySelector('#stale-threshold-input');
+        if (staleThresholdInput && window.app?.cleanupPreferences) {
+          staleThresholdInput.value = window.app.cleanupPreferences.getCurrentThresholdDays();
         }
 
         // Bind events
@@ -449,6 +463,25 @@ export class ModalManager {
         }
       });
       loadTemplateButton.dataset.bound = 'true';
+    }
+
+    const staleThresholdInput = modal.querySelector('#stale-threshold-input');
+    if (staleThresholdInput && !staleThresholdInput.dataset.bound) {
+      staleThresholdInput.addEventListener('change', async (event) => {
+        const preferences = window.app?.cleanupPreferences;
+        if (!preferences) {
+          return;
+        }
+        const result = await preferences.setStaleThresholdDays(event.target.value);
+        if (result?.success) {
+          event.target.value = result.days;
+          this.showToast('Stale threshold updated');
+        } else {
+          this.showToast(result?.message || 'Failed to update threshold', 'error');
+          event.target.value = preferences.getCurrentThresholdDays();
+        }
+      });
+      staleThresholdInput.dataset.bound = 'true';
     }
     
     // Close button is now handled automatically by the new Modal factory

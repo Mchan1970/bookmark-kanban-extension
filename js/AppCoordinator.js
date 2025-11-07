@@ -16,12 +16,14 @@ import { CleanupController } from './modules/cleanup/cleanupController.js';
 import { ArchiveManager } from './modules/cleanup/archiveManager.js';
 import { RecycleManager } from './modules/cleanup/recycleManager.js';
 import { AccessStatsClient } from './modules/accessStatsClient.js';
+import { CleanupPreferences } from './modules/cleanup/cleanupPreferences.js';
 
 export class AppCoordinator {
   constructor() {
     this._isDeleteOperation = false;
     this.faviconObserver = null;
     this.accessStatsClient = new AccessStatsClient();
+    this.cleanupPreferences = new CleanupPreferences();
     
     // Expose the app instance globally when needed
     window.app = this;
@@ -39,6 +41,7 @@ export class AppCoordinator {
       
       // Initialize the bookmark manager
       this.bookmarkManager = new BookmarkManager();
+      await this.cleanupPreferences.initialize();
       await this.accessStatsClient.initialize();
 
       // Initialize the tag manager
@@ -78,7 +81,8 @@ export class AppCoordinator {
         bookmarkManager: this.bookmarkManager,
         notificationManager: this.notificationManager,
         archiveManager: this.archiveManager,
-        recycleManager: this.recycleManager
+        recycleManager: this.recycleManager,
+        preferences: this.cleanupPreferences
       });
       await this.cleanupManager.initialize();
 
