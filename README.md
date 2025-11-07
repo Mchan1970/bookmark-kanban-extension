@@ -229,13 +229,6 @@ Chen Yifeng
     - Simplified permission model reduces security surface
     - Chrome extension favicon API integration for safer icon loading
 
-- 1.2.4
-  - Cleanup Lite release
-    - Removed site availability checking and related permissions
-    - Simplified bookmark action menu
-    - Focused on duplicate/archive/recycle flows without network probes
-    - Added on-device visit tracking to surface long-unvisited bookmarks
-
 - 1.2.3
   - Moved theme and display mode selectors to settings page
     - Added settings button with gear icon
