@@ -200,10 +200,17 @@
 .link-button {
   border: none;
   background: none;
-  color: var(--primary-color);
+  color: var(--primary-light, var(--primary-color));
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0;
+  transition: color 0.2s ease;
+}
+
+.link-button:hover,
+.link-button:focus {
+  color: var(--primary-dark, var(--primary-light, var(--primary-color)));
+  outline: none;
 }
 
 .cleanup-checkbox {

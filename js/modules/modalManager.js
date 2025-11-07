@@ -285,7 +285,13 @@ export class ModalManager {
         const scrollPosition = window.scrollY;
         console.log("Delete before scroll position:", scrollPosition);
         
-        //Execute delete operation
+        const usedRecycle = await this.trySoftDeleteBookmark(bookmark.id);
+        if (usedRecycle) {
+          this.closeActiveModal();
+          return;
+        }
+        
+        //Execute delete operation (fallback path without recycle)
         await this.bookmarkManager.deleteBookmark(bookmark.id);
         
         //Close modal
@@ -513,6 +519,20 @@ export class ModalManager {
     }
     
     // Close button is now handled automatically by the new Modal factory
+  }
+
+  async trySoftDeleteBookmark(bookmarkId) {
+    try {
+      const actions = this.app?.cleanupManager?.actions;
+      if (!actions?.remove) {
+        return false;
+      }
+      await actions.remove([bookmarkId]);
+      return true;
+    } catch (error) {
+      console.error('Failed to soft delete bookmark:', error);
+      return false;
+    }
   }
 
   /*** Show short notification message
