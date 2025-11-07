@@ -85,6 +85,8 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 - **Case-Insensitive Handling**: "#JavaScript", "#javascript", and "#JAVASCRIPT" are treated as the same tag
 - **Tag Management**: Add, remove, and organize tags directly through bookmark titles
 
+*Special thanks to [zwpaper](https://github.com/zwpaper) for the inspiring tag system concept that made this feature possible!* 🙏
+
 ### Smart Cleanup System
 - **Duplicate Detection**: Advanced algorithm finds duplicate bookmarks with URL normalization
 - **Access Frequency Tracking**: On-device tracking shows which bookmarks haven't been visited recently
