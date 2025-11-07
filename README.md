@@ -12,13 +12,23 @@ A Chrome extension that displays your bookmarks in a visual kanban board layout,
 
 1. **📋 Visual Kanban Board Layout** - Organize bookmarks in a clean, intuitive column-based interface with drag-and-drop functionality
 
-2. **🔍 Powerful Command Palette** - VS Code-style quick search for instantly finding and navigating to any bookmark
+2. **🏷️ Advanced Tag System** - Extract tags from bookmark titles using #hashtags, filter bookmarks by tags, and enjoy theme-aware color palettes with customizable options
 
-3. **🎨 Customizable Appearance** - Multiple themes (Default, Dark, Green, Purple, High Contrast) and display modes (single/double line)
+3. **🔍 Powerful Command Palette** - VS Code-style quick search for instantly finding and navigating to any bookmark
 
-4. **💾 Layout Persistence** - Automatically saves your custom column and bookmark arrangement across sessions
+4. **🎨 Customizable Appearance** - Multiple themes (Default, Dark, Green, Purple, High Contrast) and display modes (single/double line/full wrap)
 
-5. **🔄 Real-time Synchronization** - Instant updates when bookmarks are added, edited, or removed in Chrome
+5. **💾 Layout Persistence** - Automatically saves your custom column and bookmark arrangement across sessions
+
+6. **🔄 Real-time Synchronization** - Instant updates when bookmarks are added, edited, or removed in Chrome
+
+7. **🧹 Smart Cleanup Tools** - Find duplicate bookmarks and manage long-unvisited items with customizable thresholds
+
+8. **⚙️ Extensive Customization** - Control favicon visibility, stale bookmark thresholds, tag palettes, and UI density
+
+> **Important Notice (v2.0.0)**  
+> **EN:** The "Dead Link / Site Check" feature has been **removed** in this release. The legacy implementation (and its required `<all_urls>` permission) no longer complies with modern Manifest V3 security & privacy policies. We removed the feature—and its high-risk permissions—to keep the extension 100% safe, private, and compliant. Safe alternatives are being explored for future versions.  
+> **ZH:** **此版本已移除“失效链接 / 站点检测”功能。** 旧实现及其依赖的 `<all_urls>` 权限与最新版 Manifest V3 安全/隐私规范不兼容。为了让扩展保持 100% 安全、保护隐私并完全合规，我们已彻底移除该功能及其高风险权限，后续将探索更安全的替代方案。
 
 ## Installation
 
@@ -67,11 +77,28 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 - Smooth transitions between themes
 - Consistent styling across all components
 
+### Tag System
+- **Automatic Tag Extraction**: Tags are automatically extracted from bookmark titles using #hashtags (e.g., "#javascript #tutorial")
+- **Real-time Filtering**: Filter bookmarks instantly by clicking on tags in the tag filter bar
+- **Theme-Aware Colors**: Tag colors automatically adapt to your selected theme for optimal visibility
+- **Customizable Palettes**: Create custom tag color schemes with JSON configuration in Settings > Advanced
+- **Case-Insensitive Handling**: "#JavaScript", "#javascript", and "#JAVASCRIPT" are treated as the same tag
+- **Tag Management**: Add, remove, and organize tags directly through bookmark titles
+
+### Smart Cleanup System
+- **Duplicate Detection**: Advanced algorithm finds duplicate bookmarks with URL normalization
+- **Access Frequency Tracking**: On-device tracking shows which bookmarks haven't been visited recently
+- **Customizable Thresholds**: Set how long (7-3650 days) before a bookmark is considered "stale"
+- **Safe Organization**: Archive and recycle bin features for bookmark cleanup without permanent deletion
+- **Privacy-Focused**: All cleanup analysis happens locally without external requests
+
 ### User Interface
 - Clean and intuitive design
 - Responsive layout that adapts to screen size
 - Smooth animations and transitions
 - Current time and date display
+- Favicon visibility toggle for minimal layouts
+- Inline visit statistics in bookmark menus
 
 ## Development
 
@@ -165,6 +192,40 @@ If you encounter any issues or have suggestions, please:
 Chen Yifeng
 
 ## Version History
+
+- 2.0.0
+  - **🏷️ Complete Tag System Implementation**
+    - Extract tags automatically from bookmark titles using #hashtags
+    - Filter bookmarks by tags with real-time tag filtering interface
+    - Theme-aware tag color palettes that adapt to your selected theme
+    - Customizable tag palettes with JSON configuration support
+    - Case-insensitive tag handling and intelligent tag management
+
+  - **🧹 Enhanced Cleanup Tools**
+    - Smart duplicate bookmark detection with advanced URL normalization
+    - Local access frequency tracking identifies long-unvisited bookmarks
+    - Configurable stale bookmark threshold (7-3650 days)
+    - Streamlined Cleanup Lite experience focused on duplicates + stale items
+    - Archive and recycle bin management for safe bookmark organization
+
+  - **🎨 Advanced Customization Options**
+    - Favicon visibility toggle for ultra-minimal text-only layouts
+    - Full display mode (title wrapping) alongside single/double line modes
+    - Custom tag palette configuration with theme-specific color schemes
+    - UI density controls and extensive personalization settings
+
+  - **⚙️ Technical Infrastructure Overhaul**
+    - Unified modal system using factory pattern for consistent behavior
+    - Theme-aware color management with real-time adaptation
+    - Local visit tracking system without external network requests
+    - Improved bookmark action menu with inline visit statistics
+    - Performance optimizations and memory management enhancements
+
+  - **🔧 Privacy & Security Improvements**
+    - Removed high-risk network permissions for Manifest V3 compliance
+    - All data processing remains local and private
+    - Simplified permission model reduces security surface
+    - Chrome extension favicon API integration for safer icon loading
 
 - 1.2.4
   - Cleanup Lite release
