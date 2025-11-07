@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Bookmark Kanban",
   "short_name": "BookmarkKanban",
-  "version": "1.2.4",
+  "version": "2.0.0",
   "description": "Organize bookmarks in a visual kanban board. Simple, intuitive management with drag-and-drop functionality.",
   "author": "Chen Yifeng",
   "homepage_url": "https://github.com/mchan1970/bookmark-kanban-extension",
@@ -24,7 +24,7 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self';"
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data:;"
   },
   "minimum_chrome_version": "88",
   "offline_enabled": true,
@@ -32,5 +32,5 @@
     "service_worker": "js/background.js",
     "type": "module"
   },
-  "version_name": "1.2.4"
+  "version_name": "2.0.0"
 }
