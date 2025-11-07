@@ -13,10 +13,14 @@ export class TagManager {
     this.currentPalette = this.resolvePalette(this.currentTheme);
 
     this.loadCustomPalettes();
-    themeManager.subscribe((theme) => {
+    this.unsubscribeThemeChange = themeManager.subscribe((theme) => {
       this.currentTheme = theme;
       this.applyThemePalette(theme);
     });
+
+    if (typeof chrome !== 'undefined' && chrome.runtime?.onSuspend) {
+      chrome.runtime.onSuspend.addListener(() => this.dispose());
+    }
   }
 
   /*** Extract tags from a bookmark title */
@@ -359,6 +363,13 @@ export class TagManager {
 
   canUseChromeStorage() {
     return typeof chrome !== 'undefined' && chrome.storage?.sync;
+  }
+
+  dispose() {
+    if (typeof this.unsubscribeThemeChange === 'function') {
+      this.unsubscribeThemeChange();
+      this.unsubscribeThemeChange = null;
+    }
   }
 }
 

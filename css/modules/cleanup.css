@@ -211,18 +211,8 @@
   height: 16px;
 }
 
-.cleanup-item.badge-dead::before {
-  content: "⚠️";
-  margin-right: 6px;
-}
-
-.cleanup-item.badge-duplicate::before {
+.cleanup-item.badge-duplicates::before {
   content: "〰️";
-  margin-right: 6px;
-}
-
-.cleanup-item.badge-stale::before {
-  content: "⌛";
   margin-right: 6px;
 }
 

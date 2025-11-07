@@ -31,9 +31,6 @@ export class AppCoordinator {
       //Initialize message handler
       this.messageHandler = new MessageHandler(this);
       
-      //Initialize site check manager
-      this.siteCheckManager = new SiteCheckManager(this);
-      
       //InitializeNotificationManager
       this.notificationManager = new NotificationManager();
 

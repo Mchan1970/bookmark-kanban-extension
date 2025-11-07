@@ -50,10 +50,9 @@ export class BookmarkActionMenu {
     this.hide();
     this.currentBookmark = {
       id: options.id,
-      url: options.url,
-      status: options.status
+      url: options.url
     };
-    this.renderMenu(options.status);
+    this.renderMenu();
     this.positionMenu(options);
     this.menuElement.classList.add('visible');
     this.visible = true;
@@ -67,18 +66,12 @@ export class BookmarkActionMenu {
     document.body.classList.remove('bookmark-menu-open');
   }
 
-  renderMenu(status) {
+  renderMenu() {
     const fragment = document.createDocumentFragment();
 
     fragment.appendChild(this.createMenuButton('Edit', 'edit'));
     fragment.appendChild(this.createMenuButton('Archive', 'archive'));
     fragment.appendChild(this.createMenuButton('Delete', 'delete', { danger: true }));
-    fragment.appendChild(this.createDivider());
-
-    fragment.appendChild(this.createMenuButton('Re-check', 'recheck'));
-    if (status) {
-      fragment.appendChild(this.createMenuButton('Clear status', 'clear-status'));
-    }
     fragment.appendChild(this.createDivider());
 
     fragment.appendChild(this.createMenuButton('Copy link', 'copy-link'));

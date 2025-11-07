@@ -166,6 +166,12 @@ Chen Yifeng
 
 ## Version History
 
+- 1.2.4
+  - Cleanup Lite release
+    - Removed site availability checking and related permissions
+    - Simplified bookmark action menu
+    - Focused on duplicate/archive/recycle flows without network probes
+
 - 1.2.3
   - Moved theme and display mode selectors to settings page
     - Added settings button with gear icon
@@ -179,7 +185,6 @@ Chen Yifeng
     - Added AppCoordinator.js as application coordinator
     - Added EventManager.js for event handling
     - Added MessageHandler.js for message communication
-    - Added SiteCheckManager.js for website checking
     - Added NotificationManager.js for notifications
     - Optimized code organization and improved maintainability
 

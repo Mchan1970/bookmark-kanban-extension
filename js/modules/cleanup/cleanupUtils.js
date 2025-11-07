@@ -32,16 +32,3 @@ export function relativeTimeFromNow(timestamp) {
   }
   return 'just now';
 }
-
-export function describeDeadStatus(status) {
-  if (status === false) {
-    return 'Site unreachable';
-  }
-  if (status === 'certificate-error') {
-    return 'Certificate issue detected';
-  }
-  if (status === 'no-https') {
-    return 'HTTPS unavailable';
-  }
-  return 'Status unknown';
-}

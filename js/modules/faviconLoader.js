@@ -3,7 +3,6 @@
  * 
  * Handles lazy loading, caching, and error handling of website icons
  */
-import { siteChecker } from './siteChecker.js';
 
 export class FaviconLoader {
   constructor() {
@@ -63,15 +62,8 @@ export class FaviconLoader {
         return;
       }
 
-      //If icon loading fails, check website availability
-      const isAvailable = await siteChecker.checkSite(hostname);
-      if (isAvailable) {
-        //Website is available but has no icon, use default icon
-        this.updateIconStatus(iconElement, true, this.defaultIcon);
-      } else {
-        //Website may be unavailable, mark as failed state
-        this.updateIconStatus(iconElement, false, this.defaultIcon);
-      }
+      //If icon loading fails, fall back to default icon
+      this.updateIconStatus(iconElement, false, this.defaultIcon);
     } catch (error) {
       console.error(`Failed to load icon: ${hostname}`, error);
       this.updateIconStatus(iconElement, false, this.defaultIcon);
@@ -135,14 +127,6 @@ export class FaviconLoader {
     element.src = iconUrl;
     element.dataset.loaded = 'true';
     
-    const bookmarkItem = element.closest('.bookmark-item');
-    if (bookmarkItem) {
-      bookmarkItem.dataset.siteStatus = isAvailable ? 'available' : 'unavailable';
-      if (!isAvailable) {
-        bookmarkItem.title = 'This website may be unavailable or inaccessible';
-      }
-    }
-    
     this.observer.unobserve(element);
   }
 
@@ -152,8 +136,7 @@ export class FaviconLoader {
    */
   updateIconWithCache(element, hostname) {
     const iconUrl = this.iconCache.get(hostname);
-    const status = siteChecker.getCachedStatus(hostname);
-    this.updateIconStatus(element, status !== false, iconUrl || this.defaultIcon);
+    this.updateIconStatus(element, true, iconUrl || this.defaultIcon);
   }
 
   prepareIconElement(icon, url) {

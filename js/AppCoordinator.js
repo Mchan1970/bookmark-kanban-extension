@@ -9,7 +9,6 @@ import { displayManager } from './modules/displayManager.js';
 import { CommandPalette } from './modules/commandPalette.js';
 import { EventManager } from './modules/eventManager.js';
 import { MessageHandler } from './modules/messageHandler.js';
-import { SiteCheckManager } from './modules/siteCheckManager.js';
 import { NotificationManager } from './modules/notificationManager.js';
 import { tagManager } from './modules/tagManager.js';
 import { tagRenderer } from './modules/tagRenderer.js';
@@ -21,7 +20,6 @@ export class AppCoordinator {
   constructor() {
     this._isDeleteOperation = false;
     this.faviconObserver = null;
-    this.siteStatus = new Map();
     
     // Expose the app instance globally when needed
     window.app = this;
@@ -64,9 +62,6 @@ export class AppCoordinator {
       
       // Initialize the message handler
       this.messageHandler = new MessageHandler(this);
-      
-      // Initialize the site check manager
-      this.siteCheckManager = new SiteCheckManager(this);
       
       // Initialize the notification manager
       this.notificationManager = new NotificationManager();

@@ -195,14 +195,12 @@ header {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
-.check-icon,
 .cleanup-icon,
 .settings-icon {
   font-size: 1.1rem;
   color: white;
 }
 
-.check-text,
 .cleanup-text,
 .settings-text {
   color: white;
@@ -210,39 +208,8 @@ header {
   font-weight: 500;
 }
 
-/* Progress indicator styles */
-.check-progress {
-  color: white;
-  font-size: 0.85rem;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-  padding: 0px 8px;
-  margin-left: 4px;
-  min-width: 60px;
-  text-align: center;
-}
-
-/* Hide text while progress indicator is visible */
-.checking .check-text {
-  display: none;
-}
-
-/* Add loading animation for the check button */
-.header-button.checking .check-icon {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .check-text {
-    display: none;
-  }
-  
   .header-button {
     padding: 0.3rem;
   }
@@ -915,41 +882,6 @@ main {
   font-weight: 500;
 }
 
-/* Website unavailable state styles */
-.bookmark-item[data-site-status="unavailable"] {
-  position: relative;
-  opacity: 0.7;
-}
-
-.bookmark-item[data-site-status="unavailable"] .bookmark-title {
-  color: var(--text-light);
-  text-decoration: line-through;
-}
-
-.bookmark-item[data-site-status="unavailable"]::after {
-  content: "⚠️";
-  font-size: 10px;
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  color: var(--warning-color, #cc3333);
-}
-
-/* Show tooltip on hover */
-.bookmark-item[data-site-status="unavailable"]:hover::before {
-  content: "This website may be unavailable";
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100;
-}
 
 /* Special adjustments for dark mode */
 [data-theme="dark"] .spinner {
@@ -1083,110 +1015,6 @@ main {
 .kanban-column[data-folder-id="2"] .column-header,
 .kanban-column[data-folder-id="3"] .column-header {
   position: relative;
-}
-
-/* Styles for bookmarks that are unreachable */
-.bookmark-item[data-site-status="dead"] {
-  opacity: 0.7;
-  border-left: 3px solid var(--danger-color);
-}
-
-.bookmark-item[data-site-status="dead"] .bookmark-title {
-  color: var(--danger-color);
-}
-
-/* Use icons to indicate unreachable bookmarks in all themes */
-.bookmark-item[data-site-status="dead"] .bookmark-title::before {
-  content: "🚫 ";  /* Use a prohibition icon for completely unreachable sites */
-  font-size: 0.8rem;
-  color: var(--danger-color);
-}
-
-/* Unreachable bookmark styling in dark theme */
-[data-theme="dark"] .bookmark-item[data-site-status="dead"] {
-  border-left-color: var(--danger-dark);
-}
-
-[data-theme="dark"] .bookmark-item[data-site-status="dead"] .bookmark-title {
-  color: var(--danger-dark);
-}
-
-[data-theme="dark"] .bookmark-item[data-site-status="dead"] .bookmark-title::before {
-  color: var(--danger-dark);
-}
-
-/* Styling for certificate issues when the domain resolves */
-.bookmark-item[data-site-status="cert-error"] {
-  opacity: 0.85;
-  border-left: 3px solid var(--warning-color); /* Highlight issues with a warning color */
-}
-
-.bookmark-item[data-site-status="cert-error"] .bookmark-title {
-  color: var(--warning-color);
-}
-
-.bookmark-item[data-site-status="cert-error"] .bookmark-title::before {
-  content: "⚠️ ";  /* Warning icon to denote certificate issues */
-  font-size: 0.8rem;
-  color: var(--warning-color);
-}
-
-/* Styling for sites that only support HTTP */
-.bookmark-item[data-site-status="no-https"] {
-  opacity: 0.9;
-  border-left: 3px solid var(--secondary-color);
-}
-
-.bookmark-item[data-site-status="no-https"] .bookmark-title::before {
-  content: "🔓 ";  /* Unlocked icon indicates lack of HTTPS */
-  font-size: 0.8rem;
-  color: var(--secondary-color);
-}
-
-/* Hover state tooltip */
-.bookmark-item[data-site-status="dead"]:hover::after {
-  content: "This website is completely inaccessible";
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100;
-}
-
-.bookmark-item[data-site-status="cert-error"]:hover::after {
-  content: "This website has SSL certificate issues";
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100;
-}
-
-.bookmark-item[data-site-status="no-https"]:hover::after {
-  content: "This site is not using HTTPS";
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100;
 }
 
 .disabled-message,
@@ -1333,8 +1161,7 @@ main {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .settings-text,
-  .cleanup-text,
-  .check-text {
+  .cleanup-text {
     display: none;
   }
 

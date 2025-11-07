@@ -96,26 +96,12 @@ export class CleanupUIController {
   buildCleanupContent() {
     return `
       <div class="cleanup-body">
-        <div class="cleanup-section" data-section="dead">
-          <div class="cleanup-section-header">
-            <h3>Dead Links</h3>
-            <span class="cleanup-count" id="cleanup-dead-count">0</span>
-          </div>
-          <div class="cleanup-section-list" id="cleanup-dead-list"></div>
-        </div>
         <div class="cleanup-section" data-section="duplicates">
           <div class="cleanup-section-header">
             <h3>Duplicates</h3>
             <span class="cleanup-count" id="cleanup-duplicates-count">0</span>
           </div>
           <div class="cleanup-section-list" id="cleanup-duplicates-list"></div>
-        </div>
-        <div class="cleanup-section" data-section="stale">
-          <div class="cleanup-section-header">
-            <h3>Stale Bookmarks</h3>
-            <span class="cleanup-count" id="cleanup-stale-count">0</span>
-          </div>
-          <div class="cleanup-section-list" id="cleanup-stale-list"></div>
         </div>
       </div>
       <div class="cleanup-footer">

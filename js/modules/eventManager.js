@@ -20,14 +20,6 @@ export class EventManager {
       
       const target = e.target;
       
-      // Handle the “Check Sites” button
-      if (target.closest('#check-sites-button')) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.app.siteCheckManager.handleSiteCheck();
-        return;
-      }
-      
       //HandleSettingsButtonClick
       if (target.closest('#settings-button')) {
         e.preventDefault();
@@ -143,11 +135,9 @@ export class EventManager {
   openBookmarkMenu(bookmarkItem, options = {}) {
     const bookmarkId = bookmarkItem.dataset.bookmarkId;
     const url = bookmarkItem.dataset.url;
-    const status = bookmarkItem.getAttribute('data-site-status');
     this.actionMenu.show({
       id: bookmarkId,
       url,
-      status,
       anchorRect: options.anchorRect,
       position: options.position
     });
@@ -164,12 +154,6 @@ export class EventManager {
       case 'archive':
         await this.handleArchiveBookmark(bookmark.id);
         break;
-      case 'recheck':
-        await this.handleRecheckBookmark(bookmark);
-        break;
-      case 'clear-status':
-        await this.handleClearStatus(bookmark.id);
-        break;
       case 'copy-link':
         await this.handleCopyLink(bookmark.url);
         break;
@@ -184,47 +168,6 @@ export class EventManager {
     } catch (error) {
       console.error('Failed to archive bookmark:', error);
       this.app.notificationManager?.showErrorToast('Failed to archive bookmark');
-    }
-  }
-
-  async handleClearStatus(bookmarkId) {
-    try {
-      await this.app.cleanupManager?.clearStatuses([bookmarkId]);
-    } catch (error) {
-      console.error('Failed to clear status:', error);
-      this.app.notificationManager?.showErrorToast('Failed to clear status');
-    }
-  }
-
-  async handleRecheckBookmark(bookmark) {
-    if (!bookmark?.id) {
-      return;
-    }
-
-    try {
-      const response = await chrome.runtime.sendMessage({
-        type: 'RECHECK_BOOKMARK',
-        bookmarkId: bookmark.id
-      });
-
-      if (response?.error) {
-        throw new Error(response.error);
-      }
-
-      if (response?.status !== undefined) {
-        await this.app.cleanupManager?.applySiteStatus({ [bookmark.id]: response.status });
-        const message = response.status === true
-          ? 'Site reachable'
-          : response.status === 'cert-error'
-            ? 'Certificate issue detected'
-            : response.status === 'no-https'
-              ? 'Site only supports HTTP'
-              : 'Site unreachable';
-        this.app.notificationManager?.showToast(message);
-      }
-    } catch (error) {
-      console.error('Failed to re-check bookmark:', error);
-      this.app.notificationManager?.showErrorToast('Failed to re-check bookmark');
     }
   }
 

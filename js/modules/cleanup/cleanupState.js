@@ -1,11 +1,8 @@
 import { CleanupRepository } from './cleanupRepository.js';
+import { SECTION_KEYS } from './cleanupConstants.js';
 import {
   flattenBookmarks,
-  buildSections,
-  buildStatusMap,
-  normalizeStatusValue,
-  STALE_THRESHOLD_MS,
-  STATUS_EXPIRATION_MS
+  buildSections
 } from './cleanupEngine.js';
 
 export class CleanupState {
@@ -13,39 +10,25 @@ export class CleanupState {
     this.bookmarkManager = bookmarkManager;
     this.repository = options.repository || new CleanupRepository();
 
-    this.ignore = {
-      dead: new Set(),
-      duplicates: new Set(),
-      stale: new Set()
-    };
+    this.ignore = {};
+    SECTION_KEYS.forEach(section => {
+      this.ignore[section] = new Set();
+    });
 
-    this.metadata = {
-      lastCheckedAt: {},
-      lastKnownStatus: {}
-    };
-
-    this.sections = {
-      dead: [],
-      duplicates: [],
-      stale: []
-    };
+    this.sections = {};
+    SECTION_KEYS.forEach(section => {
+      this.sections[section] = [];
+    });
 
     this.statusMap = {};
     this.subscribers = new Set();
-
-    this.staleThreshold = options.staleThreshold ?? STALE_THRESHOLD_MS;
-    this.statusExpiration = options.statusExpiration ?? STATUS_EXPIRATION_MS;
   }
 
   async initialize() {
-    const [ignoreSets, metadata] = await Promise.all([
-      this.repository.loadIgnoreSets(),
-      this.repository.loadMetadata()
-    ]);
-
-    this.ignore = ignoreSets;
-    this.metadata = metadata;
-    await this.repository.syncSessionStatus(this.metadata);
+    const ignoreSets = await this.repository.loadIgnoreSets();
+    SECTION_KEYS.forEach(section => {
+      this.ignore[section] = ignoreSets[section] || new Set();
+    });
     await this.refresh();
   }
 
@@ -53,11 +36,9 @@ export class CleanupState {
     const tree = await this.bookmarkManager.getBookmarkTree();
     const bookmarkIndex = flattenBookmarks(tree);
     this.sections = buildSections(bookmarkIndex, {
-      metadata: this.metadata,
-      ignore: this.ignore,
-      staleThreshold: this.staleThreshold
+      ignore: this.ignore
     });
-    this.statusMap = buildStatusMap(this.metadata, this.ignore, this.statusExpiration);
+    this.statusMap = {};
     this.notify();
   }
 
@@ -77,11 +58,10 @@ export class CleanupState {
   }
 
   getCounts() {
-    return {
-      dead: this.sections.dead.length,
-      duplicates: this.sections.duplicates.length,
-      stale: this.sections.stale.length
-    };
+    return SECTION_KEYS.reduce((acc, section) => {
+      acc[section] = this.sections[section]?.length || 0;
+      return acc;
+    }, {});
   }
 
   getSection(section) {
@@ -89,26 +69,15 @@ export class CleanupState {
   }
 
   getStatusMap() {
-    return { ...this.statusMap };
+    return {};
   }
 
   getStatusForBookmark(bookmarkId) {
-    return this.statusMap[bookmarkId] || null;
+    return null;
   }
 
   async updateStatus(statusMap) {
-    if (!statusMap) {
-      return;
-    }
-
-    const now = Date.now();
-    Object.entries(statusMap).forEach(([bookmarkId, status]) => {
-      this.metadata.lastCheckedAt[bookmarkId] = now;
-      this.metadata.lastKnownStatus[bookmarkId] = status;
-    });
-
-    await this.repository.saveMetadata(this.metadata);
-    await this.refresh();
+    return;
   }
 
   async ignoreItems(section, bookmarkIds) {
@@ -132,36 +101,14 @@ export class CleanupState {
   }
 
   async clearStatuses(bookmarkIds = []) {
-    if (!Array.isArray(bookmarkIds) || bookmarkIds.length === 0) {
-      return;
-    }
-
-    let changed = false;
-
-    bookmarkIds.forEach(id => {
-      if (this.metadata.lastKnownStatus[id] !== undefined) {
-        delete this.metadata.lastKnownStatus[id];
-        changed = true;
-      }
-      if (this.metadata.lastCheckedAt[id] !== undefined) {
-        delete this.metadata.lastCheckedAt[id];
-        changed = true;
-      }
-    });
-
-    if (!changed) {
-      return;
-    }
-
-    await this.repository.saveMetadata(this.metadata);
-    await this.refresh();
+    return;
   }
 
   notify() {
     const snapshot = {
       counts: this.getCounts(),
       sections: this.sections,
-      statusMap: this.statusMap
+      statusMap: {}
     };
     this.subscribers.forEach(callback => {
       try {

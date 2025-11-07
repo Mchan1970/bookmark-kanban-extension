@@ -1,5 +1,4 @@
 import { SECTION_KEYS } from './cleanupConstants.js';
-import { describeDeadStatus, relativeTimeFromNow } from './cleanupUtils.js';
 
 export class CleanupView {
   constructor(options) {
@@ -50,10 +49,6 @@ export class CleanupView {
     const wrapper = document.createElement('div');
     wrapper.classList.add('cleanup-item', `badge-${section}`);
 
-    if (section === 'dead') {
-      wrapper.classList.add(item.severity === 'error' ? 'error' : 'warning');
-    }
-
     const actionColumn = document.createElement('div');
     actionColumn.className = 'cleanup-item-gutter';
 
@@ -88,15 +83,13 @@ export class CleanupView {
     viewButton.textContent = 'View';
     actions.appendChild(viewButton);
 
-    if (section === 'duplicates' || section === 'stale') {
-      const ignoreButton = document.createElement('button');
-      ignoreButton.type = 'button';
-      ignoreButton.dataset.action = 'ignore';
-      ignoreButton.dataset.section = section;
-      ignoreButton.dataset.bookmarkId = item.id;
-      ignoreButton.textContent = 'Ignore';
-      actions.appendChild(ignoreButton);
-    }
+    const ignoreButton = document.createElement('button');
+    ignoreButton.type = 'button';
+    ignoreButton.dataset.action = 'ignore';
+    ignoreButton.dataset.section = section;
+    ignoreButton.dataset.bookmarkId = item.id;
+    ignoreButton.textContent = 'Ignore';
+    actions.appendChild(ignoreButton);
 
     actionColumn.appendChild(actions);
 
@@ -107,23 +100,8 @@ export class CleanupView {
   }
 
   buildMetaText(section, item) {
-    if (section === 'dead') {
-      const statusText = describeDeadStatus(item.status);
-      const timeText = item.lastCheckedAt
-        ? `Checked ${relativeTimeFromNow(item.lastCheckedAt)}`
-        : 'Never checked';
-      return `${statusText} • ${timeText} • ${item.folderPath}`;
-    }
-
     if (section === 'duplicates') {
       return `Group of ${item.duplicateCount} • ${item.url}`;
-    }
-
-    if (section === 'stale') {
-      const timeText = item.lastCheckedAt
-        ? `Last checked ${relativeTimeFromNow(item.lastCheckedAt)}`
-        : 'No check record';
-      return `${timeText} • ${item.folderPath}`;
     }
 
     return item.folderPath || '';
@@ -131,12 +109,8 @@ export class CleanupView {
 
   emptyTextForSection(section) {
     switch (section) {
-      case 'dead':
-        return 'No dead links detected.';
       case 'duplicates':
         return 'No duplicate bookmarks found.';
-      case 'stale':
-        return 'No stale bookmarks at the moment.';
       default:
         return 'Nothing to clean up here.';
     }
