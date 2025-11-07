@@ -112,40 +112,75 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 ```
 bookmark-kanban/
 ├── js/
+│   ├── AppCoordinator.js    # Main application coordinator
 │   ├── background.js        # Background service worker
 │   ├── popup.js             # Popup window script
 │   ├── newtab.js            # New tab page script
-│   ├── app.js               # Main application controller
-│   └── modules/             # Module directory
+│   └── modules/             # Core modules directory
 │       ├── ui/              # UI components
-│       │   ├── UIManager.js # Main UI coordinator
+│       │   ├── UIManager.js
 │       │   ├── BookmarkRenderer.js
+│       │   ├── BookmarkActionMenu.js
 │       │   ├── ColumnManager.js
 │       │   ├── KanbanRenderer.js
 │       │   ├── NotificationService.js
 │       │   └── UIStateManager.js
-│       ├── bookmarkManager.js # Bookmark data management
-│       ├── modalManager.js   # Modal dialogs
-│       ├── dragManager.js    # Drag and drop functionality
-│       └── ...
+│       ├── cleanup/         # Cleanup system modules
+│       │   ├── cleanupActions.js
+│       │   ├── cleanupConstants.js
+│       │   ├── cleanupEngine.js
+│       │   ├── cleanupMediator.js
+│       │   ├── cleanupRepository.js
+│       │   ├── cleanupState.js
+│       │   ├── cleanupUIController.js
+│       │   ├── cleanupView.js
+│       │   ├── cleanupUtils.js
+│       │   ├── archiveManager.js
+│       │   ├── recycleManager.js
+│       │   ├── archivePanelController.js
+│       │   ├── recyclePanelController.js
+│       │   └── cleanupPreferences.js
+│       ├── bookmarkManager.js    # Bookmark data management
+│       ├── modalManager.js        # Modal dialogs management
+│       ├── dragManager.js         # Drag and drop functionality
+│       ├── tagManager.js          # Tag system management
+│       ├── tagRenderer.js         # Tag rendering components
+│       ├── tagPalettes.js         # Tag color palettes
+│       ├── themeManager.js        # Theme management
+│       ├── displayManager.js      # Display mode management
+│       ├── faviconLoader.js       # Favicon loading
+│       ├── faviconPreferenceManager.js
+│       ├── accessStatsClient.js   # Access frequency tracking
+│       ├── accessTracker.js       # Background access tracking
+│       ├── eventManager.js        # Event handling
+│       ├── messageHandler.js      # Message communication
+│       ├── notificationManager.js  # Notification system
+│       ├── storageManager.js      # Storage management
+│       ├── utils.js               # Utility functions
+│       └── Modal.js               # Unified modal factory
 ├── css/
 │   ├── popup.css
-│   ├── newtab.css
-│   ├── themes.css          # Theme definitions
-│   └── modules/            # CSS modules
-│       ├── common.css
-│       ├── drag.css
-│       ├── modal.css
-│       └── commandPalette.css
+│   ├── newtab.css            # Main stylesheet
+│   ├── themes.css            # Theme definitions
+│   └── modules/              # CSS modules
+│       ├── modal-unified.css # Unified modal styles
+│       ├── cleanup.css        # Cleanup system styles
+│       ├── tags.css          # Tag system styles
+│       ├── common.css        # Common utilities
+│       ├── drag.css          # Drag and drop styles
+│       ├── modal.css         # Legacy modal styles
+│       └── commandPalette.css # Command palette styles
 ├── lib/
-│   └── Sortable.min.js     # Third-party drag and drop library
+│   └── Sortable.min.js       # Third-party drag and drop library
 ├── icons/
 │   ├── icon16.png
 │   ├── icon48.png
-│   └── icon128.png
+│   ├── icon128.png
+│   └── default-favicon.png   # Default bookmark favicon
 ├── popup.html
 ├── newtab.html
-└── manifest.json
+├── manifest.json
+└── README.md                 # This file
 ```
 
 ### External Libraries
