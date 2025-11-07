@@ -474,6 +474,27 @@
   min-height: 80px;
 }
 
+.settings-textarea {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85rem;
+  min-height: 120px;
+}
+
+.form-help-text {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666666);
+}
+
+.form-actions--inline {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-inline {
+  margin-top: 8px;
+}
+
 /* ===== 错误和验证状态 ===== */
 .modal-error {
   color: var(--danger-color, #dc3545);

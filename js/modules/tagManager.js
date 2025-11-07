@@ -1,90 +1,68 @@
+import { themeManager } from './themeManager.js';
+import { tagPalettes } from './tagPalettes.js';
+
 /*** Tag Manager - BookmarkTagDataManager
- *
  * Responsible for parsing, storing, and managing tags
  */
-
 export class TagManager {
   constructor() {
-    this.tagCache = new Map();
     this.bookmarkTags = new Map();
-    this.tagColors = new Map();
+    this.CUSTOM_PALETTE_KEY = 'bookmark_board_tag_palette_override';
+    this.customPalettes = null;
+    this.currentTheme = themeManager.getCurrentTheme();
+    this.currentPalette = this.resolvePalette(this.currentTheme);
+
+    this.loadCustomPalettes();
+    themeManager.subscribe((theme) => {
+      this.currentTheme = theme;
+      this.applyThemePalette(theme);
+    });
   }
 
-  /*** Extract tags from a bookmark title
-   * @param {string} title Bookmark title
-   * @returns {{cleanTitle: string, tags: string[]}} Cleaned title and tag list
-  */
+  /*** Extract tags from a bookmark title */
   extractTags(title) {
     if (!title || typeof title !== 'string') {
       return { cleanTitle: title || '', tags: [] };
     }
 
-    // Match the #tag pattern, supporting alphanumeric and CJK characters
     const tagRegex = /#[\w\u4e00-\u9fa5]+/g;
     const tagMatches = title.match(tagRegex) || [];
-
-    // Remove the leading # character
     const tags = tagMatches.map(match => match.substring(1).toLowerCase());
 
-    // Remove tags from the title and collapse consecutive spaces
     let cleanTitle = title.replace(tagRegex, '').trim();
-    cleanTitle = cleanTitle.replace(/\s+/g, ' '); // Collapse multiple spaces
+    cleanTitle = cleanTitle.replace(/\s+/g, ' ');
 
     return { cleanTitle, tags };
   }
 
-  /*** Process a bookmark, extract tags, and cache metadata
-   * @param {Object} bookmark Bookmark object
-   * @returns {Object} Processed bookmark data including tag info
-  */
+  /*** Process a bookmark, extract tags, and cache metadata */
   processBookmark(bookmark) {
     const { cleanTitle, tags } = this.extractTags(bookmark.title);
 
-    // Create an enhanced bookmark object
     const enhancedBookmark = {
       ...bookmark,
       originalTitle: bookmark.title,
       cleanTitle: cleanTitle || bookmark.title,
-      tags: tags
+      tags
     };
 
-    // Cache tag data
     if (tags.length > 0) {
       this.bookmarkTags.set(bookmark.id, tags);
-
-      // Generate or reuse colors for each tag
-      tags.forEach(tag => {
-        if (!this.tagColors.has(tag)) {
-          this.tagColors.set(tag, this.generateTagColor(tag));
-        }
-      });
     } else {
-      // Clear stale cache entries when the bookmark no longer has tags
       this.bookmarkTags.delete(bookmark.id);
     }
 
     return enhancedBookmark;
   }
 
-  /*** Process an array of bookmarks
-   * @param {Array} bookmarks Bookmark array
-   * @returns {Array} Processed bookmark array
-  */
   processBookmarks(bookmarks) {
     return bookmarks.map(bookmark => this.processBookmark(bookmark));
   }
 
-  /*** Get tags for a bookmark
-   * @param {string} bookmarkId Bookmark ID
-   * @returns {Array} Tag array
-  */
   getBookmarkTags(bookmarkId) {
     return this.bookmarkTags.get(bookmarkId) || [];
   }
 
-  /*** Get all unique tags
-   * @returns {Array} Tag array
-  */
   getAllTags() {
     const allTags = new Set();
     this.bookmarkTags.forEach(tags => {
@@ -93,9 +71,6 @@ export class TagManager {
     return Array.from(allTags).sort();
   }
 
-  /*** Group bookmark IDs by tag
-   * @returns {Map} Mapping from tag to bookmark ID array
-  */
   groupBookmarksByTags() {
     const tagGroups = new Map();
 
@@ -111,37 +86,15 @@ export class TagManager {
     return tagGroups;
   }
 
-  /*** Generate a deterministic color for a tag
-   * @param {string} tag Tag name
-   * @returns {string} HSL color value
-  */
-  generateTagColor(tag) {
-    // Use a simple hash to provide consistent colors
-    let hash = 0;
-    for (let i = 0; i < tag.length; i++) {
-      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Convert the hash into an HSL color
-    const hue = Math.abs(hash) % 360;
-    const saturation = 60 + (Math.abs(hash) % 20); //60-80%
-    const lightness = 45 + (Math.abs(hash) % 15);  //45-60%
-
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  }
-
-  /*** Get the color associated with a tag
-   * @param {string} tag Tag name
-   * @returns {string} HSL color value
-  */
   getTagColor(tag) {
-    return this.tagColors.get(tag) || this.generateTagColor(tag);
+    const palette = this.currentPalette?.length ? this.currentPalette : tagPalettes.default;
+    const entry = this.getPaletteEntryForTag(tag, palette);
+    return {
+      background: entry.bg,
+      text: entry.text || this.getContrastColor(entry.bg)
+    };
   }
 
-  /*** Find bookmarks containing any of the provided tags
-   * @param {Array} tags Tags to search for
-   * @returns {Array} Matching bookmark IDs
-  */
   findBookmarksByTags(tags) {
     const matchingBookmarks = new Set();
 
@@ -156,11 +109,6 @@ export class TagManager {
     return Array.from(matchingBookmarks);
   }
 
-  /*** Filter bookmark IDs by tags
-   * @param {Array} bookmarkIds Bookmark ID array
-   * @param {Array} filterTags Tag filter array
-   * @returns {Array} Filtered bookmark IDs
-  */
   filterBookmarksByTags(bookmarkIds, filterTags) {
     if (!filterTags || filterTags.length === 0) {
       return bookmarkIds;
@@ -172,34 +120,246 @@ export class TagManager {
     });
   }
 
-  /*** ClearCacheData
-   */
   clearCache() {
-    this.tagCache.clear();
     this.bookmarkTags.clear();
-    this.tagColors.clear();
   }
 
-  /*** Get aggregated statistics for tag usage
-   * @returns {Object} Tag usage statistics
-   */
   getStatistics() {
     const stats = {
       totalBookmarks: this.bookmarkTags.size,
-      totalTags: this.tagColors.size,
+      totalTags: 0,
       tagUsage: new Map()
     };
 
-    // Count how many times each tag is used
+    const uniqueTags = new Set();
     this.bookmarkTags.forEach(tags => {
       tags.forEach(tag => {
+        uniqueTags.add(tag);
         stats.tagUsage.set(tag, (stats.tagUsage.get(tag) || 0) + 1);
       });
     });
 
+    stats.totalTags = uniqueTags.size;
     return stats;
+  }
+
+  /*** Palette management ***/
+  applyThemePalette(theme) {
+    this.currentPalette = this.resolvePalette(theme);
+    this.refreshRenderedTagStyles();
+  }
+
+  resolvePalette(theme) {
+    const themeKey = theme && typeof theme === 'string' ? theme : 'default';
+    const overridePalette = this.getCustomPaletteForTheme(themeKey);
+    if (overridePalette?.length) {
+      return overridePalette;
+    }
+    if (tagPalettes[themeKey]?.length) {
+      return tagPalettes[themeKey];
+    }
+    return tagPalettes.default;
+  }
+
+  getCustomPaletteForTheme(theme) {
+    if (!this.customPalettes) {
+      return null;
+    }
+    const palette = this.customPalettes[theme] || this.customPalettes.default;
+    return Array.isArray(palette) ? palette : null;
+  }
+
+  getPaletteEntryForTag(tag, palette) {
+    const normalizedPalette = palette?.length ? palette : tagPalettes.default;
+    const hash = this.hashTag(tag);
+    const index = Math.abs(hash) % normalizedPalette.length;
+    return normalizedPalette[index];
+  }
+
+  hashTag(tag) {
+    const value = tag || '';
+    let hash = 0;
+    for (let i = 0; i < value.length; i++) {
+      hash = value.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return hash;
+  }
+
+  getContrastColor(backgroundColor) {
+    if (!backgroundColor) {
+      return '#1f2937';
+    }
+    const rgb = this.hexToRgb(backgroundColor);
+    if (!rgb) {
+      return '#1f2937';
+    }
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    return luminance > 0.5 ? '#111827' : '#f8fafc';
+  }
+
+  hexToRgb(color) {
+    const hex = color.replace('#', '');
+    if (!(hex.length === 3 || hex.length === 6)) {
+      return null;
+    }
+    const normalized = hex.length === 3
+      ? hex.split('').map(char => char + char).join('')
+      : hex;
+    const bigint = parseInt(normalized, 16);
+    if (Number.isNaN(bigint)) {
+      return null;
+    }
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255
+    };
+  }
+
+  refreshRenderedTagStyles() {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const tags = document.querySelectorAll('.bookmark-tag');
+    tags.forEach(tagElement => {
+      const tag = tagElement.dataset.tag;
+      if (!tag) {
+        return;
+      }
+      const { background, text } = this.getTagColor(tag);
+      tagElement.style.backgroundColor = background;
+      tagElement.style.color = text;
+    });
+  }
+
+  /*** Custom palette API ***/
+  getCustomPaletteJSON() {
+    return this.customPalettes ? JSON.stringify(this.customPalettes, null, 2) : '';
+  }
+
+  getDefaultPaletteTemplate() {
+    return JSON.stringify(tagPalettes, null, 2);
+  }
+
+  async saveCustomPaletteConfig(input) {
+    const trimmed = (input || '').trim();
+    if (!trimmed) {
+      await this.clearCustomPaletteConfig();
+      return { success: true, message: 'Custom palette cleared' };
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch (error) {
+      return { success: false, message: 'Invalid JSON format' };
+    }
+
+    const validated = this.validatePaletteConfig(parsed);
+    if (!validated) {
+      return { success: false, message: 'Invalid palette structure' };
+    }
+
+    try {
+      await this.storePaletteOverrides(validated);
+      this.customPalettes = validated;
+      this.applyThemePalette(this.currentTheme);
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to save custom palette:', error);
+      return { success: false, message: 'Failed to save palette to storage' };
+    }
+  }
+
+  async clearCustomPaletteConfig() {
+    try {
+      await this.removePaletteOverrides();
+      this.customPalettes = null;
+      this.applyThemePalette(this.currentTheme);
+    } catch (error) {
+      console.error('Failed to clear custom palette:', error);
+    }
+  }
+
+  validatePaletteConfig(config) {
+    if (!config || typeof config !== 'object') {
+      return null;
+    }
+    const normalized = {};
+    Object.entries(config).forEach(([theme, palette]) => {
+      if (!Array.isArray(palette)) {
+        return;
+      }
+      const normalizedPalette = palette
+        .map(entry => this.normalizePaletteEntry(entry))
+        .filter(Boolean);
+      if (normalizedPalette.length > 0) {
+        normalized[theme] = normalizedPalette;
+      }
+    });
+    return Object.keys(normalized).length > 0 ? normalized : null;
+  }
+
+  normalizePaletteEntry(entry) {
+    if (typeof entry === 'string') {
+      return { bg: entry, text: null };
+    }
+    if (entry && typeof entry.bg === 'string') {
+      return {
+        bg: entry.bg,
+        text: typeof entry.text === 'string' ? entry.text : null
+      };
+    }
+    return null;
+  }
+
+  loadCustomPalettes() {
+    if (!this.canUseChromeStorage()) {
+      return;
+    }
+    chrome.storage.sync.get([this.CUSTOM_PALETTE_KEY], (result) => {
+      const stored = result?.[this.CUSTOM_PALETTE_KEY];
+      const validated = this.validatePaletteConfig(stored);
+      this.customPalettes = validated;
+      this.applyThemePalette(this.currentTheme);
+    });
+  }
+
+  storePaletteOverrides(palettes) {
+    if (!this.canUseChromeStorage()) {
+      this.customPalettes = palettes;
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.set({ [this.CUSTOM_PALETTE_KEY]: palettes }, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  removePaletteOverrides() {
+    if (!this.canUseChromeStorage()) {
+      this.customPalettes = null;
+      return Promise.resolve();
+    }
+    return new Promise((resolve, reject) => {
+      chrome.storage.sync.remove(this.CUSTOM_PALETTE_KEY, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  canUseChromeStorage() {
+    return typeof chrome !== 'undefined' && chrome.storage?.sync;
   }
 }
 
-// Export a singleton instance for reuse throughout the app
 export const tagManager = new TagManager();

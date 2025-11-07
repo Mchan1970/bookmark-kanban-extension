@@ -1,5 +1,6 @@
 import { createElement } from './utils.js';
 import { Modal, modalManager } from './Modal.js';
+import { tagManager } from './tagManager.js';
 
 export class ModalManager {
   constructor(bookmarkManager, uiManager, app) {
@@ -149,6 +150,19 @@ export class ModalManager {
             <button id="open-recycle-view" class="btn-secondary">View Recycle Bin</button>
           </div>
         </div>
+        <div class="settings-group">
+          <h3>Advanced</h3>
+          <div class="form-group">
+            <label for="tag-palette-config">Custom Tag Palette (JSON)</label>
+            <textarea id="tag-palette-config" class="settings-textarea" rows="5" placeholder='{"default":[{"bg":"#E3F2FD","text":"#0F172A"}]}'></textarea>
+            <p class="form-help-text">Leave empty to use built-in palettes.</p>
+            <button type="button" class="btn-secondary btn-inline" id="load-tag-palette-template">Insert Default Template</button>
+          </div>
+          <div class="form-actions form-actions--inline">
+            <button type="button" class="btn-secondary" id="save-tag-palette">Save Palette</button>
+            <button type="button" class="btn-secondary" id="reset-tag-palette">Reset Palette</button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -173,6 +187,11 @@ export class ModalManager {
           if (displayModeSelector && window.app.displayManager) {
             displayModeSelector.value = window.app.displayManager.getCurrentDisplayMode();
           }
+        }
+
+        const paletteField = modal.element.querySelector('#tag-palette-config');
+        if (paletteField) {
+          paletteField.value = tagManager.getCustomPaletteJSON();
         }
 
         // Bind events
@@ -392,6 +411,44 @@ export class ModalManager {
         await window.app?.cleanupManager?.ui?.openRecycleModal();
       });
       openRecycleView.dataset.bound = 'true';
+    }
+
+    const savePaletteButton = modal.querySelector('#save-tag-palette');
+    if (savePaletteButton && !savePaletteButton.dataset.bound) {
+      savePaletteButton.addEventListener('click', async () => {
+        const textarea = modal.querySelector('#tag-palette-config');
+        const result = await tagManager.saveCustomPaletteConfig(textarea?.value || '');
+        if (result.success) {
+          this.showToast('Custom palette saved');
+        } else {
+          this.showToast(result.message || 'Failed to save palette', 'error');
+        }
+      });
+      savePaletteButton.dataset.bound = 'true';
+    }
+
+    const resetPaletteButton = modal.querySelector('#reset-tag-palette');
+    if (resetPaletteButton && !resetPaletteButton.dataset.bound) {
+      resetPaletteButton.addEventListener('click', async () => {
+        await tagManager.clearCustomPaletteConfig();
+        const textarea = modal.querySelector('#tag-palette-config');
+        if (textarea) {
+          textarea.value = '';
+        }
+        this.showToast('Palette reset to defaults');
+      });
+      resetPaletteButton.dataset.bound = 'true';
+    }
+
+    const loadTemplateButton = modal.querySelector('#load-tag-palette-template');
+    if (loadTemplateButton && !loadTemplateButton.dataset.bound) {
+      loadTemplateButton.addEventListener('click', () => {
+        const textarea = modal.querySelector('#tag-palette-config');
+        if (textarea) {
+          textarea.value = tagManager.getDefaultPaletteTemplate();
+        }
+      });
+      loadTemplateButton.dataset.bound = 'true';
     }
     
     // Close button is now handled automatically by the new Modal factory

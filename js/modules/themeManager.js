@@ -9,6 +9,8 @@ export class ThemeManager {
     this.DEFAULT_THEME = 'default';
     this.availableThemes = ['default', 'dark', 'green', 'purple', 'high-contrast'];
     this.currentTheme = this.DEFAULT_THEME;
+    this.listeners = new Set();
+    this._hasAppliedInitialTheme = false;
     this.initializeTheme();
   }
 
@@ -102,16 +104,46 @@ export class ThemeManager {
       //Also clear the invalid theme from storage
       this.clearInvalidTheme();
     }
-    
+
+    if (this._hasAppliedInitialTheme && this.currentTheme === theme) {
+      return;
+    }
+
     //Ensure applied to document.documentElement (i.e., <html> element)
     document.documentElement.removeAttribute('data-theme');
-    
+
     if (theme !== 'default') {
       document.documentElement.setAttribute('data-theme', theme);
     }
-    
+
     this.currentTheme = theme;
+    this._hasAppliedInitialTheme = true;
     console.log(`Applied theme: ${theme}`); //Add debug log
+    this.notifyThemeChange(theme);
+  }
+
+  /*** Subscribe to theme changes
+   * @param {Function} listener Callback receiving new theme name
+   * @returns {Function} Unsubscribe function
+   */
+  subscribe(listener) {
+    if (typeof listener !== 'function') {
+      return () => {};
+    }
+
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  /*** Notify listeners when theme changes */
+  notifyThemeChange(theme) {
+    this.listeners.forEach((listener) => {
+      try {
+        listener(theme);
+      } catch (error) {
+        console.error('Theme listener error:', error);
+      }
+    });
   }
 
   /*** Switch theme

@@ -45,11 +45,9 @@ export class TagRenderer {
     tagElement.setAttribute('data-tag', tag);
 
     // Apply tag color
-    const color = tagManager.getTagColor(tag);
-    tagElement.style.backgroundColor = color;
-
-    // Adjust text color for readability
-    tagElement.style.color = this.getContrastColor(color);
+    const { background, text } = tagManager.getTagColor(tag);
+    tagElement.style.backgroundColor = background;
+    tagElement.style.color = text;
 
     // Attach click handler if applicable
     if (clickable) {
@@ -239,21 +237,6 @@ export class TagRenderer {
   showHiddenTagsTooltip(event, hiddenTags) {
     // TODO: Provide a richer tooltip UI if needed
     console.log('Hidden tags:', hiddenTags);
-  }
-
-  /*** Get a contrasting text color for the given background
-   * @param {string} backgroundColor Background color in HSL format
-   * @returns {string} Contrast color
-  */
-  getContrastColor(backgroundColor) {
-    // Parse the HSL color
-    const match = backgroundColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-    if (!match) return '#ffffff';
-
-    const lightness = parseInt(match[3]);
-
-    // Choose an appropriate foreground color based on lightness
-    return lightness > 55 ? '#333333' : '#ffffff';
   }
 
   /*** Update the active-state styling and clear button
