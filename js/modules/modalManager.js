@@ -131,6 +131,13 @@ export class ModalManager {
               <option value="full">Full (wrap titles)</option>
             </select>
           </div>
+          <div class="form-group form-group--toggle">
+            <label class="form-switch">
+              <input type="checkbox" id="favicon-visibility-toggle" checked>
+              <span>Show website icons (favicons) before titles</span>
+            </label>
+            <p class="form-help-text">Disable for an ultra-minimal text-only layout.</p>
+          </div>
         </div>
         <div class="settings-group">
           <h3>Data Management</h3>
@@ -206,6 +213,11 @@ export class ModalManager {
         const staleThresholdInput = modal.element.querySelector('#stale-threshold-input');
         if (staleThresholdInput && window.app?.cleanupPreferences) {
           staleThresholdInput.value = window.app.cleanupPreferences.getCurrentThresholdDays();
+        }
+
+        const faviconToggle = modal.element.querySelector('#favicon-visibility-toggle');
+        if (faviconToggle && window.app?.faviconPreferenceManager) {
+          faviconToggle.checked = window.app.faviconPreferenceManager.isEnabled();
         }
 
         // Bind events
@@ -380,6 +392,22 @@ export class ModalManager {
         }
       });
       displayModeSelector.dataset.bound = 'true';
+    }
+
+    const faviconToggle = modal.querySelector('#favicon-visibility-toggle');
+    if (faviconToggle && !faviconToggle.dataset.bound) {
+      faviconToggle.addEventListener('change', async (event) => {
+        const manager = window.app?.faviconPreferenceManager;
+        if (!manager) {
+          return;
+        }
+        const result = await manager.setPreference(event.target.checked);
+        if (!result?.success) {
+          this.showToast(result?.message || 'Failed to update preference', 'error');
+          event.target.checked = manager.isEnabled();
+        }
+      });
+      faviconToggle.dataset.bound = 'true';
     }
     
     //Refresh bookmarks button

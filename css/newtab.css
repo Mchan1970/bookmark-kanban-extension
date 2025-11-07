@@ -583,10 +583,28 @@ main {
 
 .bookmark-content {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.35rem;
   flex: 1;
   min-width: 0;
+}
+
+.bookmark-favicon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: baseline;
+  margin-top: 2px;
+  object-fit: cover;
+  background-color: var(--bg-light);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+[data-show-favicons="false"] .bookmark-favicon {
+  display: none;
 }
 
 .bookmark-item:hover {
@@ -792,6 +810,18 @@ main {
   background-color: var(--bg-light);
   border-color: var(--border-color);
   cursor: not-allowed;
+}
+
+.form-group--toggle .form-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.form-group--toggle input[type="checkbox"] {
+  width: auto;
 }
 
 .form-actions {

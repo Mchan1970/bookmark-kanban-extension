@@ -17,6 +17,7 @@ import { ArchiveManager } from './modules/cleanup/archiveManager.js';
 import { RecycleManager } from './modules/cleanup/recycleManager.js';
 import { AccessStatsClient } from './modules/accessStatsClient.js';
 import { CleanupPreferences } from './modules/cleanup/cleanupPreferences.js';
+import { FaviconPreferenceManager } from './modules/faviconPreferenceManager.js';
 
 export class AppCoordinator {
   constructor() {
@@ -24,6 +25,7 @@ export class AppCoordinator {
     this.faviconObserver = null;
     this.accessStatsClient = new AccessStatsClient();
     this.cleanupPreferences = new CleanupPreferences();
+    this.faviconPreferenceManager = new FaviconPreferenceManager();
     
     // Expose the app instance globally when needed
     window.app = this;
@@ -42,6 +44,7 @@ export class AppCoordinator {
       // Initialize the bookmark manager
       this.bookmarkManager = new BookmarkManager();
       await this.cleanupPreferences.initialize();
+      await this.faviconPreferenceManager.initialize();
       await this.accessStatsClient.initialize();
 
       // Initialize the tag manager
@@ -52,7 +55,7 @@ export class AppCoordinator {
       this.uiManager = new UIManager(this.bookmarkManager);
       
       // Initialize the modal manager
-      this.modalManager = new ModalManager(this.bookmarkManager, this.uiManager);
+      this.modalManager = new ModalManager(this.bookmarkManager, this.uiManager, this);
       
       // Initialize the drag manager
       this.dragManager = new DragManager(this.bookmarkManager, this.uiManager);

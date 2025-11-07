@@ -51,7 +51,9 @@ export class BookmarkRenderer {
     const content = createElement('div', 'bookmark-content');
 
     //Create favicon container
-    const faviconContainer = createElement('div', 'bookmark-favicon');
+    const faviconContainer = createElement('img', 'bookmark-favicon');
+    faviconContainer.alt = '';
+    faviconContainer.loading = 'lazy';
 
     //Create text container for title and tags
     const textContainer = createElement('div', 'bookmark-text-container');

@@ -6,7 +6,7 @@
   "description": "Organize bookmarks in a visual kanban board. Simple, intuitive management with drag-and-drop functionality.",
   "author": "Chen Yifeng",
   "homepage_url": "https://github.com/mchan1970/bookmark-kanban-extension",
-  "permissions": ["bookmarks", "storage", "tabs"],
+  "permissions": ["bookmarks", "storage", "tabs", "favicon"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -24,7 +24,7 @@
     "128": "icons/icon128.png"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self';"
   },
   "minimum_chrome_version": "88",
   "offline_enabled": true,
