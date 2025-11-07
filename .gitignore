@@ -5,3 +5,6 @@
 .vscode/
 .env
 .env.local
+
+# Development documentation
+docs/
