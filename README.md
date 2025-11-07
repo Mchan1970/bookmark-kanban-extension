@@ -45,7 +45,7 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 2. Drag and drop bookmarks between columns to organize them
 3. Click on a bookmark to open it in a new tab
 4. Use the edit and delete buttons to manage your bookmarks
-5. Access settings through the extension popup by clicking the extension icon in your toolbar
+5. Access settings by clicking the 'Settings' button in the new tab page header
 6. Use the theme selector in the header to switch between different visual themes
 
 ## Features in Detail
@@ -263,13 +263,6 @@ Chen Yifeng
     - All data processing remains local and private
     - Simplified permission model reduces security surface
     - Chrome extension favicon API integration for safer icon loading
-
-- 1.2.4
-  - Cleanup Lite release
-    - Removed site availability checking and related permissions
-    - Simplified bookmark action menu
-    - Focused on duplicate/archive/recycle flows without network probes
-    - Added on-device visit tracking to surface long-unvisited bookmarks
 
 - 1.2.3
   - Moved theme and display mode selectors to settings page
