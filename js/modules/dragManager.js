@@ -143,9 +143,12 @@ export class DragManager {
   async handleBookmarkMove(evt) {
     let rollbackItem = null;
     let rollbackFrom = null;
+    let bookmarkId = null;
+    let newFolderId = null;
+    let newIndex;
 
     try {
-        const bookmarkId = evt.item.dataset.bookmarkId;
+        bookmarkId = evt.item.dataset.bookmarkId;
         const targetColumn = evt.to.closest('.kanban-column');
 
         // 1. Assign rollback data *before* any potential failure
@@ -157,22 +160,98 @@ export class DragManager {
             throw new Error('Invalid bookmark or target column.');
         }
 
-        let newFolderId;
         if (targetColumn.dataset.columnType === 'uncategorized') {
             newFolderId = '1';
         } else {
             newFolderId = targetColumn.dataset.folderId;
         }
 
-        // 3. Get the index DIRECTLY from the event. This is the correct fix.
-        const newIndex = evt.newIndex;
+        // 3. Get the index with robust logic that ignores empty state elements
+        let newIndex;
 
-        if (newIndex === undefined || newIndex < 0) {
-             throw new Error('Could not determine new bookmark position.');
+        // Check if target column is truly empty (only has placeholders, not actual bookmarks)
+        const targetBookmarkItems = Array.from(evt.to.children).filter(child =>
+            child.classList.contains('bookmark-item') && child.dataset && child.dataset.bookmarkId
+        );
+        const onlyDraggedItemInTarget = targetBookmarkItems.length === 1 &&
+          targetBookmarkItems[0].dataset.bookmarkId === bookmarkId;
+        const isTargetEmpty = targetBookmarkItems.length === 0;
+
+        console.log(`🔍 Empty column check: ${isTargetEmpty}, items found: ${targetBookmarkItems.length}`);
+
+        if (isTargetEmpty || onlyDraggedItemInTarget) {
+            // Empty column: always use index 0 for first bookmark
+            newIndex = 0;
+        } else {
+            // Non-empty column: use Sortable's index or calculate position
+            if (evt.newIndex !== undefined && evt.newIndex >= 0) {
+                // Prefer Sortable's index when available
+                newIndex = evt.newIndex;
+                console.log('📐 Using Sortable index:', evt.newIndex);
+            } else {
+                // Calculate position based on dragged element among actual bookmarks
+                const draggedElement = targetBookmarkItems.find(child =>
+                    child.dataset.bookmarkId === bookmarkId
+                );
+
+                if (draggedElement) {
+                    const allBookmarkItems = Array.from(evt.to.children).filter(child =>
+                        child.classList.contains('bookmark-item') && child.dataset && child.dataset.bookmarkId
+                    );
+                    newIndex = allBookmarkItems.indexOf(draggedElement);
+                    console.log('🔍 Calculated index:', newIndex);
+                } else {
+                    // Fallback: insert at end
+                    newIndex = targetBookmarkItems.length;
+                    console.log('🔍 Using fallback index (end):', newIndex);
+                }
+            }
         }
 
-        // 4. Log and execute the move
-        console.log(`Moving bookmark: ${bookmarkId} to folder: ${newFolderId} at index: ${newIndex}`);
+        // Final validation and debug
+        if (newIndex === undefined || newIndex < 0) {
+            console.error('Index calculation failed:', {
+                bookmarkId,
+                targetColumnId: targetColumn.dataset?.folderId,
+                evtNewIndex: evt.newIndex,
+                calculatedNewIndex: newIndex,
+                targetChildrenCount: evt.to.children.length,
+                isEmptyColumn: this.isColumnEmpty(evt.to)
+            });
+            throw new Error('Invalid bookmark position calculated');
+        }
+
+        // 4. Log debug information and execute the move
+        const targetChildren = Array.from(evt.to.children);
+        const actualBookmarks = targetChildren.filter(child => child.classList.contains('bookmark-item') && child.dataset.bookmarkId);
+        const isEmptyColumn = actualBookmarks.length === 0;
+
+        console.log(`🎯 Attempting to move bookmark: ${bookmarkId}`);
+        console.log(`📁 Target folder ID: ${newFolderId}`);
+        console.log(`📍 Calculated index: ${newIndex}`);
+        console.log(`🧪 Target column children count: ${evt.to.children.length}`);
+        console.log(`📚 Actual bookmark items count: ${actualBookmarks.length}`);
+        console.log(`🔍 Is column empty: ${isEmptyColumn}`);
+        console.log(`🔍 Target column children:`, targetChildren.map((child, idx) => ({
+            index: idx,
+            element: child.tagName.toLowerCase(),
+            bookmarkId: child.dataset?.bookmarkId,
+            className: child.className,
+            isBookmarkItem: child.classList.contains('bookmark-item'),
+            isTarget: child.dataset?.bookmarkId === bookmarkId,
+            textContent: child.textContent?.substring(0, 30) + (child.textContent?.length > 30 ? '...' : '')
+        })));
+
+        // Add debug check for target folder validity
+        console.log('🔎 Calling Chrome bookmarks API...');
+        console.log('🎯 Target column analysis:', {
+            totalChildren: evt.to.children.length,
+            childrenDetails: Array.from(evt.to.children).map(child => ({
+                class: child.className,
+                text: child.textContent?.trim(),
+                isBookmark: child.classList.contains('bookmark-item') && child.dataset?.bookmarkId
+            }))
+        });
 
         await this.bookmarkManager.moveBookmark(bookmarkId, {
             parentId: newFolderId,
@@ -180,9 +259,24 @@ export class DragManager {
         });
 
         console.log('✅ Bookmark moved successfully in Chrome.');
+        this.removeEmptyStatePlaceholder(evt.to);
+        this.ensureEmptyStatePlaceholder(evt.from);
 
     } catch (error) {
         console.error('❌ Failed to move bookmark:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+            bookmarkId: bookmarkId,
+            targetFolder: newFolderId,
+            targetIndex: newIndex,
+            columnChildren: Array.from(evt.to.children).map(child => ({
+                class: child.className,
+                text: child.textContent?.trim(),
+                isBookmark: child.classList.contains('bookmark-item') && child.dataset?.bookmarkId
+            }))
+        });
 
         // 5. Execute UI rollback on failure
         this.rollbackBookmarkMove(rollbackItem, rollbackFrom, evt.oldIndex);
@@ -225,6 +319,32 @@ export class DragManager {
    * Show error message to user
    * @param {string} message Error message
    */
+  /*** Check if a column is truly empty (contains actual bookmark items)
+   * @param {HTMLElement} columnElement Column element to check
+   * @returns {boolean} True if column has no bookmark items
+   */
+isColumnEmpty(columnElement) {
+  if (!columnElement) {
+    return true;
+  }
+
+  const bookmarkList = columnElement.querySelector('.bookmark-list');
+  if (!bookmarkList) {
+    return true;
+  }
+
+  // Count actual bookmark items (exclude placeholders, dividers, empty states, etc.)
+  const actualBookmarks = Array.from(bookmarkList.children).filter(child => {
+    return child.classList.contains('bookmark-item') &&
+           child.dataset &&
+           child.dataset.bookmarkId &&
+           child.dataset.bookmarkId !== '' &&
+           child.dataset.bookmarkId !== undefined;
+  });
+
+  return actualBookmarks.length === 0;
+}
+
   showErrorMessage(message) {
     // 创建简单的错误提示
     const errorToast = document.createElement('div');
@@ -270,6 +390,33 @@ export class DragManager {
     //Use storageManager to collect and save bookmark order
     const bookmarkOrders = storageManager.collectBookmarkOrderFromDOM();
     storageManager.saveBookmarkOrder(bookmarkOrders);
+  }
+
+  ensureEmptyStatePlaceholder(listElement) {
+    if (!listElement) {
+      return;
+    }
+    const hasBookmarkItems = listElement.querySelector('.bookmark-item');
+    if (hasBookmarkItems) {
+      this.removeEmptyStatePlaceholder(listElement);
+      return;
+    }
+    if (!listElement.querySelector('.empty-column')) {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'empty-column';
+      placeholder.textContent = 'No bookmarks';
+      listElement.appendChild(placeholder);
+    }
+  }
+
+  removeEmptyStatePlaceholder(listElement) {
+    if (!listElement) {
+      return;
+    }
+    const empty = listElement.querySelector('.empty-column');
+    if (empty) {
+      empty.remove();
+    }
   }
 
   /*** Destroy all drag instances

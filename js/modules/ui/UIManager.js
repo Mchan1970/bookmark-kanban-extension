@@ -339,10 +339,6 @@ export class UIManager {
   }
 
   refreshTagFilter() {
-    if (!this.tagFilterContainer) {
-      return;
-    }
-
     this.bookmarkManager.getBookmarkTree().then((tree) => {
       if (!tree) {
         return;
@@ -350,7 +346,17 @@ export class UIManager {
       tagManager.clearCache();
       this.collectTags(tree);
       const availableTags = tagManager.getAllTags();
-      this.renderTagFilter(availableTags);
+      if (!availableTags.length) {
+        if (this.tagFilterContainer && this.tagFilterContainer.parentNode) {
+          this.tagFilterContainer.parentNode.removeChild(this.tagFilterContainer);
+        }
+        this.tagFilterContainer = null;
+        return;
+      }
+      const filterElement = this.renderTagFilter(availableTags);
+      if (filterElement && !filterElement.parentNode && this.container) {
+        this.container.prepend(filterElement);
+      }
     }).catch((error) => {
       console.error('Failed to refresh tag filter:', error);
     });
