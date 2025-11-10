@@ -1120,7 +1120,7 @@ main {
 .settings-group h3 {
   font-size: 1.1rem;
   margin-bottom: 16px;
-  color: var(--primary-color);
+  color: var(--link-color, var(--primary-color));
 }
 
 .stale-threshold-control {

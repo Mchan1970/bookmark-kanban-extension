@@ -47,6 +47,12 @@
   --filter-active-border: #3b82f6;
   --filter-clear-bg: #ef4444;
   --filter-clear-hover-bg: #dc2626;
+
+  /* Interactive/link text */
+  --link-color: #2563eb;
+  --link-hover-color: #1d4ed8;
+  --link-danger-color: #dc2626;
+  --link-danger-hover-color: #b91c1c;
 }
 
 /* Dark theme */
@@ -88,6 +94,12 @@
   --filter-active-border: #6366f1;
   --filter-clear-bg: #dc2626;
   --filter-clear-hover-bg: #b91c1c;
+
+  /* Interactive/link text */
+  --link-color: #93c5fd;
+  --link-hover-color: #bfdbfe;
+  --link-danger-color: #fca5a5;
+  --link-danger-hover-color: #fecaca;
 }
 
 /* Green theme */
@@ -124,6 +136,12 @@
   --filter-active-border: #22c55e;
   --filter-clear-bg: #ef4444;
   --filter-clear-hover-bg: #dc2626;
+
+  /* Interactive/link text */
+  --link-color: #047857;
+  --link-hover-color: #065f46;
+  --link-danger-color: #dc2626;
+  --link-danger-hover-color: #b91c1c;
 }
 
 /* Purple theme */
@@ -160,6 +178,12 @@
   --filter-active-border: #8b5cf6;
   --filter-clear-bg: #ef4444;
   --filter-clear-hover-bg: #dc2626;
+
+  /* Interactive/link text */
+  --link-color: #6d28d9;
+  --link-hover-color: #5b21b6;
+  --link-danger-color: #dc2626;
+  --link-danger-hover-color: #b91c1c;
 }
 
 /* High contrast theme */
@@ -201,4 +225,10 @@
   --filter-active-border: #000000;
   --filter-clear-bg: #000000;
   --filter-clear-hover-bg: #333333;
+
+  /* Interactive/link text */
+  --link-color: #0000ff;
+  --link-hover-color: #ff00ff;
+  --link-danger-color: #ff0000;
+  --link-danger-hover-color: #990000;
 }

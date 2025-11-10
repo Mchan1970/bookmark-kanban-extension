@@ -25,6 +25,8 @@ export class CleanupUIController {
     SECTION_KEYS.forEach(section => {
       this.selected[section] = new Set();
     });
+    this.archiveSelection = new Set();
+    this.recycleSelection = new Set();
 
     this.elements = {};
     this.view = null;
@@ -190,6 +192,9 @@ export class CleanupUIController {
     this.elements.archiveCount = document.getElementById('archive-count');
     this.elements.recycleList = document.getElementById('recycle-list');
     this.elements.recycleCount = document.getElementById('recycle-count');
+    this.elements.archiveRestoreButton = document.getElementById('archive-restore');
+    this.elements.recycleRestoreButton = document.getElementById('recycle-restore');
+    this.elements.recycleDeleteButton = document.getElementById('recycle-delete-permanent');
   }
 
   initializeViewControllers() {
@@ -216,13 +221,13 @@ export class CleanupUIController {
     });
 
     this.archivePanel.setHandlers({
-      onRestore: (id) => this.callbacks.archiveRestore([id]),
-      onRemove: (id) => this.callbacks.archiveRemove([id])
+      onRestore: (id) => this.handleArchiveQuickAction('restore', id),
+      onRemove: (id) => this.handleArchiveQuickAction('remove', id)
     });
 
     this.recyclePanel.setHandlers({
-      onRestore: (id) => this.callbacks.recycleRestore([id]),
-      onPurge: (id) => this.callbacks.recyclePurge([id])
+      onRestore: (id) => this.handleRecycleQuickAction('restore', id),
+      onPurge: (id) => this.handleRecycleQuickAction('purge', id)
     });
   }
 
@@ -236,7 +241,12 @@ export class CleanupUIController {
       openRecycleView,
       archiveButton,
       deleteButton,
-      ignoreButton
+      ignoreButton,
+      archiveModal,
+      recycleModal,
+      archiveRestoreButton,
+      recycleRestoreButton,
+      recycleDeleteButton
     } = this.elements;
 
     headerButton?.addEventListener('click', () => this.openCleanupModal());
@@ -288,6 +298,28 @@ export class CleanupUIController {
     archiveButton?.addEventListener('click', () => this.handleBulkAction('archive'));
     deleteButton?.addEventListener('click', () => this.handleBulkAction('delete'));
     ignoreButton?.addEventListener('click', () => this.handleBulkAction('ignore'));
+
+    archiveModal?.addEventListener('change', (event) => {
+      if (!event.target.classList.contains('archive-checkbox')) {
+        return;
+      }
+      const checkbox = event.target;
+      const bookmarkId = checkbox.dataset.bookmarkId;
+      this.toggleArchiveSelection(bookmarkId, checkbox.checked);
+    });
+
+    recycleModal?.addEventListener('change', (event) => {
+      if (!event.target.classList.contains('recycle-checkbox')) {
+        return;
+      }
+      const checkbox = event.target;
+      const bookmarkId = checkbox.dataset.bookmarkId;
+      this.toggleRecycleSelection(bookmarkId, checkbox.checked);
+    });
+
+    archiveRestoreButton?.addEventListener('click', () => this.handleArchiveBulkRestore());
+    recycleRestoreButton?.addEventListener('click', () => this.handleRecycleBulkAction('restore'));
+    recycleDeleteButton?.addEventListener('click', () => this.handleRecycleBulkAction('purge'));
   }
 
   renderSnapshot(snapshot) {
@@ -306,6 +338,7 @@ export class CleanupUIController {
     if (options.fromCleanup) {
       this.cleanupModal?.close();
     }
+    this.clearArchiveSelection();
     await this.refreshPanels({ archiveOnly: true });
     this.archiveModal?.show();
   }
@@ -314,6 +347,7 @@ export class CleanupUIController {
     if (options.fromCleanup) {
       this.cleanupModal?.close();
     }
+    this.clearRecycleSelection();
     await this.refreshPanels({ recycleOnly: true });
     this.recycleModal?.show();
   }
@@ -385,10 +419,12 @@ export class CleanupUIController {
     const [archiveItems, recycleItems] = await Promise.all(requests);
 
     if (archiveItems) {
-      this.archivePanel.render(archiveItems || []);
+      this.archivePanel.render(archiveItems || [], this.archiveSelection);
+      this.updateArchiveSelectionUI();
     }
     if (recycleItems) {
-      this.recyclePanel.render(recycleItems || []);
+      this.recyclePanel.render(recycleItems || [], this.recycleSelection);
+      this.updateRecycleSelectionUI();
     }
   }
 
@@ -408,5 +444,126 @@ export class CleanupUIController {
     setTimeout(() => {
       element.classList.remove('cleanup-highlight');
     }, 1600);
+  }
+
+  toggleArchiveSelection(bookmarkId, isSelected) {
+    if (!bookmarkId) {
+      return;
+    }
+    if (isSelected) {
+      this.archiveSelection.add(bookmarkId);
+    } else {
+      this.archiveSelection.delete(bookmarkId);
+    }
+    this.updateArchiveSelectionUI();
+  }
+
+  toggleRecycleSelection(bookmarkId, isSelected) {
+    if (!bookmarkId) {
+      return;
+    }
+    if (isSelected) {
+      this.recycleSelection.add(bookmarkId);
+    } else {
+      this.recycleSelection.delete(bookmarkId);
+    }
+    this.updateRecycleSelectionUI();
+  }
+
+  updateArchiveSelectionUI() {
+    const hasSelection = this.archiveSelection.size > 0;
+    this.elements.archiveRestoreButton && (this.elements.archiveRestoreButton.disabled = !hasSelection);
+    const archiveElement = this.elements.archiveModal;
+    const checkboxes = archiveElement?.querySelectorAll('.archive-checkbox');
+    checkboxes?.forEach(checkbox => {
+      const id = checkbox.dataset.bookmarkId;
+      checkbox.checked = !!id && this.archiveSelection.has(id);
+    });
+  }
+
+  updateRecycleSelectionUI() {
+    const hasSelection = this.recycleSelection.size > 0;
+    this.elements.recycleRestoreButton && (this.elements.recycleRestoreButton.disabled = !hasSelection);
+    this.elements.recycleDeleteButton && (this.elements.recycleDeleteButton.disabled = !hasSelection);
+    const recycleElement = this.elements.recycleModal;
+    const checkboxes = recycleElement?.querySelectorAll('.recycle-checkbox');
+    checkboxes?.forEach(checkbox => {
+      const id = checkbox.dataset.bookmarkId;
+      checkbox.checked = !!id && this.recycleSelection.has(id);
+    });
+  }
+
+  clearArchiveSelection() {
+    this.archiveSelection.clear();
+    this.updateArchiveSelectionUI();
+  }
+
+  clearRecycleSelection() {
+    this.recycleSelection.clear();
+    this.updateRecycleSelectionUI();
+  }
+
+  async handleArchiveBulkRestore() {
+    const ids = Array.from(this.archiveSelection);
+    if (!ids.length) {
+      return;
+    }
+    try {
+      await this.callbacks.archiveRestore(ids);
+      this.clearArchiveSelection();
+    } catch (error) {
+      console.error('Failed to restore archive selection:', error);
+    }
+  }
+
+  async handleRecycleBulkAction(action) {
+    const ids = Array.from(this.recycleSelection);
+    if (!ids.length) {
+      return;
+    }
+    try {
+      if (action === 'restore') {
+        await this.callbacks.recycleRestore(ids);
+      } else if (action === 'purge') {
+        await this.callbacks.recyclePurge(ids);
+      }
+      this.clearRecycleSelection();
+    } catch (error) {
+      console.error('Recycle bulk action failed:', error);
+    }
+  }
+
+  async handleArchiveQuickAction(action, bookmarkId) {
+    if (!bookmarkId) {
+      return;
+    }
+    try {
+      if (action === 'restore') {
+        await this.callbacks.archiveRestore([bookmarkId]);
+      } else if (action === 'remove') {
+        await this.callbacks.archiveRemove([bookmarkId]);
+      }
+      this.archiveSelection.delete(bookmarkId);
+      this.updateArchiveSelectionUI();
+    } catch (error) {
+      console.error('Archive action failed:', error);
+    }
+  }
+
+  async handleRecycleQuickAction(action, bookmarkId) {
+    if (!bookmarkId) {
+      return;
+    }
+    try {
+      if (action === 'restore') {
+        await this.callbacks.recycleRestore([bookmarkId]);
+      } else if (action === 'purge') {
+        await this.callbacks.recyclePurge([bookmarkId]);
+      }
+      this.recycleSelection.delete(bookmarkId);
+      this.updateRecycleSelectionUI();
+    } catch (error) {
+      console.error('Recycle action failed:', error);
+    }
   }
 }

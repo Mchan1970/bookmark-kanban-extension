@@ -34,7 +34,8 @@ export class RecyclePanelController {
     };
   }
 
-  render(items = []) {
+  render(items = [], selectedIds = new Set()) {
+    const selectedSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds || []);
     if (this.countElement) {
       this.countElement.textContent = items.length.toString();
     }
@@ -54,13 +55,23 @@ export class RecyclePanelController {
     }
 
     items.forEach(item => {
-      this.listElement.appendChild(this.buildRow(item));
+      this.listElement.appendChild(this.buildRow(item, selectedSet));
     });
   }
 
-  buildRow(item) {
+  buildRow(item, selectedSet = new Set()) {
     const row = document.createElement('div');
     row.className = 'cleanup-item cleanup-item--management';
+
+    const gutter = document.createElement('div');
+    gutter.className = 'cleanup-item-gutter';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'cleanup-checkbox recycle-checkbox';
+    checkbox.dataset.bookmarkId = item.originalId || item.id;
+    checkbox.checked = selectedSet.has(checkbox.dataset.bookmarkId);
+    gutter.appendChild(checkbox);
 
     const details = document.createElement('div');
     details.className = 'cleanup-item-details';
@@ -94,8 +105,10 @@ export class RecyclePanelController {
     actions.appendChild(restoreButton);
     actions.appendChild(purgeButton);
 
+    gutter.appendChild(actions);
+
+    row.appendChild(gutter);
     row.appendChild(details);
-    row.appendChild(actions);
     return row;
   }
 }
