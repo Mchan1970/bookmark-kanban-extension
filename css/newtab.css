@@ -355,9 +355,10 @@ body[data-display-mode="full"] .bookmark-menu-button {
 }
 
 #current-time {
+  font-family: 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
-  min-width: 120px;
+  width: 120px;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
