@@ -21,6 +21,7 @@
   --bg-color: #f8fafc;
   --bg-light: #f1f5f9;
   --card-bg: #ffffff;
+  --bg-primary: #ffffff;
 
   /* Border */
   --border-color: #e2e8f0;
@@ -76,6 +77,7 @@
   --bg-color: #0f172a;
   --bg-light: #1e293b;
   --card-bg: #1e293b;
+  --bg-primary: #1e293b;
 
   /* Border */
   --border-color: #334155;
@@ -123,6 +125,7 @@
   --bg-color: #f0fdf4;
   --bg-light: #dcfce7;
   --card-bg: #ffffff;
+  --bg-primary: #ffffff;
 
   /* Border */
   --border-color: #bbf7d0;
@@ -165,6 +168,7 @@
   --bg-color: #f5f3ff;
   --bg-light: #ede9fe;
   --card-bg: #ffffff;
+  --bg-primary: #ffffff;
 
   /* Border */
   --border-color: #ddd6fe;
@@ -207,6 +211,7 @@
   --bg-color: #ffffff;
   --bg-light: #ffffff;
   --card-bg: #ffffff;
+  --bg-primary: #ffffff;
 
   /* Border */
   --border-color: #000000;
