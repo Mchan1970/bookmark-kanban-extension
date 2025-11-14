@@ -34,6 +34,13 @@ export class EventManager {
         this.app.modalManager.showSettingsModal();
         return;
       }
+
+      if (target.closest('#add-column-button')) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.app.modalManager.showAddColumnModal();
+        return;
+      }
       
       //Handle more actions button
       if (target.closest('.bookmark-menu-btn')) {

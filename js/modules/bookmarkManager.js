@@ -1,3 +1,5 @@
+const BOOKMARK_BAR_ID = '1';
+
 /*** Bookmark Manager Class
  * Handles all operations related to Chrome Bookmarks API
  */
@@ -74,7 +76,7 @@ export class BookmarkManager {
     try {
       const tree = await this.getBookmarkTree();
       //Bookmark bar ID is usually "1"
-      const bookmarkBar = tree[0].children.find(child => child.id === '1');
+      const bookmarkBar = tree[0].children.find(child => child.id === BOOKMARK_BAR_ID);
       return bookmarkBar ? bookmarkBar.children : [];
     } catch (error) {
       console.error('Failed to get bookmark bar contents:', error);
@@ -160,6 +162,30 @@ export class BookmarkManager {
         }
       });
     });
+  }
+
+  createFolder(parentId, title) {
+    return new Promise((resolve, reject) => {
+      if (!parentId || !title) {
+        reject(new Error('Missing folder information'));
+        return;
+      }
+      chrome.bookmarks.create({ parentId, title }, (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  async createColumnFolder(title) {
+    const normalizedTitle = title?.trim();
+    if (!normalizedTitle) {
+      throw new Error('Column title is required');
+    }
+    return this.createFolder(BOOKMARK_BAR_ID, normalizedTitle);
   }
 
   /*** Get bookmark folders

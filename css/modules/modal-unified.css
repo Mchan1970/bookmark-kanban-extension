@@ -486,6 +486,13 @@
   color: var(--text-secondary, #666666);
 }
 
+.form-error-text {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--danger-color, #dc2626);
+  display: none;
+}
+
 .form-actions--inline {
   display: flex;
   gap: 8px;

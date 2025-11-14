@@ -20,6 +20,8 @@ export class ModalManager {
     this.confirmModal = this.createConfirmModal();
     //Create settings modal using new factory
     this.settingsModal = this.createSettingsModal();
+    //Create add column modal
+    this.addColumnModal = this.createAddColumnModal();
 
     //Add to document
     document.body.appendChild(this.editModal);
@@ -226,6 +228,117 @@ export class ModalManager {
     });
   }
 
+  createAddColumnModal() {
+    const content = `
+      <form id="add-column-form" class="add-column-form">
+        <div class="form-group">
+          <label for="new-column-name">Column name</label>
+          <input type="text" id="new-column-name" name="columnName" maxlength="120" placeholder="e.g., To Read" required />
+          <p class="form-help-text">New columns are created on your bookmarks bar.</p>
+          <p class="form-error-text add-column-error"></p>
+        </div>
+      </form>
+    `;
+
+    return new Modal({
+      id: 'addColumnModal',
+      title: 'Add New Column',
+      content,
+      width: '360px',
+      buttons: [
+        {
+          text: 'Cancel',
+          class: 'btn-secondary',
+          onClick: (_event, modalInstance) => modalInstance.close()
+        },
+        {
+          text: 'Create Column',
+          id: 'add-column-submit-btn',
+          class: 'btn-primary',
+          onClick: () => this.handleAddColumnSubmit()
+        }
+      ],
+      onOpen: (modalInstance) => {
+        this.prepareAddColumnModal(modalInstance);
+      }
+    });
+  }
+
+  prepareAddColumnModal(modalInstance) {
+    const form = modalInstance.element.querySelector('#add-column-form');
+    if (form && !form.dataset.bound) {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        this.handleAddColumnSubmit();
+      });
+      form.dataset.bound = 'true';
+    }
+
+    if (form) {
+      form.reset();
+    }
+
+    const input = modalInstance.element.querySelector('#new-column-name');
+    if (input) {
+      input.value = '';
+      setTimeout(() => input.focus(), 50);
+    }
+
+    this.setAddColumnError('');
+  }
+
+  setAddColumnError(message = '') {
+    if (!this.addColumnModal) {
+      return;
+    }
+    const errorElement = this.addColumnModal.element.querySelector('.add-column-error');
+    if (!errorElement) {
+      return;
+    }
+    if (message) {
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    } else {
+      errorElement.textContent = '';
+      errorElement.style.display = 'none';
+    }
+  }
+
+  async handleAddColumnSubmit() {
+    if (!this.addColumnModal) {
+      return;
+    }
+
+    const input = this.addColumnModal.element.querySelector('#new-column-name');
+    if (!input) {
+      return;
+    }
+
+    const rawTitle = input.value.trim();
+    if (!rawTitle) {
+      this.setAddColumnError('Please enter a column name.');
+      input.focus();
+      return;
+    }
+
+    this.setAddColumnError('');
+    this.addColumnModal.setButtonDisabled('#add-column-submit-btn', true);
+
+    try {
+      const newFolder = await this.bookmarkManager.createColumnFolder(rawTitle);
+      this.addColumnModal.close();
+      const title = newFolder?.title || rawTitle;
+      this.app.notificationManager?.showToast(`Added column "${title}"`);
+      this.app.handleBookmarksChange?.();
+    } catch (error) {
+      console.error('Failed to create column:', error);
+      this.setAddColumnError(error?.message || 'Failed to create column. Please try again.');
+      this.app.notificationManager?.showErrorToast('Failed to create column');
+    } finally {
+      this.addColumnModal.setButtonDisabled('#add-column-submit-btn', false);
+    }
+  }
+
   /*** Show edit modal
    * @param {Object} bookmark Bookmark data
    */
@@ -253,6 +366,14 @@ export class ModalManager {
     
     this.showModal(modal);
     titleInput.focus();
+  }
+
+  showAddColumnModal() {
+    if (!this.addColumnModal) {
+      this.showToast('Unable to open Add Column dialog', 'error');
+      return;
+    }
+    this.addColumnModal.show();
   }
 
   /*** Show confirm delete modal
