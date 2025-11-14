@@ -204,12 +204,31 @@ export class EventManager {
 
   async handleColumnMenuAction(action, column) {
     switch (action) {
+      case 'rename-column':
+        this.handleRenameColumn(column);
+        break;
       case 'delete-column':
         await this.handleDeleteColumn(column);
         break;
       default:
         break;
     }
+  }
+
+  handleRenameColumn(column) {
+    if (!column?.element) {
+      return;
+    }
+    const titleElement = column.element.querySelector('.column-title');
+    if (!titleElement) {
+      return;
+    }
+    const event = new MouseEvent('dblclick', {
+      bubbles: true,
+      cancelable: true,
+      view: window
+    });
+    titleElement.dispatchEvent(event);
   }
 
   async handleArchiveBookmark(bookmarkId) {

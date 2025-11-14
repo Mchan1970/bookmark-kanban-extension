@@ -76,6 +76,7 @@ export class ColumnActionMenu {
 
   renderMenu() {
     const fragment = document.createDocumentFragment();
+    fragment.appendChild(this.createMenuButton('Rename column', 'rename-column'));
     fragment.appendChild(this.createMenuButton('Delete column', 'delete-column', { danger: true }));
     this.menuElement.innerHTML = '';
     this.menuElement.appendChild(fragment);
