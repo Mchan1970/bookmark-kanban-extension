@@ -266,7 +266,7 @@ export class ColumnManager {
     inputElement.type = 'text';
     inputElement.className = 'column-title-edit';
     inputElement.value = originalTitle;
-    inputElement.style.width = '100%';
+    inputElement.style.width = 'auto';
     inputElement.style.padding = '4px';
     inputElement.style.border = '1px solid var(--primary-color)';
     inputElement.style.borderRadius = 'var(--border-radius)';
