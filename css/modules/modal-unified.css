@@ -142,12 +142,16 @@
   border-radius: var(--border-radius, 6px);
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
-  min-width: 80px;
+  min-width: max-content;
   position: relative;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-button:disabled {
@@ -321,7 +325,7 @@
 
   .modal-button {
     width: 100%;
-    min-width: auto;
+    min-width: 0;
   }
 
   .modal-title {
