@@ -194,6 +194,15 @@
   gap: 8px;
 }
 
+.cleanup-actions button {
+  width: auto;
+  min-width: max-content;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .cleanup-actions button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
