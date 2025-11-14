@@ -1,6 +1,8 @@
 import { createElement } from './utils.js';
 import { Modal, modalManager } from './Modal.js';
 import { tagManager } from './tagManager.js';
+import { TagMaintenanceService } from './tagMaintenanceService.js';
+import { TagManagementPanel } from './ui/TagManagementPanel.js';
 
 export class ModalManager {
   constructor(bookmarkManager, uiManager, app) {
@@ -8,6 +10,9 @@ export class ModalManager {
     this.uiManager = uiManager;
     this.app = app;
     this.activeModal = null;
+    this.activeSettingsTab = 'general';
+    this.tagManagementPanel = null;
+    this.tagMaintenanceService = new TagMaintenanceService(this.bookmarkManager);
     this.initializeModals();
   }
 
@@ -111,7 +116,7 @@ export class ModalManager {
    * @returns {Modal} Settings modal instance
    */
   createSettingsModal() {
-    const settingsContent = `
+    const generalSettingsContent = `
       <div class="settings-container">
         <div class="settings-group">
           <h3>Appearance</h3>
@@ -184,6 +189,25 @@ export class ModalManager {
       </div>
     `;
 
+    const settingsContent = `
+      <div class="settings-tabs">
+        <div class="settings-tabs__nav">
+          <button type="button" class="settings-tabs__nav-button active" data-settings-tab="general">General</button>
+          <button type="button" class="settings-tabs__nav-button" data-settings-tab="tags">Tags</button>
+        </div>
+        <div class="settings-tabs__panels">
+          <div class="settings-tab-panel active" data-settings-panel="general">
+            ${generalSettingsContent}
+          </div>
+          <div class="settings-tab-panel" data-settings-panel="tags">
+            <div id="tag-management-root" class="tag-management-root">
+              <div class="tag-manager-empty">Loading tags...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
     return new Modal({
       id: 'settingsModal',
       title: 'Settings',
@@ -224,6 +248,7 @@ export class ModalManager {
 
         // Bind events
         this.bindSettingsEvents(modal.element);
+        this.setupSettingsTabs(modal.element);
       }
     });
   }
@@ -640,6 +665,57 @@ export class ModalManager {
     }
     
     // Close button is now handled automatically by the new Modal factory
+  }
+
+  setupSettingsTabs(modal) {
+    if (!modal || modal.dataset.tabsBound === 'true') {
+      this.switchSettingsTab(this.activeSettingsTab || 'general', modal);
+      return;
+    }
+    const tabButtons = modal.querySelectorAll('[data-settings-tab]');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        this.switchSettingsTab(button.dataset.settingsTab, modal);
+      });
+    });
+    modal.dataset.tabsBound = 'true';
+    this.switchSettingsTab(this.activeSettingsTab || 'general', modal);
+  }
+
+  switchSettingsTab(tabId, modal) {
+    if (!modal) {
+      return;
+    }
+    const tabButtons = modal.querySelectorAll('[data-settings-tab]');
+    tabButtons.forEach(button => {
+      button.classList.toggle('active', button.dataset.settingsTab === tabId);
+    });
+
+    const panels = modal.querySelectorAll('[data-settings-panel]');
+    panels.forEach(panel => {
+      panel.classList.toggle('active', panel.dataset.settingsPanel === tabId);
+    });
+
+    this.activeSettingsTab = tabId;
+    if (tabId === 'tags') {
+      this.initializeTagManagementPanel(modal);
+    }
+  }
+
+  initializeTagManagementPanel(modal) {
+    const container = modal.querySelector('#tag-management-root');
+    if (!container) {
+      return;
+    }
+    if (!this.tagManagementPanel) {
+      this.tagManagementPanel = new TagManagementPanel({
+        container,
+        bookmarkManager: this.bookmarkManager,
+        tagService: this.tagMaintenanceService,
+        showToast: (message, type) => this.showToast(message, type)
+      });
+    }
+    this.tagManagementPanel.initialize();
   }
 
   async trySoftDeleteBookmark(bookmarkId) {

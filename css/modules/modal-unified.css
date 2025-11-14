@@ -168,7 +168,7 @@
 /* 主要按钮 */
 .modal-button.btn-primary {
   background-color: var(--primary-color, #0066cc);
-  color: white;
+  color: #ffffff;
   border-color: var(--primary-color, #0066cc);
 }
 
@@ -181,13 +181,13 @@
 
 /* 次要按钮 */
 .modal-button.btn-secondary {
-  background-color: var(--bg-secondary, #f8f9fa);
+  background-color: var(--card-bg, #ffffff);
   color: var(--text-primary, #333333);
   border-color: var(--border-color, #e0e0e0);
 }
 
 .modal-button.btn-secondary:hover:not(:disabled) {
-  background-color: var(--bg-hover, #e9ecef);
+  background-color: var(--border-color, #e0e0e0);
   border-color: var(--border-hover, #d0d0d0);
   transform: translateY(-1px);
 }
@@ -524,6 +524,149 @@
 .modal-input.error {
   border-color: var(--danger-color, #dc3545);
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* ===== Settings tabs ===== */
+.settings-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-tabs__nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.settings-tabs__nav-button {
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary, #64748b);
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-tabs__nav-button.active {
+  color: var(--primary-light, var(--primary-color, #2563eb));
+  border-color: var(--primary-light, var(--primary-color, #2563eb));
+}
+
+.settings-tab-panel {
+  display: none;
+}
+
+.settings-tab-panel.active {
+  display: block;
+}
+
+.tag-management-root {
+  min-height: 240px;
+}
+
+.tag-manager-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tag-manager-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tag-manager-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 6px);
+}
+
+.tag-manager-summary {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #64748b);
+  display: flex;
+  align-items: center;
+}
+
+.tag-manager-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag-manager-actions .tag-action-btn {
+  width: auto;
+  min-width: 110px;
+}
+
+.tag-manager-status {
+  min-height: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #475569);
+}
+
+.tag-manager-list-wrapper {
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 8px);
+  overflow: hidden;
+}
+
+.tag-manager-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tag-manager-table th,
+.tag-manager-table td {
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.tag-manager-table thead {
+  background-color: var(--bg-light, #f8fafc);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, #64748b);
+}
+
+.tag-manager-table tbody tr:nth-child(odd) {
+  background-color: rgba(148, 163, 184, 0.08);
+}
+
+.tag-manager-table tbody tr:hover {
+  background-color: rgba(37, 99, 235, 0.08);
+}
+
+.tag-manager-empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #94a3b8);
+}
+
+.tag-action-modal label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.tag-action-modal input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--border-radius, 6px);
+}
+
+.tag-action-modal input.input-error {
+  border-color: var(--danger-color, #dc2626);
 }
 
 /* ===== 兼容性修复 ===== */

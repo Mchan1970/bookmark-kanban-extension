@@ -321,7 +321,7 @@ export class TagManager {
     if (!this.canUseChromeStorage()) {
       return;
     }
-    chrome.storage.sync.get([this.CUSTOM_PALETTE_KEY], (result) => {
+    chrome.storage.local.get([this.CUSTOM_PALETTE_KEY], (result) => {
       const stored = result?.[this.CUSTOM_PALETTE_KEY];
       const validated = this.validatePaletteConfig(stored);
       this.customPalettes = validated;
@@ -335,7 +335,7 @@ export class TagManager {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
-      chrome.storage.sync.set({ [this.CUSTOM_PALETTE_KEY]: palettes }, () => {
+      chrome.storage.local.set({ [this.CUSTOM_PALETTE_KEY]: palettes }, () => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
@@ -351,7 +351,7 @@ export class TagManager {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
-      chrome.storage.sync.remove(this.CUSTOM_PALETTE_KEY, () => {
+      chrome.storage.local.remove(this.CUSTOM_PALETTE_KEY, () => {
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
@@ -362,7 +362,7 @@ export class TagManager {
   }
 
   canUseChromeStorage() {
-    return typeof chrome !== 'undefined' && chrome.storage?.sync;
+    return typeof chrome !== 'undefined' && chrome.storage?.local;
   }
 
   dispose() {

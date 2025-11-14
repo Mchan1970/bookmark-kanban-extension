@@ -25,18 +25,21 @@
         <input type="text" id="header-search" placeholder="Search bookmarks or type #tag" autocomplete="off" />
         <button id="header-search-go" title="Search">Go</button>
       </div>
-      <div id="add-column-button" class="header-button" title="Add a new column">
-        <span class="add-column-icon">+</span>
-        <span class="add-column-text">Add Column</span>
+      <div id="add-column-button" class="header-button header-button--icon" title="Add New Column" aria-label="Add New Column">
+        <svg class="header-button-svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
       </div>
-      <div id="cleanup-button" class="header-button" title="Cleanup suggestions">
-        <span class="cleanup-icon">🧹</span>
-        <span class="cleanup-text">Cleanup</span>
+      <div id="cleanup-button" class="header-button header-button--icon" title="Cleanup Suggestions" aria-label="Cleanup Suggestions">
+        <svg class="header-button-svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+          <path d="M4 15h16M8 15l2-10h4l2 10M6 15l-.5 3m12.5-3l.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
         <span id="cleanup-badge" class="header-badge" style="display: none;">0</span>
       </div>
-      <div id="settings-button" class="header-button" title="Open settings">
-        <span class="settings-icon">⚙️</span>
-        <span class="settings-text">Settings</span>
+      <div id="settings-button" class="header-button header-button--icon" title="Open settings" aria-label="Open settings">
+        <svg class="header-button-svg" viewBox="0 0 24 24" role="img" aria-hidden="true" focusable="false">
+          <path d="M11.983 8.75a3.25 3.25 0 100 6.5 3.25 3.25 0 000-6.5zm7.267 3.25a5.06 5.06 0 00-.071-.826l2.202-1.719-1.5-2.598-2.602 1.005a5.064 5.064 0 00-1.428-.828l-.393-2.7H9.543l-.393 2.7a5.064 5.064 0 00-1.428.828L5.12 6.857l-1.5 2.598 2.202 1.719a5.06 5.06 0 000 1.652l-2.202 1.719 1.5 2.598 2.602-1.005c.426.336.9.618 1.428.828l.393 2.7h5.615l.393-2.7c.528-.21 1.002-.492 1.428-.828l2.602 1.005 1.5-2.598-2.202-1.719c.047-.272.071-.551.071-.826z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
       <div id="current-time"></div>
       <div id="current-date"></div>
