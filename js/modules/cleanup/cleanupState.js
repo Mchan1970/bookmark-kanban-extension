@@ -78,7 +78,14 @@ export class CleanupState {
 
   getCounts() {
     return SECTION_KEYS.reduce((acc, section) => {
-      acc[section] = this.sections[section]?.length || 0;
+      const sectionData = this.sections[section] || [];
+      if (section === 'duplicates') {
+        acc[section] = sectionData.reduce((total, group) => {
+          return total + (group.bookmarks?.length || 0);
+        }, 0);
+      } else {
+        acc[section] = sectionData.length;
+      }
       return acc;
     }, {});
   }

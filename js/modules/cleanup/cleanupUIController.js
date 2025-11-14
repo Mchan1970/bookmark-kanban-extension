@@ -272,12 +272,29 @@ export class CleanupUIController {
         return;
       }
       const checkbox = event.target;
+
+      if (checkbox.dataset.groupCheckbox === 'true') {
+        this.handleGroupSelectionToggle(checkbox);
+        return;
+      }
+
       const section = checkbox.dataset.section;
       const bookmarkId = checkbox.dataset.bookmarkId;
       this.toggleSelection(section, bookmarkId, checkbox.checked);
+      if (section === 'duplicates') {
+        const groupElement = checkbox.closest('.cleanup-duplicate-group');
+        this.view?.syncGroupCheckboxState(groupElement);
+      }
     });
 
     cleanupModal?.addEventListener('click', async (event) => {
+      const toggleButton = event.target.closest('[data-group-toggle]');
+      if (toggleButton) {
+        event.preventDefault();
+        this.handleGroupToggle(toggleButton);
+        return;
+      }
+
       const button = event.target.closest('button[data-action]');
       if (!button) {
         return;
@@ -362,6 +379,55 @@ export class CleanupUIController {
       this.selected[section].delete(bookmarkId);
     }
     this.updateSelectionState();
+  }
+
+  handleGroupSelectionToggle(groupCheckbox) {
+    const groupElement = groupCheckbox.closest('.cleanup-duplicate-group');
+    if (!groupElement) {
+      return;
+    }
+
+    const bookmarkCheckboxes = groupElement.querySelectorAll('.cleanup-group-items .cleanup-checkbox[data-bookmark-id]');
+    if (!bookmarkCheckboxes.length) {
+      groupCheckbox.checked = false;
+      groupCheckbox.indeterminate = false;
+      return;
+    }
+
+    const shouldSelect = groupCheckbox.checked;
+    bookmarkCheckboxes.forEach(box => {
+      box.checked = shouldSelect;
+      const bookmarkId = box.dataset.bookmarkId;
+      if (!bookmarkId) {
+        return;
+      }
+      if (shouldSelect) {
+        this.selected.duplicates.add(bookmarkId);
+      } else {
+        this.selected.duplicates.delete(bookmarkId);
+      }
+    });
+
+    this.updateSelectionState();
+    this.view?.syncGroupCheckboxState(groupElement);
+  }
+
+  handleGroupToggle(button) {
+    const groupElement = button.closest('.cleanup-duplicate-group');
+    if (!groupElement) {
+      return;
+    }
+    const itemsContainer = groupElement.querySelector('.cleanup-group-items');
+    const groupId = button.dataset.groupId;
+    const shouldExpand = !groupElement.classList.contains('is-expanded');
+    groupElement.classList.toggle('is-expanded', shouldExpand);
+    if (itemsContainer) {
+      itemsContainer.hidden = !shouldExpand;
+    }
+    button.textContent = shouldExpand ? '▼' : '▶';
+    button.setAttribute('aria-expanded', shouldExpand ? 'true' : 'false');
+    button.setAttribute('aria-label', shouldExpand ? 'Collapse duplicate group' : 'Expand duplicate group');
+    this.view?.setGroupExpansion(groupId, shouldExpand);
   }
 
   updateSelectionState() {

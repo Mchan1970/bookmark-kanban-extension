@@ -634,6 +634,12 @@ main {
   transition: color 0.3s;
 }
 
+.column-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .bookmark-menu-button {
   margin-left: auto;
   width: 28px;
@@ -660,6 +666,31 @@ main {
   background: rgba(0, 0, 0, 0.05);
 }
 
+.column-menu-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.column-menu-button svg {
+  fill: currentColor;
+}
+
+.column-menu-button:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .empty-column {
   padding: 2rem 1rem;
   text-align: center;
@@ -667,7 +698,8 @@ main {
   font-style: italic;
 }
 
-.bookmark-action-menu {
+.bookmark-action-menu,
+.column-action-menu {
   position: absolute;
   min-width: 180px;
   background: var(--card-bg, #fff);
@@ -683,13 +715,15 @@ main {
   pointer-events: none;
 }
 
-.bookmark-action-menu.visible {
+.bookmark-action-menu.visible,
+.column-action-menu.visible {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
 }
 
-.bookmark-action-menu button {
+.bookmark-action-menu button,
+.column-action-menu button {
   width: 100%;
   border: none;
   background: none;
@@ -704,11 +738,13 @@ main {
   transition: background 0.12s ease;
 }
 
-.bookmark-action-menu button:hover {
+.bookmark-action-menu button:hover,
+.column-action-menu button:hover {
   background: rgba(0, 0, 0, 0.04);
 }
 
-.bookmark-action-menu button.danger {
+.bookmark-action-menu button.danger,
+.column-action-menu button.danger {
   color: var(--danger-color);
 }
 
@@ -718,7 +754,8 @@ main {
   margin: 6px 0;
 }
 
-.bookmark-action-menu button:disabled {
+.bookmark-action-menu button:disabled,
+.column-action-menu button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

@@ -47,37 +47,46 @@ function computeDuplicateItems(bookmarkIndex, ignoreSet) {
 
     const groupId = normalizeUrl(bookmark.url);
     if (!groups.has(groupId)) {
-      groups.set(groupId, []);
+      groups.set(groupId, {
+        allBookmarks: [],
+        displayUrl: bookmark.url
+      });
     }
-    groups.get(groupId).push(bookmark);
+    const group = groups.get(groupId);
+    group.allBookmarks.push(bookmark);
+    if (!group.displayUrl && bookmark.url) {
+      group.displayUrl = bookmark.url;
+    }
   });
 
-  const duplicateItems = [];
+  const duplicateGroups = [];
 
-  groups.forEach((bookmarks, groupId) => {
-    if (bookmarks.length < 2) {
+  groups.forEach((group, groupId) => {
+    if (group.allBookmarks.length < 2) {
       return;
     }
 
-    bookmarks.forEach(bookmark => {
-      if (ignoreSet.has(bookmark.id)) {
-        return;
-      }
+    const activeBookmarks = group.allBookmarks.filter(bookmark => !ignoreSet.has(bookmark.id));
+    if (activeBookmarks.length < 2) {
+      return;
+    }
 
-      duplicateItems.push({
+    duplicateGroups.push({
+      type: 'duplicates',
+      groupId,
+      url: activeBookmarks[0].url || group.displayUrl,
+      totalCount: activeBookmarks.length,
+      bookmarks: activeBookmarks.map(bookmark => ({
         id: bookmark.id,
-        type: 'duplicates',
-        groupId,
         title: bookmark.title,
         url: bookmark.url,
-        folderPath: bookmark.folderPath,
-        duplicateCount: bookmarks.length
-      });
+        folderPath: bookmark.folderPath
+      }))
     });
   });
 
-  duplicateItems.sort((a, b) => a.title.localeCompare(b.title));
-  return duplicateItems;
+  duplicateGroups.sort((a, b) => a.url.localeCompare(b.url));
+  return duplicateGroups;
 }
 
 function computeStaleItems(bookmarkIndex, accessStats, ignoreSet, threshold = 180 * 24 * 60 * 60 * 1000) {

@@ -202,4 +202,45 @@ export class BookmarkManager {
   setRemoveListener(callback) {
     this.removeListener = callback;
   }
+
+  getFolderChildren(folderId) {
+    return new Promise((resolve, reject) => {
+      if (!folderId) {
+        resolve([]);
+        return;
+      }
+      chrome.bookmarks.getChildren(folderId, (children) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(children || []);
+        }
+      });
+    });
+  }
+
+  async isFolderEmpty(folderId) {
+    if (!folderId) {
+      return false;
+    }
+    const children = await this.getFolderChildren(folderId);
+    return !children || children.length === 0;
+  }
+
+  deleteFolder(folderId) {
+    return new Promise((resolve, reject) => {
+      if (!folderId) {
+        reject(new Error('Missing folder identifier'));
+        return;
+      }
+      chrome.bookmarks.removeTree(folderId, () => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          this.updateBookmarkTreeCache();
+          resolve();
+        }
+      });
+    });
+  }
 }

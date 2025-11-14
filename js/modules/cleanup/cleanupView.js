@@ -10,6 +10,7 @@ export class CleanupView {
     this.archiveButton = options.archiveButton;
     this.deleteButton = options.deleteButton;
     this.ignoreButton = options.ignoreButton;
+    this.groupExpansion = new Map();
   }
 
   updateCounts(counts) {
@@ -41,8 +42,80 @@ export class CleanupView {
       return;
     }
 
+    if (section === 'duplicates') {
+      this.renderDuplicateGroups(listElement, items);
+      return;
+    }
+
     items.forEach(item => {
       listElement.appendChild(this.createSectionItem(section, item));
+    });
+  }
+
+  renderDuplicateGroups(listElement, groups) {
+    const activeGroupIds = new Set(groups.map(group => group.groupId));
+    Array.from(this.groupExpansion.keys()).forEach(groupId => {
+      if (!activeGroupIds.has(groupId)) {
+        this.groupExpansion.delete(groupId);
+      }
+    });
+
+    groups.forEach(group => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'cleanup-duplicate-group';
+      wrapper.dataset.groupId = group.groupId;
+
+      const expanded = this.groupExpansion.has(group.groupId)
+        ? this.groupExpansion.get(group.groupId)
+        : false;
+      if (expanded) {
+        wrapper.classList.add('is-expanded');
+      }
+      this.groupExpansion.set(group.groupId, expanded);
+
+      const header = document.createElement('div');
+      header.className = 'cleanup-duplicate-group-header';
+
+      const groupCheckbox = document.createElement('input');
+      groupCheckbox.type = 'checkbox';
+      groupCheckbox.className = 'cleanup-checkbox cleanup-group-checkbox';
+      groupCheckbox.dataset.section = 'duplicates';
+      groupCheckbox.dataset.groupId = group.groupId;
+      groupCheckbox.dataset.groupCheckbox = 'true';
+      header.appendChild(groupCheckbox);
+
+      const toggleButton = document.createElement('button');
+      toggleButton.type = 'button';
+      toggleButton.className = 'cleanup-group-toggle';
+      toggleButton.dataset.groupToggle = 'true';
+      toggleButton.dataset.groupId = group.groupId;
+      toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      toggleButton.setAttribute('aria-label', expanded ? 'Collapse duplicate group' : 'Expand duplicate group');
+      toggleButton.textContent = expanded ? '▼' : '▶';
+      header.appendChild(toggleButton);
+
+      const url = document.createElement('span');
+      url.className = 'cleanup-group-url';
+      url.title = group.url;
+      url.textContent = group.url;
+      header.appendChild(url);
+
+      const count = document.createElement('span');
+      count.className = 'cleanup-group-count';
+      count.textContent = `(${group.bookmarks.length} item${group.bookmarks.length > 1 ? 's' : ''})`;
+      header.appendChild(count);
+
+      const itemsContainer = document.createElement('div');
+      itemsContainer.className = 'cleanup-group-items';
+      itemsContainer.hidden = !expanded;
+
+      group.bookmarks.forEach(bookmark => {
+        itemsContainer.appendChild(this.createDuplicateGroupItem(bookmark));
+      });
+
+      wrapper.appendChild(header);
+      wrapper.appendChild(itemsContainer);
+      listElement.appendChild(wrapper);
     });
   }
 
@@ -98,6 +171,59 @@ export class CleanupView {
     wrapper.appendChild(details);
 
     return wrapper;
+  }
+
+  createDuplicateGroupItem(item) {
+    const row = document.createElement('div');
+    row.className = 'cleanup-duplicate-item';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'cleanup-checkbox';
+    checkbox.dataset.section = 'duplicates';
+    checkbox.dataset.bookmarkId = item.id;
+
+    const details = document.createElement('div');
+    details.className = 'cleanup-duplicate-item-details';
+
+    const title = document.createElement('div');
+    title.className = 'cleanup-duplicate-item-title';
+    title.textContent = item.title || '(Untitled bookmark)';
+
+    const meta = document.createElement('div');
+    meta.className = 'cleanup-duplicate-item-meta';
+    if (item.folderPath) {
+      meta.textContent = `In: "${item.folderPath}"`;
+    } else {
+      meta.textContent = 'Location unavailable';
+    }
+
+    details.appendChild(title);
+    details.appendChild(meta);
+
+    const actions = document.createElement('div');
+    actions.className = 'cleanup-item-actions cleanup-duplicate-item-actions';
+
+    const viewButton = document.createElement('button');
+    viewButton.type = 'button';
+    viewButton.dataset.action = 'view';
+    viewButton.dataset.bookmarkId = item.id;
+    viewButton.textContent = 'View';
+    actions.appendChild(viewButton);
+
+    const ignoreButton = document.createElement('button');
+    ignoreButton.type = 'button';
+    ignoreButton.dataset.action = 'ignore';
+    ignoreButton.dataset.section = 'duplicates';
+    ignoreButton.dataset.bookmarkId = item.id;
+    ignoreButton.textContent = 'Ignore';
+    actions.appendChild(ignoreButton);
+
+    row.appendChild(checkbox);
+    row.appendChild(details);
+    row.appendChild(actions);
+
+    return row;
   }
 
   buildMetaText(section, item) {
@@ -157,6 +283,51 @@ export class CleanupView {
     const checkboxes = this.cleanupModal?.querySelectorAll('.cleanup-checkbox');
     checkboxes?.forEach(checkbox => {
       checkbox.checked = false;
+      if (checkbox.dataset.groupCheckbox === 'true') {
+        checkbox.indeterminate = false;
+      }
     });
+  }
+
+  setGroupExpansion(groupId, expanded) {
+    if (!groupId) {
+      return;
+    }
+    this.groupExpansion.set(groupId, expanded);
+  }
+
+  syncGroupCheckboxState(groupElement) {
+    if (!groupElement) {
+      return;
+    }
+
+    const groupCheckbox = groupElement.querySelector('.cleanup-group-checkbox');
+    if (!groupCheckbox) {
+      return;
+    }
+
+    const itemCheckboxes = groupElement.querySelectorAll('.cleanup-group-items .cleanup-checkbox[data-bookmark-id]');
+    if (!itemCheckboxes.length) {
+      groupCheckbox.checked = false;
+      groupCheckbox.indeterminate = false;
+      return;
+    }
+
+    const checkedItems = Array.from(itemCheckboxes).filter(checkbox => checkbox.checked).length;
+
+    if (checkedItems === 0) {
+      groupCheckbox.checked = false;
+      groupCheckbox.indeterminate = false;
+      return;
+    }
+
+    if (checkedItems === itemCheckboxes.length) {
+      groupCheckbox.checked = true;
+      groupCheckbox.indeterminate = false;
+      return;
+    }
+
+    groupCheckbox.checked = false;
+    groupCheckbox.indeterminate = true;
   }
 }

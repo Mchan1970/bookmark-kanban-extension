@@ -258,6 +258,11 @@ export class DragManager {
             index: newIndex
         });
 
+        this.updateColumnCount(evt.from);
+        if (evt.to !== evt.from) {
+            this.updateColumnCount(evt.to);
+        }
+
         console.log('✅ Bookmark moved successfully in Chrome.');
         this.removeEmptyStatePlaceholder(evt.to);
         this.ensureEmptyStatePlaceholder(evt.from);
@@ -417,6 +422,22 @@ isColumnEmpty(columnElement) {
     if (empty) {
       empty.remove();
     }
+  }
+
+  updateColumnCount(listElement) {
+    if (!listElement) {
+      return;
+    }
+    const column = listElement.closest('.kanban-column');
+    if (!column) {
+      return;
+    }
+    const countElement = column.querySelector('.column-count');
+    if (!countElement) {
+      return;
+    }
+    const totalBookmarks = column.querySelectorAll('.bookmark-item').length;
+    countElement.textContent = totalBookmarks.toString();
   }
 
   /*** Destroy all drag instances

@@ -1,4 +1,5 @@
 import { BookmarkActionMenu } from './ui/BookmarkActionMenu.js';
+import { ColumnActionMenu } from './ui/ColumnActionMenu.js';
 
 export class EventManager {
   constructor(app) {
@@ -9,6 +10,7 @@ export class EventManager {
         getAccessStats: (bookmarkId) => this.app.getBookmarkAccessStats?.(bookmarkId)
       }
     );
+    this.columnMenu = new ColumnActionMenu((action, column) => this.handleColumnMenuAction(action, column));
   }
 
   setupEventListeners() {
@@ -41,6 +43,17 @@ export class EventManager {
         if (bookmarkItem) {
           const rect = target.getBoundingClientRect();
           this.openBookmarkMenu(bookmarkItem, { anchorRect: rect });
+        }
+        return;
+      }
+
+      if (target.closest('.column-menu-button')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const columnElement = target.closest('.kanban-column');
+        if (columnElement) {
+          const rect = target.getBoundingClientRect();
+          this.openColumnMenu(columnElement, { anchorRect: rect });
         }
         return;
       }
@@ -148,6 +161,21 @@ export class EventManager {
     });
   }
 
+  openColumnMenu(columnElement, options = {}) {
+    if (!columnElement) {
+      return;
+    }
+    const titleElement = columnElement.querySelector('.column-title');
+    const title = titleElement?.textContent?.trim() || 'Untitled column';
+    this.columnMenu.show({
+      columnElement,
+      folderId: columnElement.dataset.folderId || '',
+      columnType: columnElement.dataset.columnType || '',
+      title,
+      anchorRect: options.anchorRect
+    });
+  }
+
   async handleMenuAction(action, bookmark) {
     switch (action) {
       case 'edit':
@@ -161,6 +189,16 @@ export class EventManager {
         break;
       case 'copy-link':
         await this.handleCopyLink(bookmark.url);
+        break;
+      default:
+        break;
+    }
+  }
+
+  async handleColumnMenuAction(action, column) {
+    switch (action) {
+      case 'delete-column':
+        await this.handleDeleteColumn(column);
         break;
       default:
         break;
@@ -198,6 +236,51 @@ export class EventManager {
     } catch (error) {
       console.error('Failed to copy link:', error);
       this.app.notificationManager?.showErrorToast('Failed to copy link');
+    }
+  }
+
+  async handleDeleteColumn(column) {
+    if (!column) {
+      return;
+    }
+
+    const { folderId, columnType, title } = column;
+
+    if (!folderId) {
+      this.app.notificationManager?.showWarningToast('This column cannot be deleted.');
+      return;
+    }
+
+    if (columnType === 'uncategorized') {
+      this.app.notificationManager?.showWarningToast('Uncategorized column cannot be deleted.');
+      return;
+    }
+
+    if (folderId === '2' || folderId === '3') {
+      this.app.notificationManager?.showWarningToast('System columns cannot be deleted.');
+      return;
+    }
+
+    try {
+      const isEmpty = await this.app.bookmarkManager.isFolderEmpty(folderId);
+      if (!isEmpty) {
+        this.app.notificationManager?.showWarningToast('Column is not empty. Move or delete its bookmarks first.');
+        return;
+      }
+
+      const confirmed = window.confirm(`Delete column "${title}"? This action cannot be undone.`);
+      if (!confirmed) {
+        return;
+      }
+
+      await this.app.bookmarkManager.deleteFolder(folderId);
+      this.app.notificationManager?.showToast(`Deleted column "${title}"`);
+      if (typeof this.app.handleBookmarksChange === 'function') {
+        this.app.handleBookmarksChange();
+      }
+    } catch (error) {
+      console.error('Failed to delete column:', error);
+      this.app.notificationManager?.showErrorToast('Failed to delete column.');
     }
   }
 }

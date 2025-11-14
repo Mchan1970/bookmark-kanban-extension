@@ -175,9 +175,32 @@ export class ColumnManager {
       titleElement.appendChild(infoElement);
     }
 
-    header.appendChild(countElement);
+    const metaContainer = createElement('div', 'column-meta');
+    metaContainer.appendChild(countElement);
+    const menuButton = this.createColumnMenuButton();
+    metaContainer.appendChild(menuButton);
+    header.appendChild(metaContainer);
     
     return header;
+  }
+
+  createColumnMenuButton() {
+    const button = createElement('button', 'column-menu-button');
+    button.type = 'button';
+    button.setAttribute('aria-haspopup', 'true');
+    button.setAttribute('aria-label', 'Column options');
+    button.setAttribute('title', 'More column actions');
+    button.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="5" r="1.5"></circle>
+        <circle cx="12" cy="12" r="1.5"></circle>
+        <circle cx="12" cy="19" r="1.5"></circle>
+      </svg>
+    `;
+    button.addEventListener('pointerdown', (event) => {
+      event.stopPropagation();
+    });
+    return button;
   }
 
   getSpecialColumnInfo(columnType, folderId) {
