@@ -62,6 +62,7 @@ export class ModalManager {
           <div class="form-group">
             <label for="bookmarkTitle">Title</label>
             <input type="text" id="bookmarkTitle" required>
+            <div class="input-helper-text">Tip: Type # followed by a tag name to add tags (e.g. #work).</div>
           </div>
           <div class="form-group">
             <label for="bookmarkUrl">URL</label>
