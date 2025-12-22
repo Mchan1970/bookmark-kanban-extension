@@ -8,3 +8,8 @@
 
 # Development documentation
 docs/
+
+# Release packages
+release/
+*.zip
+*.tar.gz
