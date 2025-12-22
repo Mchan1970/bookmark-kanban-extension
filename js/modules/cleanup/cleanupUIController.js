@@ -48,6 +48,7 @@ export class CleanupUIController {
       content: this.buildCleanupContent(),
       width: '660px',
       maxWidth: '95vw',
+      type: 'cleanup',
       onOpen: () => this.clearSelectionState()
     });
 
@@ -75,6 +76,9 @@ export class CleanupUIController {
       return false;
     }
 
+    // Cache header buttons after they are created
+    this.cacheHeaderButtons();
+
     this.initializeViewControllers();
     this.bindEvents();
     await this.refreshPanels();
@@ -92,7 +96,57 @@ export class CleanupUIController {
     modal.element.classList.add('cleanup-modal');
     const content = modal.element.querySelector('.modal-content');
     content?.classList.add('cleanup-content');
+
+    // Add header toolbar buttons for cleanup modal
+    if (options.type === 'cleanup') {
+      this.addCleanupHeaderButtons(modal);
+    }
+
     return modal;
+  }
+
+  cacheHeaderButtons() {
+    // Cache the header buttons that were dynamically added
+    this.elements.openArchiveFromCleanup = this.cleanupModal.element.querySelector('#open-archive-from-cleanup');
+    this.elements.openRecycleFromCleanup = this.cleanupModal.element.querySelector('#open-recycle-from-cleanup');
+  }
+
+  addCleanupHeaderButtons(modal) {
+    const header = modal.element.querySelector('.modal-header');
+    if (!header) return;
+
+    // Create toolbar container
+    const toolbar = document.createElement('div');
+    toolbar.className = 'cleanup-header-toolbar';
+
+    // Archive button
+    const archiveBtn = document.createElement('button');
+    archiveBtn.type = 'button';
+    archiveBtn.className = 'cleanup-header-btn';
+    archiveBtn.id = 'open-archive-from-cleanup';
+    archiveBtn.innerHTML = '📦';
+    archiveBtn.title = 'View Archive';
+    archiveBtn.setAttribute('aria-label', 'View Archive');
+
+    // Recycle bin button
+    const recycleBtn = document.createElement('button');
+    recycleBtn.type = 'button';
+    recycleBtn.className = 'cleanup-header-btn';
+    recycleBtn.id = 'open-recycle-from-cleanup';
+    recycleBtn.innerHTML = '🗑️';
+    recycleBtn.title = 'View Recycle Bin';
+    recycleBtn.setAttribute('aria-label', 'View Recycle Bin');
+
+    toolbar.appendChild(archiveBtn);
+    toolbar.appendChild(recycleBtn);
+
+    // Insert toolbar before the close button
+    const closeBtn = header.querySelector('.modal-close');
+    if (closeBtn) {
+      header.insertBefore(toolbar, closeBtn);
+    } else {
+      header.appendChild(toolbar);
+    }
   }
 
   buildCleanupContent() {
@@ -119,10 +173,6 @@ export class CleanupUIController {
           <button id="cleanup-archive" class="btn-secondary" disabled>Archive</button>
           <button id="cleanup-delete" class="btn-warning" disabled>Delete</button>
           <button id="cleanup-ignore" class="btn-secondary" disabled>Ignore</button>
-        </div>
-        <div class="cleanup-links">
-          <button id="open-archive-from-cleanup" class="link-button">View Archive</button>
-          <button id="open-recycle-from-cleanup" class="link-button">View Recycle Bin</button>
         </div>
       </div>
     `;
