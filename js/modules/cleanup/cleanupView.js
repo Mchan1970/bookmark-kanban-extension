@@ -225,13 +225,23 @@ export class CleanupView {
     }
 
     if (section === 'stale') {
-      const timeText = item.lastVisitedAt
-        ? `Last visited ${relativeTimeFromNow(item.lastVisitedAt)}`
-        : 'No recorded visits';
-      const visitText = item.visitCount > 0
-        ? `${item.visitCount} visit${item.visitCount > 1 ? 's' : ''}`
-        : '0 visits tracked';
-      return `${timeText} • ${visitText} • ${item.folderPath}`;
+      let timeText = '';
+      if (item.neverVisited) {
+        // Case B: Never visited - show addition time
+        const addedTime = item.dateAdded ? relativeTimeFromNow(item.dateAdded) : 'unknown';
+        timeText = `Never visited • Added ${addedTime}`;
+      } else if (item.lastVisitedAt) {
+        // Case A: Has visit records - show last visit time
+        const visitTime = relativeTimeFromNow(item.lastVisitedAt);
+        const visitText = item.visitCount > 0
+          ? `${item.visitCount} visit${item.visitCount > 1 ? 's' : ''}`
+          : '1 visit';
+        timeText = `Last visited ${visitTime} • ${visitText}`;
+      } else {
+        // Fallback - should not happen with new logic
+        timeText = 'No recorded visits';
+      }
+      return `${timeText} • ${item.folderPath}`;
     }
 
     return item.folderPath || '';

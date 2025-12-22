@@ -15,7 +15,8 @@ export function flattenBookmarks(tree) {
         title: node.title || '(No title)',
         url: node.url,
         parentId: node.parentId || null,
-        folderPath: path.join(' / ') || 'Bookmarks Bar'
+        folderPath: path.join(' / ') || 'Bookmarks Bar',
+        dateAdded: node.dateAdded || Date.now()
       };
       continue;
     }
@@ -105,25 +106,43 @@ function computeStaleItems(bookmarkIndex, accessStats, ignoreSet, threshold = 18
     }
 
     const stats = accessStats[bookmarkId];
-    if (!stats?.lastVisitedAt) {
-      return;
+    let isStale = false;
+    let age = 0;
+    let lastVisitedAt = null;
+    let visitCount = 0;
+    let neverVisited = false;
+
+    if (stats?.lastVisitedAt) {
+      // Case A: Has access records - check last visit time
+      age = now - stats.lastVisitedAt;
+      if (age > threshold) {
+        isStale = true;
+        lastVisitedAt = stats.lastVisitedAt;
+        visitCount = stats.visitCount || 0;
+      }
+    } else {
+      // Case B: No access records - check addition time
+      const addedAge = now - (bookmark.dateAdded || 0);
+      if (addedAge > threshold) {
+        isStale = true;
+        age = addedAge;
+        neverVisited = true;
+      }
     }
 
-    const age = now - stats.lastVisitedAt;
-    if (age < threshold) {
-      return;
+    if (isStale) {
+      items.push({
+        id: bookmarkId,
+        type: 'stale',
+        title: bookmark.title,
+        url: bookmark.url,
+        folderPath: bookmark.folderPath,
+        lastVisitedAt,
+        visitCount,
+        age,
+        neverVisited
+      });
     }
-
-    items.push({
-      id: bookmarkId,
-      type: 'stale',
-      title: bookmark.title,
-      url: bookmark.url,
-      folderPath: bookmark.folderPath,
-      lastVisitedAt: stats.lastVisitedAt,
-      visitCount: stats.visitCount || 0,
-      age
-    });
   });
 
   items.sort((a, b) => b.age - a.age);

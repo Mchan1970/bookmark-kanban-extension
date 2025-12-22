@@ -26,6 +26,8 @@ export class CleanupActions {
     const archived = await this.archiveManager.archiveBookmarks(bookmarkIds);
     if (archived.length) {
       await this.recycleManager.purgeBookmarks(archived.map(item => item.originalId || item.id));
+      // Add archived bookmarks to ignore list so they don't appear in future cleanup scans
+      await this.store.ignoreItems('stale', archived.map(item => item.originalId || item.id));
     }
     if (!archived.length) {
       return;
