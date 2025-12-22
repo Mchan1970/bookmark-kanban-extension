@@ -187,8 +187,6 @@ export class AppCoordinator {
           return;
         }
         
-        console.log('Processing bookmark changes, re-rendering board');
-        
         // Remember current scroll position
         const scrollPosition = window.scrollY;
         

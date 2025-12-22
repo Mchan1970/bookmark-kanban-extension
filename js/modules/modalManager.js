@@ -429,7 +429,6 @@ export class ModalManager {
         
         //Save current scroll position
         const scrollPosition = window.scrollY;
-        console.log("Delete before scroll position:", scrollPosition);
         
         const usedRecycle = await this.trySoftDeleteBookmark(bookmark.id);
         if (usedRecycle) {
@@ -467,7 +466,6 @@ export class ModalManager {
             //Then try a few more times to ensure success
             //Finally use requestAnimationFrame to ensure restoration after rendering
             const restoreScroll = () => {
-              console.log("Try to restore scroll position:", scrollPosition);
               window.scrollTo(0, scrollPosition);
             };
             

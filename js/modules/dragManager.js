@@ -14,7 +14,6 @@ export class DragManager {
   /*** Initialize drag functionality
    */
   initialize() {
-    console.log('Initializing drag functionality');
     //Ensure cleanup of any existing instances before initialization
     this.destroy();
     
@@ -40,8 +39,6 @@ export class DragManager {
       console.warn('No kanban columns found');
       return;
     }
-
-    console.log(`Found ${columns.length} columns`);
 
     try {
       //Ensure Sortable is defined
@@ -69,7 +66,6 @@ export class DragManager {
       
       //Save instance for later cleanup
       this.sortableInstances.set('board', columnSortable);
-      console.log('Successfully initialized column drag');
     } catch (error) {
       console.error('Failed to initialize column drag:', error);
     }
@@ -177,8 +173,6 @@ export class DragManager {
           targetBookmarkItems[0].dataset.bookmarkId === bookmarkId;
         const isTargetEmpty = targetBookmarkItems.length === 0;
 
-        console.log(`🔍 Empty column check: ${isTargetEmpty}, items found: ${targetBookmarkItems.length}`);
-
         if (isTargetEmpty || onlyDraggedItemInTarget) {
             // Empty column: always use index 0 for first bookmark
             newIndex = 0;
@@ -187,7 +181,6 @@ export class DragManager {
             if (evt.newIndex !== undefined && evt.newIndex >= 0) {
                 // Prefer Sortable's index when available
                 newIndex = evt.newIndex;
-                console.log('📐 Using Sortable index:', evt.newIndex);
             } else {
                 // Calculate position based on dragged element among actual bookmarks
                 const draggedElement = targetBookmarkItems.find(child =>
@@ -199,11 +192,9 @@ export class DragManager {
                         child.classList.contains('bookmark-item') && child.dataset && child.dataset.bookmarkId
                     );
                     newIndex = allBookmarkItems.indexOf(draggedElement);
-                    console.log('🔍 Calculated index:', newIndex);
                 } else {
                     // Fallback: insert at end
                     newIndex = targetBookmarkItems.length;
-                    console.log('🔍 Using fallback index (end):', newIndex);
                 }
             }
         }
@@ -221,38 +212,7 @@ export class DragManager {
             throw new Error('Invalid bookmark position calculated');
         }
 
-        // 4. Log debug information and execute the move
-        const targetChildren = Array.from(evt.to.children);
-        const actualBookmarks = targetChildren.filter(child => child.classList.contains('bookmark-item') && child.dataset.bookmarkId);
-        const isEmptyColumn = actualBookmarks.length === 0;
-
-        console.log(`🎯 Attempting to move bookmark: ${bookmarkId}`);
-        console.log(`📁 Target folder ID: ${newFolderId}`);
-        console.log(`📍 Calculated index: ${newIndex}`);
-        console.log(`🧪 Target column children count: ${evt.to.children.length}`);
-        console.log(`📚 Actual bookmark items count: ${actualBookmarks.length}`);
-        console.log(`🔍 Is column empty: ${isEmptyColumn}`);
-        console.log(`🔍 Target column children:`, targetChildren.map((child, idx) => ({
-            index: idx,
-            element: child.tagName.toLowerCase(),
-            bookmarkId: child.dataset?.bookmarkId,
-            className: child.className,
-            isBookmarkItem: child.classList.contains('bookmark-item'),
-            isTarget: child.dataset?.bookmarkId === bookmarkId,
-            textContent: child.textContent?.substring(0, 30) + (child.textContent?.length > 30 ? '...' : '')
-        })));
-
-        // Add debug check for target folder validity
-        console.log('🔎 Calling Chrome bookmarks API...');
-        console.log('🎯 Target column analysis:', {
-            totalChildren: evt.to.children.length,
-            childrenDetails: Array.from(evt.to.children).map(child => ({
-                class: child.className,
-                text: child.textContent?.trim(),
-                isBookmark: child.classList.contains('bookmark-item') && child.dataset?.bookmarkId
-            }))
-        });
-
+        // 4. Execute the move
         await this.bookmarkManager.moveBookmark(bookmarkId, {
             parentId: newFolderId,
             index: newIndex
@@ -263,7 +223,6 @@ export class DragManager {
             this.updateColumnCount(evt.to);
         }
 
-        console.log('✅ Bookmark moved successfully in Chrome.');
         this.removeEmptyStatePlaceholder(evt.to);
         this.ensureEmptyStatePlaceholder(evt.from);
 
@@ -313,7 +272,6 @@ export class DragManager {
       const referenceNode = from.children[oldIndex];
       from.insertBefore(item, referenceNode);
 
-      console.log('✅ UI rollback completed.');
     } catch (rollbackError) {
       console.error('❌ Failed to rollback UI:', rollbackError);
       // At this point, a full UI refresh might be needed
@@ -443,12 +401,10 @@ isColumnEmpty(columnElement) {
   /*** Destroy all drag instances
    */
   destroy() {
-    console.log('Destroying drag instances');
     this.sortableInstances.forEach((instance, key) => {
       if (instance && typeof instance.destroy === 'function') {
         try {
           instance.destroy();
-          console.log(`Successfully destroyed instance: ${key}`);
         } catch (error) {
           console.error(`Failed to destroy instance ${key}:`, error);
         }
@@ -468,7 +424,6 @@ isColumnEmpty(columnElement) {
    * Call this method after drag completion to resolve refresh issues
    */
   reinitialize() {
-    console.log('Reinitializing drag functionality');
     //Ensure cleanup of old instances
     this.destroy();
     

@@ -323,15 +323,27 @@ export class TagManagementPanel {
 
   promptForTagInput({ title, label, submitText, defaultValue }) {
     return new Promise((resolve) => {
+      const contentWrapper = document.createElement('div');
+      contentWrapper.className = 'tag-action-modal';
+
+      const labelElement = document.createElement('label');
+      labelElement.textContent = label;
+
+      const inputId = `tag-action-input-${Date.now()}`;
+      const inputElement = document.createElement('input');
+      inputElement.type = 'text';
+      inputElement.id = inputId;
+      inputElement.placeholder = '#example-tag';
+      inputElement.value = defaultValue || '';
+
+      labelElement.setAttribute('for', inputId);
+      contentWrapper.appendChild(labelElement);
+      contentWrapper.appendChild(inputElement);
+
       const modal = new Modal({
         id: `tag-input-${Date.now()}`,
         title,
-        content: `
-          <div class="tag-action-modal">
-            <label>${label}</label>
-            <input type="text" id="tag-action-input" value="${defaultValue || ''}" placeholder="#example-tag" />
-          </div>
-        `,
+        content: contentWrapper,
         buttons: [
           {
             text: 'Cancel',
@@ -345,10 +357,10 @@ export class TagManagementPanel {
             text: submitText || 'Confirm',
             class: 'btn-primary',
             onClick: (_event, instance) => {
-              const input = instance.element.querySelector('#tag-action-input');
+              const input = instance.element.querySelector(`#${inputId}`);
               const value = input?.value?.trim();
               if (!value) {
-                input.classList.add('input-error');
+                input?.classList.add('input-error');
                 return;
               }
               instance.close();
@@ -358,10 +370,7 @@ export class TagManagementPanel {
         ]
       });
       modal.show();
-      const input = modal.element.querySelector('#tag-action-input');
-      if (input) {
-        setTimeout(() => input.focus(), 50);
-      }
+      setTimeout(() => inputElement.focus(), 50);
     });
   }
 

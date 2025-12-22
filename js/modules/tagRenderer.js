@@ -210,7 +210,6 @@ export class TagRenderer {
   */
   handleTagRemove(tag, event) {
     // TODO: Implement tag removal logic when tag editing is enabled
-    console.log(`Remove tag: ${tag}`);
   }
 
   /*** Handle tag filter toggles
@@ -236,7 +235,6 @@ export class TagRenderer {
   */
   showHiddenTagsTooltip(event, hiddenTags) {
     // TODO: Provide a richer tooltip UI if needed
-    console.log('Hidden tags:', hiddenTags);
   }
 
   /*** Update the active-state styling and clear button

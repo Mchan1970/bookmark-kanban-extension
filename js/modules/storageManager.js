@@ -35,8 +35,6 @@ export class StorageManager {
     chrome.storage.sync.set({ [this.STORAGE_KEYS.COLUMN_ORDER]: columnOrder }, () => {
       if (chrome.runtime.lastError) {
         console.error('Failed to save column order:', chrome.runtime.lastError);
-      } else {
-        console.log('Column order saved:', columnOrder);
       }
     });
   }
@@ -48,8 +46,6 @@ export class StorageManager {
     chrome.storage.sync.set({ [this.STORAGE_KEYS.BOOKMARK_ORDER]: bookmarkOrders }, () => {
       if (chrome.runtime.lastError) {
         console.error('Failed to save bookmark order:', chrome.runtime.lastError);
-      } else {
-        console.log('Bookmark order saved');
       }
     });
   }
@@ -95,8 +91,6 @@ export class StorageManager {
     ], () => {
       if (chrome.runtime.lastError) {
         console.error('Failed to clear order data:', chrome.runtime.lastError);
-      } else {
-        console.log('All order data cleared');
       }
     });
   }

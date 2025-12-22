@@ -73,7 +73,6 @@ export class DisplayManager {
           console.error('Failed to save display mode settings:', chrome.runtime.lastError);
           reject(chrome.runtime.lastError);
         } else {
-          console.log('Display mode settings saved:', mode);
           resolve();
         }
       });
@@ -98,7 +97,6 @@ export class DisplayManager {
     }
     
     this.currentMode = mode;
-    console.log(`Applied display mode: ${mode}`);
   }
 
   /*** Update bookmark items with URL attribute for tooltip

@@ -71,8 +71,26 @@ export class AccessTracker {
 // 现在使用简单的"点击即活跃"策略，不再需要这些复杂的匹配逻辑
 
   // 直接通过 ID 记录访问（用于 UI 点击事件）
-  recordVisitById(bookmarkId) {
-    if (!bookmarkId) return;
+  async recordVisitById(bookmarkId) {
+    if (!bookmarkId) {
+      const error = new Error('Missing bookmarkId when recording visit');
+      console.error('[AccessTracker] Missing bookmarkId when recording visit');
+      throw error;
+    }
+
+    let exists = false;
+    try {
+      exists = await this.verifyBookmarkExists(bookmarkId);
+    } catch (error) {
+      console.error('[AccessTracker] Failed to verify bookmark before recording visit:', error);
+      throw error;
+    }
+
+    if (!exists) {
+      const error = new Error(`Bookmark ${bookmarkId} not found`);
+      console.error(`[AccessTracker] Bookmark ${bookmarkId} not found, skipping visit record`);
+      throw error;
+    }
 
     const timestamp = Date.now();
     const stats = this.accessStats[bookmarkId] || { visitCount: 0, lastVisitedAt: 0 };
@@ -83,8 +101,19 @@ export class AccessTracker {
     this.accessStats[bookmarkId] = stats;
     this.scheduleSave();
 
-    // 简化的访问记录日志
-    console.log(`[AccessTracker] Bookmark ${bookmarkId} visited - count: ${stats.visitCount}, time: ${new Date(timestamp).toLocaleString()}`);
+    return true;
+  }
+
+  verifyBookmarkExists(bookmarkId) {
+    return new Promise((resolve, reject) => {
+      chrome.bookmarks.get(bookmarkId, (nodes) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+          return;
+        }
+        resolve(Array.isArray(nodes) && nodes.length > 0);
+      });
+    });
   }
 
   // normalizeUrl 方法已移除 - 不再需要URL匹配逻辑

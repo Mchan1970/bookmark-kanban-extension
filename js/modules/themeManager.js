@@ -69,8 +69,6 @@ export class ThemeManager {
       chrome.storage.sync.remove(this.STORAGE_KEY, () => {
         if (chrome.runtime.lastError) {
           console.error('Failed to clear invalid theme:', chrome.runtime.lastError);
-        } else {
-          console.log('Invalid theme cleared from storage');
         }
         resolve();
       });
@@ -87,7 +85,6 @@ export class ThemeManager {
           console.error('Failed to save theme settings:', chrome.runtime.lastError);
           reject(chrome.runtime.lastError);
         } else {
-          console.log('Theme settings saved:', theme);
           resolve();
         }
       });
@@ -118,7 +115,6 @@ export class ThemeManager {
 
     this.currentTheme = theme;
     this._hasAppliedInitialTheme = true;
-    console.log(`Applied theme: ${theme}`); //Add debug log
     this.notifyThemeChange(theme);
   }
 

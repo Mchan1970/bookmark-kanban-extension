@@ -12,26 +12,49 @@ accessTracker.initialize().catch(() => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.type) {
     case 'GET_BOOKMARKS':
-      chrome.bookmarks.getTree((tree) => sendResponse({ bookmarks: tree }));
+      chrome.bookmarks.getTree((tree) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+        sendResponse({ success: true, bookmarks: tree });
+      });
       return true;
     case 'UPDATE_BOOKMARK':
       chrome.bookmarks.update(message.bookmarkId, message.changes, (bookmark) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
         sendResponse({ success: true, bookmark });
       });
       return true;
     case 'DELETE_BOOKMARK':
       chrome.bookmarks.removeTree(message.bookmarkId, () => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
         sendResponse({ success: true });
       });
       return true;
     case 'CREATE_BOOKMARK':
       chrome.bookmarks.create(message.bookmark, (bookmark) => {
+        if (chrome.runtime.lastError) {
+          sendResponse({ success: false, error: chrome.runtime.lastError.message });
+          return;
+        }
         sendResponse({ success: true, bookmark });
       });
       return true;
     case 'recordVisitById':
-      accessTracker.recordVisitById(message.bookmarkId);
-      sendResponse({ success: true });
+      accessTracker.recordVisitById(message.bookmarkId)
+        .then(() => {
+          sendResponse({ success: true });
+        })
+        .catch((error) => {
+          sendResponse({ success: false, error: error?.message || 'Failed to record visit' });
+        });
       return true;
     default:
       return false;
