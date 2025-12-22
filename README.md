@@ -12,7 +12,7 @@ A Chrome extension that displays your bookmarks in a visual kanban board layout,
 
 1. **📋 Visual Kanban Board Layout** - Organize bookmarks in a clean, intuitive column-based interface with drag-and-drop functionality
 
-2. **🏷️ Advanced Tag System** - Extract tags from bookmark titles using #hashtags, filter bookmarks by tags, and enjoy theme-aware color palettes with customizable options
+2. **🏷️ Advanced Tag System** - Extract tags from bookmark titles using #hashtags, filter bookmarks by tags, manage tags in bulk (rename/merge/delete), and enjoy theme-aware color palettes with customizable options
 
 3. **🔍 Powerful Command Palette** - VS Code-style quick search for instantly finding and navigating to any bookmark
 
@@ -45,8 +45,9 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 2. Drag and drop bookmarks between columns to organize them
 3. Click on a bookmark to open it in a new tab
 4. Use the edit and delete buttons to manage your bookmarks
-5. Access settings by clicking the 'Settings' button in the new tab page header
-6. Use the theme selector in the header to switch between different visual themes
+5. Press <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> at any time to open the command palette for instant search and navigation
+6. Access settings by clicking the 'Settings' button in the new tab page header to adjust layouts, tag palettes, cleanup preferences, and more
+7. Use the theme selector in the header (or the popup) to switch between different visual themes
 
 ## Features in Detail
 
@@ -80,6 +81,8 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 ### Tag System
 - **Automatic Tag Extraction**: Tags are automatically extracted from bookmark titles using #hashtags (e.g., "#javascript #tutorial")
 - **Real-time Filtering**: Filter bookmarks instantly by clicking on tags in the tag filter bar
+- **Tag Management Panel**: Bulk rename, merge, or delete tags from Settings → Tags using the dedicated Tag Management Panel with progress reporting
+- **Tag Maintenance Service**: Background helpers keep the rendered tag list in sync as you edit bookmarks
 - **Theme-Aware Colors**: Tag colors automatically adapt to your selected theme for optimal visibility
 - **Customizable Palettes**: Create custom tag color schemes with JSON configuration in Settings > Advanced
 - **Case-Insensitive Handling**: "#JavaScript", "#javascript", and "#JAVASCRIPT" are treated as the same tag
@@ -89,10 +92,11 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 
 ### Smart Cleanup System
 - **Duplicate Detection**: Advanced algorithm finds duplicate bookmarks with URL normalization
-- **Access Frequency Tracking**: On-device tracking shows which bookmarks haven't been visited recently
+- **Access Frequency Tracking**: On-device tracking observes visits when you click bookmarks on the board ("点击即活跃") to avoid background snooping
 - **Customizable Thresholds**: Set how long (7-3650 days) before a bookmark is considered "stale"
 - **Safe Organization**: Archive and recycle bin features for bookmark cleanup without permanent deletion
 - **Privacy-Focused**: All cleanup analysis happens locally without external requests
+- **Cleanup Dashboard**: Dedicated Cleanup, Archive, and Recycle views surface duplicates, stale entries, and items awaiting restoration
 
 ### User Interface
 - Clean and intuitive design
@@ -100,7 +104,7 @@ The extension operates primarily by replacing your new tab page with a kanban bo
 - Smooth animations and transitions
 - Current time and date display
 - Favicon visibility toggle for minimal layouts
-- Inline visit statistics in bookmark menus
+- Inline visit statistics in bookmark menus backed by the on-device access tracker
 
 ## Development
 
@@ -150,8 +154,8 @@ bookmark-kanban/
 │       ├── displayManager.js      # Display mode management
 │       ├── faviconLoader.js       # Favicon loading
 │       ├── faviconPreferenceManager.js
-│       ├── accessStatsClient.js   # Access frequency tracking
-│       ├── accessTracker.js       # Background access tracking
+│       ├── accessStatsClient.js   # Access frequency tracking reader for UI
+│       ├── accessTracker.js       # Background access tracking (click-to-visit)
 │       ├── eventManager.js        # Event handling
 │       ├── messageHandler.js      # Message communication
 │       ├── notificationManager.js  # Notification system
