@@ -29,6 +29,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true, bookmark });
       });
       return true;
+    case 'recordVisitById':
+      accessTracker.recordVisitById(message.bookmarkId);
+      sendResponse({ success: true });
+      return true;
     default:
       return false;
   }

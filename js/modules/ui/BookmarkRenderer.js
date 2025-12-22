@@ -118,6 +118,12 @@ export class BookmarkRenderer {
       }
       if (!e.target.closest('.bookmark-action-menu')) {
         window.open(bookmark.url, '_blank');
+
+        // 记录访问（点击即活跃策略）
+        chrome.runtime.sendMessage({
+          type: 'recordVisitById',
+          bookmarkId: bookmark.id
+        });
       }
     });
     
