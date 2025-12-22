@@ -123,22 +123,24 @@ export class CleanupView {
     const wrapper = document.createElement('div');
     wrapper.classList.add('cleanup-item', `badge-${section}`);
 
-    const actionColumn = document.createElement('div');
-    actionColumn.className = 'cleanup-item-gutter';
+    const leftSection = document.createElement('div');
+    leftSection.className = 'cleanup-item-left';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'cleanup-checkbox';
     checkbox.dataset.section = section;
     checkbox.dataset.bookmarkId = item.id;
-    actionColumn.appendChild(checkbox);
+    leftSection.appendChild(checkbox);
 
     const details = document.createElement('div');
     details.className = 'cleanup-item-details';
 
     const title = document.createElement('div');
-    title.className = 'cleanup-item-title';
+    title.className = 'cleanup-item-title cleanup-item-title--clickable';
     title.textContent = item.title || '(Untitled bookmark)';
+    title.dataset.action = 'view';
+    title.dataset.bookmarkId = item.id;
 
     const meta = document.createElement('div');
     meta.className = 'cleanup-item-meta';
@@ -147,28 +149,20 @@ export class CleanupView {
     details.appendChild(title);
     details.appendChild(meta);
 
-    const actions = document.createElement('div');
-    actions.className = 'cleanup-item-actions';
-
-    const viewButton = document.createElement('button');
-    viewButton.type = 'button';
-    viewButton.dataset.action = 'view';
-    viewButton.dataset.bookmarkId = item.id;
-    viewButton.textContent = 'View';
-    actions.appendChild(viewButton);
+    leftSection.appendChild(details);
 
     const ignoreButton = document.createElement('button');
     ignoreButton.type = 'button';
+    ignoreButton.className = 'cleanup-item-ignore-button';
     ignoreButton.dataset.action = 'ignore';
     ignoreButton.dataset.section = section;
     ignoreButton.dataset.bookmarkId = item.id;
-    ignoreButton.textContent = 'Ignore';
-    actions.appendChild(ignoreButton);
+    ignoreButton.innerHTML = '🚫';
+    ignoreButton.title = 'Ignore this bookmark';
+    ignoreButton.setAttribute('aria-label', 'Ignore this bookmark');
 
-    actionColumn.appendChild(actions);
-
-    wrapper.appendChild(actionColumn);
-    wrapper.appendChild(details);
+    wrapper.appendChild(leftSection);
+    wrapper.appendChild(ignoreButton);
 
     return wrapper;
   }
@@ -176,6 +170,9 @@ export class CleanupView {
   createDuplicateGroupItem(item) {
     const row = document.createElement('div');
     row.className = 'cleanup-duplicate-item';
+
+    const leftSection = document.createElement('div');
+    leftSection.className = 'cleanup-duplicate-item-left';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -187,8 +184,10 @@ export class CleanupView {
     details.className = 'cleanup-duplicate-item-details';
 
     const title = document.createElement('div');
-    title.className = 'cleanup-duplicate-item-title';
+    title.className = 'cleanup-duplicate-item-title cleanup-duplicate-item-title--clickable';
     title.textContent = item.title || '(Untitled bookmark)';
+    title.dataset.action = 'view';
+    title.dataset.bookmarkId = item.id;
 
     const meta = document.createElement('div');
     meta.className = 'cleanup-duplicate-item-meta';
@@ -201,27 +200,21 @@ export class CleanupView {
     details.appendChild(title);
     details.appendChild(meta);
 
-    const actions = document.createElement('div');
-    actions.className = 'cleanup-item-actions cleanup-duplicate-item-actions';
-
-    const viewButton = document.createElement('button');
-    viewButton.type = 'button';
-    viewButton.dataset.action = 'view';
-    viewButton.dataset.bookmarkId = item.id;
-    viewButton.textContent = 'View';
-    actions.appendChild(viewButton);
+    leftSection.appendChild(checkbox);
+    leftSection.appendChild(details);
 
     const ignoreButton = document.createElement('button');
     ignoreButton.type = 'button';
+    ignoreButton.className = 'cleanup-item-ignore-button';
     ignoreButton.dataset.action = 'ignore';
     ignoreButton.dataset.section = 'duplicates';
     ignoreButton.dataset.bookmarkId = item.id;
-    ignoreButton.textContent = 'Ignore';
-    actions.appendChild(ignoreButton);
+    ignoreButton.innerHTML = '🚫';
+    ignoreButton.title = 'Ignore this bookmark';
+    ignoreButton.setAttribute('aria-label', 'Ignore this bookmark');
 
-    row.appendChild(checkbox);
-    row.appendChild(details);
-    row.appendChild(actions);
+    row.appendChild(leftSection);
+    row.appendChild(ignoreButton);
 
     return row;
   }

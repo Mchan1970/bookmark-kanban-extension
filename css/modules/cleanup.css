@@ -108,6 +108,7 @@
 .cleanup-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   padding: 10px;
   border: 1px solid var(--border-color);
@@ -142,12 +143,49 @@
   font-size: 0.75rem;
 }
 
-.cleanup-item-gutter {
+.cleanup-item-left {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  min-width: 30px;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cleanup-item-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cleanup-item-title--clickable {
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.cleanup-item-title--clickable:hover {
+  color: var(--link-color, var(--primary-light, var(--primary-color)));
+  text-decoration: underline;
+}
+
+.cleanup-item-ignore-button {
+  border: none;
+  background: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cleanup-item-ignore-button:hover,
+.cleanup-item-ignore-button:focus {
+  color: #666;
+  background-color: rgba(0, 0, 0, 0.05);
+  outline: none;
 }
 
 .cleanup-item-actions {
@@ -240,19 +278,100 @@
   margin-right: 6px;
 }
 
-.cleanup-item.cleanup-item--management {
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.cleanup-item.cleanup-item--management .cleanup-item-details {
-  padding-left: 4px;
-}
-
-.cleanup-item.cleanup-item--management .cleanup-item-actions {
-  flex-direction: row;
+/* Archive items have their own action styling */
+.archive-item {
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+}
+
+.archive-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.archive-action-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.archive-action-button--restore {
+  color: #10b981; /* Green for restore */
+}
+
+.archive-action-button--restore:hover,
+.archive-action-button--restore:focus {
+  color: #059669;
+  background-color: rgba(16, 185, 129, 0.1);
+  outline: none;
+}
+
+.archive-action-button--remove {
+  color: #ef4444; /* Red for remove */
+}
+
+.archive-action-button--remove:hover,
+.archive-action-button--remove:focus {
+  color: #dc2626;
+  background-color: rgba(239, 68, 68, 0.1);
+  outline: none;
+}
+
+/* Recycle bin items follow the same pattern as archive */
+.recycle-item {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.recycle-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.recycle-action-button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.recycle-action-button--restore {
+  color: #10b981; /* Green for restore */
+}
+
+.recycle-action-button--restore:hover,
+.recycle-action-button--restore:focus {
+  color: #059669;
+  background-color: rgba(16, 185, 129, 0.1);
+  outline: none;
+}
+
+.recycle-action-button--purge {
+  color: #ef4444; /* Red for purge */
+}
+
+.recycle-action-button--purge:hover,
+.recycle-action-button--purge:focus {
+  color: #dc2626;
+  background-color: rgba(239, 68, 68, 0.1);
+  outline: none;
 }
 
 .cleanup-empty {
@@ -323,9 +442,9 @@
 
 .cleanup-duplicate-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 .cleanup-duplicate-item-details {
@@ -342,17 +461,31 @@
   word-break: break-word;
 }
 
+.cleanup-duplicate-item-title--clickable {
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+
+.cleanup-duplicate-item-title--clickable:hover {
+  color: var(--link-color, var(--primary-light, var(--primary-color)));
+  text-decoration: underline;
+}
+
+.cleanup-duplicate-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
 .cleanup-duplicate-item-meta {
   color: var(--text-secondary);
   font-size: 0.8rem;
 }
 
-.cleanup-duplicate-item-actions {
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+/* Duplicate items now use the same ignore button as regular items */
+/* cleanup-duplicate-item-actions is kept for compatibility but may be deprecated */
 
 .cleanup-highlight {
   outline: 2px solid var(--primary-color);

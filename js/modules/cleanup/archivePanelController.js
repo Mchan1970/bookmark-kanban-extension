@@ -61,17 +61,16 @@ export class ArchivePanelController {
 
   buildRow(item, selectedSet = new Set()) {
     const row = document.createElement('div');
-    row.className = 'cleanup-item cleanup-item--management';
+    row.className = 'cleanup-item archive-item';
 
-    const gutter = document.createElement('div');
-    gutter.className = 'cleanup-item-gutter';
+    const leftSection = document.createElement('div');
+    leftSection.className = 'cleanup-item-left';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'cleanup-checkbox archive-checkbox';
     checkbox.dataset.bookmarkId = item.originalId || item.id;
     checkbox.checked = selectedSet.has(checkbox.dataset.bookmarkId);
-    gutter.appendChild(checkbox);
 
     const details = document.createElement('div');
     details.className = 'cleanup-item-details';
@@ -87,28 +86,35 @@ export class ArchivePanelController {
     details.appendChild(title);
     details.appendChild(meta);
 
+    leftSection.appendChild(checkbox);
+    leftSection.appendChild(details);
+
     const actions = document.createElement('div');
-    actions.className = 'cleanup-item-actions';
+    actions.className = 'archive-item-actions';
 
     const restoreButton = document.createElement('button');
     restoreButton.type = 'button';
+    restoreButton.className = 'archive-action-button archive-action-button--restore';
     restoreButton.dataset.archiveAction = 'restore';
     restoreButton.dataset.bookmarkId = item.originalId || item.id;
-    restoreButton.textContent = 'Restore';
+    restoreButton.innerHTML = '↩️';
+    restoreButton.title = 'Restore bookmark';
+    restoreButton.setAttribute('aria-label', 'Restore bookmark');
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
+    removeButton.className = 'archive-action-button archive-action-button--remove';
     removeButton.dataset.archiveAction = 'remove';
     removeButton.dataset.bookmarkId = item.originalId || item.id;
-    removeButton.textContent = 'Remove';
+    removeButton.innerHTML = '🗑️';
+    removeButton.title = 'Permanently remove';
+    removeButton.setAttribute('aria-label', 'Permanently remove');
 
     actions.appendChild(restoreButton);
     actions.appendChild(removeButton);
 
-    gutter.appendChild(actions);
-
-    row.appendChild(gutter);
-    row.appendChild(details);
+    row.appendChild(leftSection);
+    row.appendChild(actions);
     return row;
   }
 }

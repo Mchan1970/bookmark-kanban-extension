@@ -61,17 +61,16 @@ export class RecyclePanelController {
 
   buildRow(item, selectedSet = new Set()) {
     const row = document.createElement('div');
-    row.className = 'cleanup-item cleanup-item--management';
+    row.className = 'cleanup-item recycle-item';
 
-    const gutter = document.createElement('div');
-    gutter.className = 'cleanup-item-gutter';
+    const leftSection = document.createElement('div');
+    leftSection.className = 'cleanup-item-left';
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'cleanup-checkbox recycle-checkbox';
     checkbox.dataset.bookmarkId = item.originalId || item.id;
     checkbox.checked = selectedSet.has(checkbox.dataset.bookmarkId);
-    gutter.appendChild(checkbox);
 
     const details = document.createElement('div');
     details.className = 'cleanup-item-details';
@@ -87,28 +86,35 @@ export class RecyclePanelController {
     details.appendChild(title);
     details.appendChild(meta);
 
+    leftSection.appendChild(checkbox);
+    leftSection.appendChild(details);
+
     const actions = document.createElement('div');
-    actions.className = 'cleanup-item-actions';
+    actions.className = 'recycle-item-actions';
 
     const restoreButton = document.createElement('button');
     restoreButton.type = 'button';
+    restoreButton.className = 'recycle-action-button recycle-action-button--restore';
     restoreButton.dataset.recycleAction = 'restore';
     restoreButton.dataset.bookmarkId = item.originalId || item.id;
-    restoreButton.textContent = 'Restore';
+    restoreButton.innerHTML = '↩️';
+    restoreButton.title = 'Restore bookmark';
+    restoreButton.setAttribute('aria-label', 'Restore bookmark');
 
     const purgeButton = document.createElement('button');
     purgeButton.type = 'button';
+    purgeButton.className = 'recycle-action-button recycle-action-button--purge';
     purgeButton.dataset.recycleAction = 'purge';
     purgeButton.dataset.bookmarkId = item.originalId || item.id;
-    purgeButton.textContent = 'Delete';
+    purgeButton.innerHTML = '🗑️';
+    purgeButton.title = 'Permanently delete';
+    purgeButton.setAttribute('aria-label', 'Permanently delete');
 
     actions.appendChild(restoreButton);
     actions.appendChild(purgeButton);
 
-    gutter.appendChild(actions);
-
-    row.appendChild(gutter);
-    row.appendChild(details);
+    row.appendChild(leftSection);
+    row.appendChild(actions);
     return row;
   }
 }
